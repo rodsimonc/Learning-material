@@ -1,0 +1,23 @@
+(tablas creadas y datos insertados)
+
+$ SELECT producto, monto FROM pedidos WHERE monto BETWEEN 10000 AND 50000;
+producto | monto  
+------------------
+Teclado  | 25000.0
+Mouse    | 12000.0
+Teclado  | 25000.0
+
+$ SELECT nombre FROM usuarios WHERE ciudad IN ('Rosario','Córdoba');
+nombre
+------
+Ana   
+Luis  
+Sofia 
+
+$ SELECT producto FROM pedidos WHERE producto LIKE 'M%';
+producto
+--------
+Mouse   
+Monitor 
+Monitor 
+

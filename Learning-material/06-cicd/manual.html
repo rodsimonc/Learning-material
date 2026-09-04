@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CI/CD con GitHub Actions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">CI/CD y automatización</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Manual de estudio</div>
+  <h1>CI/CD con GitHub Actions</h1>
+  <p class="lead">CI/CD automatiza lo aburrido y peligroso: correr los tests en cada cambio y desplegar sin hacerlo a mano. Este libro va de "¿qué es un pipeline?" a un workflow que testea cada push y despliega solo. Es el que une Git, testing y Docker en un solo flujo.</p>
+  <div class="box ojo"><span class="tag">Sobre los ejemplos</span><p>Los workflows YAML de este libro son válidos y están listos para pegar en un repo. Las salidas de consola son ilustrativas: representan lo que verías en la pestaña Actions de GitHub, no una captura de esta sesión, porque un pipeline corre en la infraestructura de GitHub.</p></div>
+  <h2>Cómo está armado</h2>
+  <ul>
+    <li><strong>Parte 1, fundamentos.</strong> Qué es CI/CD y las piezas de un pipeline.</li>
+    <li><strong>Parte 2, GitHub Actions.</strong> Tu primer workflow, matrices, secrets, caché.</li>
+    <li><strong>Parte 3, deploy.</strong> Construir la imagen Docker y desplegar automático.</li>
+    <li><strong>Parte 4, a producción.</strong> Buenas prácticas y cheatsheet.</li>
+  </ul>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">¿Qué es CI/CD? →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="1" data-title="¿Qué es CI/CD?" id="que-es">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Qué es CI/CD</h1>
+  <p class="lead">CI/CD son dos prácticas que se encadenan: integrar los cambios seguido y con red de seguridad, y entregarlos a producción de forma automática. Detrás hay una idea simple: que la computadora haga los pasos repetitivos que la gente se olvida o hace mal.</p>
+  <h2>CI: Continuous Integration</h2>
+  <p>Cada vez que alguien sube código, un servidor automático lo baja, instala dependencias, corre los tests y avisa si algo se rompió. En minutos sabés si tu cambio rompió algo, antes de mergearlo. Nadie tiene que acordarse de correr los tests: pasan solos en cada push.</p>
+  <h2>CD: Continuous Delivery / Deployment</h2>
+  <p>La continuación: si los tests pasan, el código se empaqueta y se despliega. En <em>Delivery</em> queda listo para desplegar con un botón. En <em>Deployment</em> se despliega solo, sin intervención. La diferencia es si hay un humano apretando el botón final.</p>
+  <h2>Por qué cambia el trabajo</h2>
+  <ul>
+    <li>Los bugs se atrapan en minutos, no en producción.</li>
+    <li>Desplegar deja de ser un evento estresante de viernes a la tarde y pasa a ser rutina.</li>
+    <li>Todos integran seguido, así que los merges son chicos y los conflictos, raros.</li>
+    <li>El proceso queda documentado en código: cualquiera ve qué corre y cómo se despliega.</li>
+  </ul>
+  <div class="box nota"><span class="tag">Cómo cierra con los otros libritos</span><p>CI/CD es el pegamento. Corre los <strong>tests</strong> que aprendiste a escribir, sobre el repo que manejás con <strong>Git</strong>, construye la imagen <strong>Docker</strong>, y la despliega. Tiene sentido pleno después de esos tres.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Anatomía de un pipeline →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="2" data-title="Anatomía de un pipeline" id="anatomia">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Las piezas de un pipeline</h1>
+  <p class="lead">GitHub Actions tiene un vocabulario propio, pero son cuatro conceptos y se entienden rápido. Todo vive en archivos YAML dentro de <code>.github/workflows/</code> de tu repo.</p>
+  <h2>Los cuatro conceptos</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Pieza</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Workflow</th><td>Un proceso automatizado completo, definido en un archivo YAML. "Correr los tests", por ejemplo.</td></tr>
+      <tr><th>Trigger (on)</th><td>El evento que lo dispara: un push, un pull request, un horario.</td></tr>
+      <tr><th>Job</th><td>Un grupo de pasos que corren juntos en una máquina limpia (un "runner"). Un workflow puede tener varios jobs, en paralelo o en secuencia.</td></tr>
+      <tr><th>Step</th><td>Un paso individual dentro de un job: un comando, o una "action" reutilizable.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Cómo se anidan</h2>
+<pre>workflow (archivo .yml)
+ └─ on: push                    # trigger
+ └─ job: test
+     └─ step: bajar el código
+     └─ step: instalar Python
+     └─ step: correr pytest
+ └─ job: deploy                 # otro job, corre si test pasó
+     └─ step: ...</pre>
+  <h2>Runners y actions</h2>
+  <p>Cada job corre en un <strong>runner</strong>: una máquina virtual limpia que GitHub te presta, gratis dentro de un límite generoso. Y las <strong>actions</strong> son pasos empaquetados que reusás en vez de escribir todo a mano: <code>actions/checkout</code> baja tu código, <code>actions/setup-node</code> instala Node. Es el "no reinventes la rueda" del CI.</p>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← ¿Qué es CI/CD?</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Tu primer workflow →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · GitHub Actions" data-num="3" data-title="Tu primer workflow" id="primero">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Tu primer workflow: tests en cada push</h1>
+  <p class="lead">El caso más común y el más valioso: que cada push corra los tests. Creás un archivo en <code>.github/workflows/</code> y GitHub se encarga del resto.</p>
+  <h2>El workflow, para Python</h2>
+  <div class="codehead"><span class="lang txt">.github/workflows/tests.yml</span></div>
+<pre>name: Tests
+on: [push, pull_request]        <span class="cm"># se dispara en cada push y PR</span>
+
+jobs:
+  test:
+    runs-on: ubuntu-latest      <span class="cm"># máquina limpia que da GitHub</span>
+    steps:
+      - uses: actions/checkout@v4          <span class="cm"># baja tu código</span>
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: pytest -v                     <span class="cm"># corre los tests</span></pre>
+  <h2>La versión Node</h2>
+  <div class="codehead"><span class="lang txt">.github/workflows/tests.yml</span></div>
+<pre>name: Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - run: npm test</pre>
+  <h2>Qué pasa cuando pusheás</h2>
+  <p>Apenas subís el archivo y hacés push, GitHub levanta un runner, corre los pasos, y te muestra el resultado en la pestaña Actions y al lado de cada commit:</p>
+  <div class="codehead"><span class="lang txt">pestaña Actions (ilustrativo)</span></div>
+<pre>✓ Tests · push a main
+  ✓ test (12s)
+    ✓ Set up job
+    ✓ actions/checkout@v4
+    ✓ actions/setup-python@v5
+    ✓ pip install -r requirements.txt
+    ✓ pytest -v          6 passed in 0.12s
+  Todos los checks pasaron</pre>
+  <div class="box nota"><span class="tag">El tilde verde</span><p>Ese check verde aparece al lado del commit y del PR. Si los tests fallan, aparece una cruz roja y GitHub te manda un mail. Muchos equipos configuran que no se pueda mergear un PR hasta que el check esté verde.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Anatomía de un pipeline</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Matrices →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · GitHub Actions" data-num="4" data-title="Matrices" id="matrices">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Probar en varias versiones a la vez</h1>
+  <p class="lead">Si tu librería tiene que andar en Python 3.10, 3.11 y 3.12, no querés tres workflows. Una matriz corre el mismo job con cada combinación, en paralelo.</p>
+  <div class="codehead"><span class="lang txt">matriz de versiones</span></div>
+<pre>jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -r requirements.txt
+      - run: pytest</pre>
+  <p>Eso lanza tres jobs en paralelo, uno por versión. En minutos sabés si tu código anda en las tres. La matriz puede combinar dimensiones: versiones de lenguaje por sistemas operativos, por ejemplo, y GitHub corre todas las combinaciones.</p>
+  <div class="codehead"><span class="lang txt">resultado (ilustrativo)</span></div>
+<pre>✓ test (3.10)   14s
+✓ test (3.11)   13s
+✓ test (3.12)   15s</pre>
+  <div class="box nota"><span class="tag">La sintaxis ${{ }}</span><p>Esas llaves dobles son expresiones de GitHub Actions: leen variables del contexto, como el valor actual de la matriz o un secreto. Las vas a ver por todos lados en los workflows.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Tu primer workflow</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Secrets →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · GitHub Actions" data-num="5" data-title="Secrets" id="secrets">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Secrets y variables</h1>
+  <p class="lead">Tu pipeline casi siempre necesita algo sensible: una clave de API, un token para desplegar, la contraseña de la base de tests. Eso nunca va en el YAML. GitHub tiene un lugar seguro para guardarlo.</p>
+  <h2>Dónde viven</h2>
+  <p>En el repo, en Settings, Secrets and variables, Actions, cargás los secretos por nombre. GitHub los guarda cifrados y los inyecta en el workflow cuando corre, sin mostrarlos nunca en los logs.</p>
+  <h2>Cómo se usan</h2>
+  <div class="codehead"><span class="lang txt">yaml</span></div>
+<pre>steps:
+  - run: ./deploy.sh
+    env:
+      API_TOKEN: ${{ secrets.API_TOKEN }}    <span class="cm"># viene del almacén cifrado</span>
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}</pre>
+  <div class="box ojo"><span class="tag">Nunca los imprimas</span><p>Si hacés <code>echo $API_TOKEN</code>, queda en los logs del workflow, que otros pueden ver. GitHub intenta enmascarar los secretos conocidos en el output, pero no confíes en eso: simplemente no los imprimas. Y jamás los pongas como texto plano en el YAML, que vive en el repo.</p></div>
+  <p>Hay dos tipos: <strong>secrets</strong> para lo sensible (cifrados, no se ven), y <strong>variables</strong> para configuración no secreta (una URL pública, un nombre de entorno), que sí se ven.</p>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Matrices</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Caché y artefactos →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 2 · GitHub Actions" data-num="6" data-title="Caché y artefactos" id="cache">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Más rápido: caché y artefactos</h1>
+  <p class="lead">Cada job arranca en una máquina limpia, así que reinstala todo cada vez. Dos herramientas evitan trabajo repetido y te dejan pasar cosas entre jobs.</p>
+  <h2>Caché: no reinstalar lo que no cambió</h2>
+  <p>Bajar dependencias en cada corrida es lento. La caché guarda esa carpeta entre corridas mientras el archivo de dependencias no cambie. Las actions de setup ya lo traen incorporado:</p>
+  <div class="codehead"><span class="lang txt">yaml</span></div>
+<pre>- uses: actions/setup-node@v4
+  with:
+    node-version: "20"
+    cache: "npm"          <span class="cm"># cachea node_modules automáticamente</span></pre>
+  <p>La primera corrida instala normal; las siguientes reusan la caché y arrancan mucho más rápido.</p>
+  <h2>Artefactos: guardar resultados</h2>
+  <p>Un artefacto es un archivo que producís en el workflow y querés conservar o pasar a otro job: un reporte de cobertura, un build compilado, un binario. Se sube y después se puede descargar o usar:</p>
+  <div class="codehead"><span class="lang txt">yaml</span></div>
+<pre>- run: npm run build          # genera /dist
+- uses: actions/upload-artifact@v4
+  with:
+    name: build
+    path: dist/</pre>
+  <div class="box nota"><span class="tag">Caché vs artefacto</span><p>La caché es para acelerar (dependencias que se pueden regenerar). El artefacto es para conservar o transportar un resultado que te importa. No los confundas: la caché puede desaparecer, el artefacto queda guardado el tiempo que definas.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Secrets</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">CD: construir la imagen →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 3 · Deploy" data-num="7" data-title="Construir la imagen" id="build">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>CD: construir y publicar la imagen</h1>
+  <p class="lead">Con los tests en verde, el siguiente paso es empaquetar la app. Acá se junta con Docker: el pipeline construye la imagen y la sube a un registry, listo para desplegar.</p>
+  <h2>Jobs encadenados</h2>
+  <p>Queremos que el build corra solo si los tests pasaron. Eso se logra con <code>needs</code>: un job espera a otro.</p>
+  <div class="codehead"><span class="lang txt">.github/workflows/deploy.yml</span></div>
+<pre>on:
+  push:
+    branches: [main]          <span class="cm"># solo desplegar desde main</span>
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -r requirements.txt
+      - run: pytest
+
+  build-y-push:
+    needs: test               <span class="cm"># espera a que test pase</span>
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: usuario/mi-api:latest</pre>
+  <p>Fijate dos cosas: el <code>needs: test</code> garantiza que no se construya nada roto, y el trigger acotado a <code>main</code> hace que solo se despliegue lo que ya se mergeó, no cada rama de trabajo.</p>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Caché y artefactos</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Deploy automático →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 3 · Deploy" data-num="8" data-title="Deploy automático" id="deploy">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Deploy automático</h1>
+  <p class="lead">El último eslabón: que la imagen construida llegue a producción sola. Cómo se hace depende del proveedor, pero el patrón es el mismo.</p>
+  <h2>El patrón general</h2>
+  <p>Después del build, un job final le avisa al proveedor que hay una versión nueva. Muchos proveedores dan una action oficial o un webhook de deploy:</p>
+  <div class="codehead"><span class="lang txt">yaml</span></div>
+<pre>  deploy:
+    needs: build-y-push
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -X POST ${{ secrets.DEPLOY_HOOK_URL }}
+        <span class="cm"># el proveedor recibe el aviso y actualiza la app</span></pre>
+  <h2>El flujo completo, de punta a punta</h2>
+  <ol>
+    <li>Pusheás a una rama y abrís un PR. El workflow de tests corre.</li>
+    <li>Con el check verde y la revisión hecha, se mergea a main.</li>
+    <li>El push a main dispara el pipeline de deploy: corre los tests de nuevo, construye la imagen, la sube al registry.</li>
+    <li>El job de deploy le avisa al proveedor, que baja la imagen nueva y la pone a andar.</li>
+  </ol>
+  <p>Desde que mergeás hasta que está en producción, sin que nadie toque nada. Eso es CI/CD completo.</p>
+  <div class="box ojo"><span class="tag">Empezá de a poco</span><p>No armes todo el pipeline el día uno. Primero solo los tests en cada push, que es donde está el 80% del valor. Después el build. El deploy automático al final, cuando ya confiás en tus tests. Un deploy automático sin buenos tests es una forma rápida de romper producción.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Construir la imagen</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Buenas prácticas →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 4 · A producción" data-num="9" data-title="Buenas prácticas" id="cierre">
+  <div class="ch-eyebrow">Cierre</div>
+  <h1>Buenas prácticas, cheatsheet y glosario</h1>
+  <h2>Buenas prácticas</h2>
+  <ul>
+    <li>Pipelines rápidos. Si el CI tarda 40 minutos, la gente deja de esperarlo. Cacheá dependencias y paralelizá con jobs.</li>
+    <li>Falla rápido y claro. El pipeline tiene que decir en el título qué se rompió, sin tener que abrir logs.</li>
+    <li>Tests obligatorios para mergear. Configurá el branch protection para que no entre nada rojo a main.</li>
+    <li>Secretos siempre en el almacén, nunca en el YAML.</li>
+    <li>Deploy solo desde main, y solo si los tests pasaron (<code>needs</code>).</li>
+    <li>Fijá las versiones de las actions (<code>@v4</code>), no uses ramas móviles.</li>
+  </ul>
+  <h2>Cheatsheet de un workflow</h2>
+  <div class="codehead"><span class="lang txt">estructura mínima</span></div>
+<pre>name: Nombre
+on: [push]                 # cuándo corre
+jobs:
+  nombre-del-job:
+    runs-on: ubuntu-latest # dónde corre
+    needs: otro-job        # (opcional) espera a otro
+    strategy:
+      matrix: { version: ["a","b"] }   # (opcional) varias combinaciones
+    steps:
+      - uses: actions/checkout@v4       # action reutilizable
+      - run: comando                    # comando propio
+        env:
+          SECRETO: ${{ secrets.SECRETO }}</pre>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>CI</th><td>Integración continua: testear cada cambio automáticamente.</td></tr>
+      <tr><th>CD</th><td>Entrega o despliegue continuo: llevar los cambios a producción automáticamente.</td></tr>
+      <tr><th>Pipeline</th><td>La secuencia automatizada de pasos, del push al deploy.</td></tr>
+      <tr><th>Workflow</th><td>Un pipeline definido en un archivo YAML.</td></tr>
+      <tr><th>Job</th><td>Grupo de pasos que corren en una máquina limpia.</td></tr>
+      <tr><th>Step</th><td>Un paso: un comando o una action.</td></tr>
+      <tr><th>Action</th><td>Paso reutilizable y empaquetado (checkout, setup-node).</td></tr>
+      <tr><th>Runner</th><td>La máquina que ejecuta un job.</td></tr>
+      <tr><th>Secret</th><td>Dato sensible guardado cifrado, inyectado al correr.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Sabés qué es CI/CD, escribir un workflow que testea cada push, usar matrices, secrets y caché, y armar un pipeline que construye y despliega. Empezá agregando el workflow de tests a un repo tuyo: es dos minutos y cambia cómo trabajás.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Deploy automático</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('cicd-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('cicd-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('cicd-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('cicd-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

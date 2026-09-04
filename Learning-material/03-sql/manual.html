@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bases de datos y SQL, de 0 a producción</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Bases de datos y SQL</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Manual de estudio</div>
+  <h1>Bases de datos y SQL, de cero</h1>
+  <p class="lead">Casi toda aplicación guarda datos en una base de datos, y SQL es el idioma para hablarles. Este libro te lleva de no saber qué es una tabla a escribir consultas con joins, agrupaciones e índices. Los bloques con <span class="tested">✓ salida real</span> se ejecutaron contra una base de verdad (SQLite).</p>
+  <h2>Cómo está armado</h2>
+  <ul>
+    <li><strong>Parte 1, fundamentos.</strong> Qué es una base relacional, cómo crear tablas e insertar y leer datos.</li>
+    <li><strong>Parte 2, consultas de verdad.</strong> Filtrar fino, combinar tablas con JOIN, agrupar y agregar, y modificar datos con cuidado.</li>
+    <li><strong>Parte 3, que ande bien.</strong> Índices y performance, transacciones, y cómo consultar desde tu código sin abrir agujeros de seguridad.</li>
+    <li><strong>Parte 4, a producción.</strong> Normalización, migraciones, backups y una cheatsheet.</li>
+  </ul>
+  <div class="box nota"><span class="tag">Cómo moverte</span><p>Índice a la izquierda, o flechas <span class="kbd">←</span> <span class="kbd">→</span>. El libro recuerda dónde quedaste.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">¿Qué es una base relacional? →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="1" data-title="Bases relacionales" id="relacional">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Qué es una base de datos relacional</h1>
+  <p class="lead">Una base de datos relacional guarda la información en tablas: filas y columnas, como una planilla, pero con reglas estrictas y la capacidad de relacionar tablas entre sí. Postgres, MySQL, SQLite y SQL Server son todas de este tipo.</p>
+  <h2>El vocabulario</h2>
+  <ul>
+    <li><strong>Tabla.</strong> Un conjunto de datos del mismo tipo. Una tabla <code>usuarios</code>, una tabla <code>pedidos</code>.</li>
+    <li><strong>Fila (o registro).</strong> Un elemento. Un usuario concreto.</li>
+    <li><strong>Columna (o campo).</strong> Un atributo. El <code>nombre</code>, la <code>ciudad</code>.</li>
+    <li><strong>Esquema.</strong> La definición de qué columnas tiene cada tabla y de qué tipo. La estructura, fijada de antemano.</li>
+  </ul>
+  <h2>Claves: cómo se identifican y se relacionan</h2>
+  <p>Cada fila tiene una <strong>clave primaria</strong> (primary key), un valor único que la identifica, casi siempre un <code>id</code>. Y una tabla puede apuntar a otra con una <strong>clave foránea</strong> (foreign key): la tabla <code>pedidos</code> guarda el <code>usuario_id</code> del usuario que hizo el pedido. Así se relacionan las tablas, de ahí el nombre "relacional".</p>
+  <h2>SQL: el idioma</h2>
+  <p>SQL (Structured Query Language) es cómo le hablás a la base. Es declarativo: describís qué querés, no cómo buscarlo. Decís "dame los usuarios de Rosario" y el motor se encarga de encontrarlos rápido.</p>
+  <div class="box nota"><span class="tag">Relacional vs NoSQL</span><p>Existen bases no relacionales (MongoDB, Redis) que guardan documentos o pares clave-valor, útiles para otros casos. Este libro es sobre relacionales, que siguen siendo el default para la mayoría de las apps porque garantizan estructura y consistencia.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Elegir motor y conectarse →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="2" data-title="Elegir motor" id="motor">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Qué motor usar</h1>
+  <p class="lead">SQL es casi el mismo en todos los motores, así que lo que aprendas acá sirve en cualquiera. Pero conviene saber cuál elegir según el proyecto.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Motor</th><th>Cuándo</th></tr></thead>
+    <tbody>
+      <tr><th>SQLite</th><td>Un solo archivo, cero configuración. Ideal para aprender, apps chicas, móviles, prototipos. Es el que usa este libro.</td></tr>
+      <tr><th>PostgreSQL</th><td>El favorito hoy para apps serias. Potente, robusto y open source. Es lo que hay debajo de Supabase.</td></tr>
+      <tr><th>MySQL / MariaDB</th><td>Muy usado, sobre todo en web clásica (WordPress y compañía).</td></tr>
+      <tr><th>SQL Server / Oracle</th><td>Mundo corporativo y sistemas grandes.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Para empezar, SQLite</h2>
+  <p>SQLite no necesita instalar un servidor: es una librería, y la base es un solo archivo <code>.db</code>. Python ya lo trae incluido. Todo lo de este libro corre con esto:</p>
+  <div class="codehead"><span class="lang py">python</span></div>
+<pre>import sqlite3
+con = sqlite3.connect("mi_base.db")   <span class="cm"># crea el archivo si no existe</span>
+cur = con.cursor()
+cur.execute("SELECT 1")
+print(cur.fetchone())                 <span class="cm"># (1,)</span></pre>
+  <p>Cuando pases a Postgres, cambia la forma de conectarte y poco más. Las consultas SQL son casi idénticas.</p>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← Bases relacionales</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Crear tablas →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="3" data-title="Crear tablas" id="crear">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Crear tablas</h1>
+  <p class="lead">Antes de guardar datos hay que definir la estructura. Con <code>CREATE TABLE</code> decís qué columnas hay, de qué tipo, y qué reglas cumplen.</p>
+  <h2>Las dos tablas del libro</h2>
+  <div class="codehead"><span class="lang sh">sql</span></div>
+<pre>CREATE TABLE usuarios (
+  id      INTEGER PRIMARY KEY,        <span class="cm">-- identifica cada fila</span>
+  nombre  TEXT NOT NULL,              <span class="cm">-- obligatorio</span>
+  ciudad  TEXT
+);
+
+CREATE TABLE pedidos (
+  id          INTEGER PRIMARY KEY,
+  usuario_id  INTEGER NOT NULL REFERENCES usuarios(id),  <span class="cm">-- clave foránea</span>
+  producto    TEXT NOT NULL,
+  monto       REAL NOT NULL,
+  fecha       TEXT
+);</pre>
+  <h2>Los pedazos importantes</h2>
+  <ul>
+    <li><strong>Tipos.</strong> <code>INTEGER</code>, <code>TEXT</code>, <code>REAL</code> (decimal). En Postgres tenés más: <code>VARCHAR</code>, <code>TIMESTAMP</code>, <code>BOOLEAN</code>, etc.</li>
+    <li><strong>PRIMARY KEY.</strong> Marca la columna que identifica cada fila. Única y no nula.</li>
+    <li><strong>NOT NULL.</strong> Esa columna no puede quedar vacía. Es tu primera línea de defensa contra datos incompletos.</li>
+    <li><strong>REFERENCES.</strong> Declara la clave foránea: <code>usuario_id</code> tiene que existir en <code>usuarios</code>. La base no te deja crear un pedido de un usuario fantasma.</li>
+  </ul>
+  <div class="box nota"><span class="tag">El esquema te protege</span><p>Fijar tipos y reglas de entrada evita basura en la base. Un <code>monto</code> siempre será un número, un pedido siempre tendrá un usuario real. Esas garantías son la razón de ser de las bases relacionales.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Elegir motor</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Insertar y leer →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="4" data-title="Insertar y leer" id="insertar">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Insertar y leer datos</h1>
+  <p class="lead">Con las tablas creadas, cargamos datos con <code>INSERT</code> y los leemos con <code>SELECT</code>, el comando que más vas a escribir en tu vida.</p>
+  <h2>Insertar filas</h2>
+  <div class="codehead"><span class="lang sh">sql</span></div>
+<pre>INSERT INTO usuarios (id, nombre, ciudad)
+VALUES (1, 'Carlos', 'Mar del Plata');
+
+INSERT INTO pedidos (id, usuario_id, producto, monto, fecha)
+VALUES (1, 1, 'Teclado', 25000, '2026-08-01');</pre>
+  <h2>SELECT: la consulta base</h2>
+  <p>Elegís qué columnas (<code>SELECT nombre, ciudad</code>) y de qué tabla (<code>FROM usuarios</code>):</p>
+  <div class="codehead"><span class="lang sh">SELECT nombre, ciudad FROM usuarios;</span><span class="tested">✓ salida real</span></div>
+<pre class="output">nombre | ciudad
+----------------------
+Carlos | Mar del Plata
+Ana    | Rosario
+Luis   | Rosario
+Sofia  | Córdoba</pre>
+  <p>El <code>*</code> trae todas las columnas: <code>SELECT * FROM usuarios</code>. Cómodo para explorar, pero en código conviene nombrar solo lo que usás.</p>
+  <h2>Ordenar y limitar</h2>
+  <p><code>ORDER BY</code> ordena, <code>DESC</code> de mayor a menor, <code>LIMIT</code> corta la cantidad:</p>
+  <div class="codehead"><span class="lang sh">SELECT producto, monto FROM pedidos ORDER BY monto DESC LIMIT 3;</span><span class="tested">✓ salida real</span></div>
+<pre class="output">producto | monto
+------------------
+Monitor  | 90000.0
+Monitor  | 90000.0
+Teclado  | 25000.0</pre>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Crear tablas</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Filtrar fino →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · Consultas de verdad" data-num="5" data-title="Filtrar con WHERE" id="where">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Filtrar con WHERE</h1>
+  <p class="lead"><code>WHERE</code> es cómo pedís solo las filas que cumplen una condición. Es el filtro, y tiene varios operadores que conviene tener a mano.</p>
+  <h2>Rangos con BETWEEN</h2>
+  <div class="codehead"><span class="lang sh">WHERE monto BETWEEN 10000 AND 50000</span><span class="tested">✓ salida real</span></div>
+<pre class="output">producto | monto
+------------------
+Teclado  | 25000.0
+Mouse    | 12000.0
+Teclado  | 25000.0</pre>
+  <h2>Listas con IN</h2>
+  <div class="codehead"><span class="lang sh">WHERE ciudad IN ('Rosario','Córdoba')</span><span class="tested">✓ salida real</span></div>
+<pre class="output">nombre
+------
+Ana
+Luis
+Sofia</pre>
+  <h2>Texto con LIKE</h2>
+  <p><code>LIKE</code> busca patrones. El <code>%</code> es "cualquier cosa": <code>'M%'</code> es "empieza con M".</p>
+  <div class="codehead"><span class="lang sh">WHERE producto LIKE 'M%'</span><span class="tested">✓ salida real</span></div>
+<pre class="output">producto
+--------
+Mouse
+Monitor
+Monitor</pre>
+  <div class="box ojo"><span class="tag">NULL es especial</span><p>Para preguntar por vacíos no se usa <code>= NULL</code> (eso nunca da verdadero), se usa <code>IS NULL</code> o <code>IS NOT NULL</code>. Es el error de principiante más común con WHERE.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Insertar y leer</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">JOIN →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 2 · Consultas de verdad" data-num="6" data-title="JOIN" id="join">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Combinar tablas con JOIN</h1>
+  <p class="lead">Acá está el corazón de lo relacional. Un JOIN combina filas de dos tablas usando la relación entre ellas. Es lo que te deja preguntar "qué pidió cada usuario" cuando los pedidos viven en otra tabla.</p>
+  <h2>INNER JOIN: lo que coincide</h2>
+  <p>Une cada pedido con su usuario, cruzando <code>pedidos.usuario_id</code> con <code>usuarios.id</code>:</p>
+  <div class="codehead"><span class="lang sh">sql</span><span class="tested">✓ salida real</span></div>
+<pre class="output">SELECT u.nombre, p.producto, p.monto
+FROM pedidos p
+JOIN usuarios u ON u.id = p.usuario_id
+ORDER BY u.nombre;
+
+nombre | producto | monto
+---------------------------
+Ana    | Monitor  | 90000.0
+Ana    | Cable    | 3000.0
+Carlos | Teclado  | 25000.0
+Carlos | Mouse    | 12000.0
+Carlos | Monitor  | 90000.0
+Luis   | Teclado  | 25000.0</pre>
+  <p>Las letras <code>u</code> y <code>p</code> son alias: acortan el nombre de la tabla para no repetirlo. El <code>ON</code> dice cómo se conectan las dos tablas.</p>
+  <h2>LEFT JOIN: incluir los que no tienen match</h2>
+  <p>El INNER JOIN deja afuera a Sofía, que no hizo pedidos. Si querés a todos los usuarios, incluso los que no compraron, usás <code>LEFT JOIN</code>:</p>
+  <div class="codehead"><span class="lang sh">sql</span><span class="tested">✓ salida real</span></div>
+<pre class="output">SELECT u.nombre, COUNT(p.id) AS pedidos
+FROM usuarios u
+LEFT JOIN pedidos p ON p.usuario_id = u.id
+GROUP BY u.id
+ORDER BY pedidos DESC;
+
+nombre | pedidos
+----------------
+Carlos | 3
+Ana    | 2
+Luis   | 1
+Sofia  | 0</pre>
+  <p>Ahí está Sofía con 0. El LEFT JOIN conserva todas las filas de la tabla izquierda (usuarios) aunque no tengan pareja en la derecha (pedidos).</p>
+  <div class="box nota"><span class="tag">La diferencia en una línea</span><p>INNER JOIN trae solo lo que coincide en ambas tablas. LEFT JOIN trae todo lo de la izquierda, y completa con vacío lo que falta a la derecha.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Filtrar con WHERE</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Agregar y agrupar →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 2 · Consultas de verdad" data-num="7" data-title="Agregar y agrupar" id="agrupar">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>Agregar y agrupar</h1>
+  <p class="lead">Las funciones de agregación resumen muchas filas en un número: contar, sumar, promediar. Combinadas con <code>GROUP BY</code>, responden preguntas de negocio reales.</p>
+  <h2>Las funciones</h2>
+  <p><code>COUNT()</code> cuenta, <code>SUM()</code> suma, <code>AVG()</code> promedia, <code>MAX()</code> y <code>MIN()</code> el mayor y el menor.</p>
+  <h2>GROUP BY: un resultado por grupo</h2>
+  <p><code>GROUP BY</code> junta las filas que comparten un valor y aplica la agregación a cada grupo. Y <code>HAVING</code> filtra sobre el resultado agrupado (como un WHERE, pero para grupos):</p>
+  <div class="codehead"><span class="lang sh">quién gastó más de 30000</span><span class="tested">✓ salida real</span></div>
+<pre class="output">SELECT u.nombre, SUM(p.monto) AS total, COUNT(*) AS cantidad
+FROM pedidos p JOIN usuarios u ON u.id = p.usuario_id
+GROUP BY u.id
+HAVING total > 30000
+ORDER BY total DESC;
+
+nombre | total    | cantidad
+----------------------------
+Carlos | 127000.0 | 3
+Ana    | 93000.0  | 2</pre>
+  <h2>Otro ejemplo: producto más vendido</h2>
+  <div class="codehead"><span class="lang sh">sql</span><span class="tested">✓ salida real</span></div>
+<pre class="output">SELECT producto, COUNT(*) AS veces, AVG(monto) AS promedio
+FROM pedidos GROUP BY producto ORDER BY veces DESC;
+
+producto | veces | promedio
+---------------------------
+Teclado  | 2     | 25000.0
+Monitor  | 2     | 90000.0
+Mouse    | 1     | 12000.0
+Cable    | 1     | 3000.0</pre>
+  <div class="box ojo"><span class="tag">WHERE vs HAVING</span><p><code>WHERE</code> filtra filas antes de agrupar. <code>HAVING</code> filtra grupos después de agrupar. Si querés "pedidos mayores a 1000", es WHERE. Si querés "usuarios cuyo total supera 30000", es HAVING.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← JOIN</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Modificar datos →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 2 · Consultas de verdad" data-num="8" data-title="Modificar datos" id="modificar">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Modificar y borrar datos</h1>
+  <p class="lead"><code>UPDATE</code> cambia filas existentes y <code>DELETE</code> las borra. Los dos comparten un detalle que arruinó muchos días: el <code>WHERE</code>.</p>
+  <h2>UPDATE</h2>
+  <div class="codehead"><span class="lang sh">UPDATE usuarios SET ciudad='Buenos Aires' WHERE id=4;</span><span class="tested">✓ salida real</span></div>
+<pre class="output">SELECT id, nombre, ciudad FROM usuarios WHERE id=4;
+
+id | nombre | ciudad
+--------------------------
+4  | Sofia  | Buenos Aires</pre>
+  <h2>DELETE</h2>
+  <div class="codehead"><span class="lang sh">sql</span></div>
+<pre>DELETE FROM pedidos WHERE id = 6;    <span class="cm">-- borra un pedido puntual</span></pre>
+  <div class="box ojo"><span class="tag">El error que borra la base entera</span><p>Un <code>UPDATE usuarios SET ciudad='X'</code> sin <code>WHERE</code> cambia TODAS las filas. Un <code>DELETE FROM pedidos</code> sin <code>WHERE</code> borra TODO. Antes de un UPDATE o DELETE, escribí primero el SELECT con el mismo WHERE para ver qué filas vas a tocar. Y en producción, andá con transacciones (próximo capítulo), que te dan marcha atrás.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Agregar y agrupar</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Índices y performance →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 3 · Que ande bien" data-num="9" data-title="Índices" id="indices">
+  <div class="ch-eyebrow">Capítulo 9</div>
+  <h1>Índices: el mismo query, mucho más rápido</h1>
+  <p class="lead">Un índice es como el índice de un libro: en vez de leer todas las páginas para encontrar algo, vas directo. Sin índice, la base recorre toda la tabla. Con índice, salta a las filas que importan.</p>
+  <h2>Ver el plan de ejecución</h2>
+  <p><code>EXPLAIN QUERY PLAN</code> te dice cómo va a resolver el query la base. Sin índice, hace un <strong>SCAN</strong>: recorre toda la tabla.</p>
+  <div class="codehead"><span class="lang sh">sin índice</span><span class="tested">✓ salida real</span></div>
+<pre class="output">EXPLAIN QUERY PLAN SELECT * FROM pedidos WHERE usuario_id = 1;
+
+detail
+------------
+SCAN pedidos</pre>
+  <p>Ahora creamos un índice sobre <code>usuario_id</code> y repetimos:</p>
+  <div class="codehead"><span class="lang sh">con índice</span><span class="tested">✓ salida real</span></div>
+<pre class="output">CREATE INDEX idx_pedidos_usuario ON pedidos(usuario_id);
+EXPLAIN QUERY PLAN SELECT * FROM pedidos WHERE usuario_id = 1;
+
+detail
+--------------------------------------------------------
+SEARCH pedidos USING INDEX idx_pedidos_usuario (usuario_id=?)</pre>
+  <p>Cambió de <code>SCAN</code> (leer todo) a <code>SEARCH ... USING INDEX</code> (ir directo). Con una tabla de millones de filas, esa diferencia es de segundos a milisegundos.</p>
+  <h2>Cuándo indexar</h2>
+  <ul>
+    <li>Columnas que usás seguido en <code>WHERE</code>.</li>
+    <li>Columnas de claves foráneas, que se usan en JOINs.</li>
+    <li>Columnas por las que ordenás mucho.</li>
+  </ul>
+  <div class="box ojo"><span class="tag">No indexes todo</span><p>Cada índice acelera las lecturas pero hace más lentas las escrituras (hay que mantenerlo actualizado) y ocupa espacio. Indexá lo que consultás, no cada columna por las dudas.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Modificar datos</span></button><button class="navbtn next" data-goto="10"><span class="dir">Siguiente</span><span class="t">Transacciones →</span></button></div>
+</section>
+
+<!-- 10 -->
+<section class="chapter" data-part="Parte 3 · Que ande bien" data-num="10" data-title="Transacciones" id="transacciones">
+  <div class="ch-eyebrow">Capítulo 10</div>
+  <h1>Transacciones: todo o nada</h1>
+  <p class="lead">Una transacción agrupa varias operaciones en una sola unidad: o pasan todas, o no pasa ninguna. Es lo que evita dejar la base a medio camino cuando algo falla.</p>
+  <h2>El ejemplo clásico: una transferencia</h2>
+  <p>Restar plata de una cuenta y sumarla a otra son dos operaciones. Si el sistema se cae entre las dos, la plata desaparece. La transacción garantiza que las dos pasen juntas o ninguna:</p>
+  <div class="codehead"><span class="lang sh">sql</span></div>
+<pre>BEGIN;
+  UPDATE cuentas SET saldo = saldo - 1000 WHERE id = 1;
+  UPDATE cuentas SET saldo = saldo + 1000 WHERE id = 2;
+COMMIT;     <span class="cm">-- confirma las dos juntas</span>
+
+<span class="cm">-- si algo salió mal en el medio:</span>
+ROLLBACK;   <span class="cm">-- deshace todo, como si nada hubiera pasado</span></pre>
+  <h2>ACID, las garantías</h2>
+  <p>Las bases relacionales prometen cuatro cosas, resumidas en la sigla ACID:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Letra</th><th>Garantía</th></tr></thead>
+    <tbody>
+      <tr><th>Atomicity</th><td>La transacción pasa entera o no pasa. Nada a medias.</td></tr>
+      <tr><th>Consistency</th><td>La base pasa de un estado válido a otro válido, respetando las reglas.</td></tr>
+      <tr><th>Isolation</th><td>Transacciones simultáneas no se pisan entre sí.</td></tr>
+      <tr><th>Durability</th><td>Una vez confirmada, queda guardada aunque se corte la luz.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Cuándo usarlas</span><p>Siempre que varias operaciones tengan que pasar juntas para que los datos tengan sentido. Pagos, reservas, cualquier cosa donde un estado intermedio sea inválido.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="9"><span class="dir">Anterior</span><span class="t">← Índices</span></button><button class="navbtn next" data-goto="11"><span class="dir">Siguiente</span><span class="t">SQL desde tu código →</span></button></div>
+</section>
+
+<!-- 11 -->
+<section class="chapter" data-part="Parte 3 · Que ande bien" data-num="11" data-title="SQL desde el código" id="codigo">
+  <div class="ch-eyebrow">Capítulo 11</div>
+  <h1>Consultar desde tu código</h1>
+  <p class="lead">Rara vez escribís SQL a mano en producción: lo corre tu aplicación. Y ahí hay una regla que no se negocia, porque de ella depende la seguridad de toda tu base.</p>
+  <h2>Python</h2>
+  <div class="codehead"><span class="lang py">python</span></div>
+<pre>import sqlite3
+con = sqlite3.connect("mi_base.db")
+cur = con.cursor()
+
+<span class="cm"># consulta parametrizada: el ? es un hueco seguro</span>
+ciudad = "Rosario"
+cur.execute("SELECT nombre FROM usuarios WHERE ciudad = ?", (ciudad,))
+for fila in cur.fetchall():
+    print(fila[0])</pre>
+  <h2>Node</h2>
+  <div class="codehead"><span class="lang js">javascript (pg, Postgres)</span></div>
+<pre>const { Client } = require("pg");
+const client = new Client();
+await client.connect();
+
+const ciudad = "Rosario";
+const r = await client.query(
+  "SELECT nombre FROM usuarios WHERE ciudad = $1", [ciudad]  // $1 es el hueco
+);
+console.log(r.rows);</pre>
+  <div class="box ojo"><span class="tag">La regla que evita el hackeo más común</span><p>NUNCA armes SQL pegando texto del usuario: <code>"... WHERE ciudad = '" + ciudad + "'"</code>. Eso es una inyección SQL esperando pasar: alguien manda <code>' OR '1'='1</code> y se lleva toda tu tabla. Usá siempre parámetros (<code>?</code> en SQLite, <code>$1</code> en Postgres). La librería se encarga de escaparlos. Esto lo vemos a fondo en el librito de ciberseguridad.</p></div>
+  <h2>ORMs: SQL sin escribir SQL</h2>
+  <p>Muchos proyectos usan un ORM (SQLAlchemy, Prisma, Django ORM) que traduce objetos de tu lenguaje a SQL. Cómodo y seguro por defecto, pero conviene entender el SQL que genera. Por eso este libro va primero al SQL crudo.</p>
+  <div class="navrow"><button class="navbtn" data-goto="10"><span class="dir">Anterior</span><span class="t">← Transacciones</span></button><button class="navbtn next" data-goto="12"><span class="dir">Siguiente</span><span class="t">Buenas prácticas →</span></button></div>
+</section>
+
+<!-- 12 -->
+<section class="chapter" data-part="Parte 4 · A producción" data-num="12" data-title="Buenas prácticas" id="practicas">
+  <div class="ch-eyebrow">Cierre</div>
+  <h1>Buenas prácticas, migraciones y cheatsheet</h1>
+  <p class="lead">Lo que hace a una base mantenible en el tiempo, y una hoja de referencia.</p>
+  <h2>Normalización, en simple</h2>
+  <p>No repitas datos. Si la ciudad de un usuario está en cada uno de sus pedidos, cuando se mude tenés que cambiar diez filas y alguna se te va a escapar. Guardala una sola vez en <code>usuarios</code> y referenciala. Esa idea de "cada dato en un solo lugar" es el corazón de la normalización.</p>
+  <h2>Migraciones</h2>
+  <p>El esquema cambia con el tiempo: agregás una columna, una tabla. Esos cambios se manejan con <strong>migraciones</strong>: archivos versionados que describen cada cambio, para aplicarlos igual en tu máquina y en producción. Herramientas: Alembic (Python), Prisma Migrate, Flyway. No cambies el esquema de producción a mano.</p>
+  <h2>Backups</h2>
+  <p>Una base sin backup es un accidente esperando pasar. Automatizá copias periódicas y, cada tanto, probá restaurarlas. Un backup que nunca probaste restaurar no es un backup, es una esperanza.</p>
+  <h2>Cheatsheet</h2>
+  <div class="codehead"><span class="lang sh">lo esencial</span></div>
+<pre>SELECT col1, col2 FROM tabla WHERE cond ORDER BY col LIMIT n;
+INSERT INTO tabla (col1, col2) VALUES (v1, v2);
+UPDATE tabla SET col = v WHERE cond;      -- ¡nunca sin WHERE!
+DELETE FROM tabla WHERE cond;             -- ¡nunca sin WHERE!
+SELECT a.x, b.y FROM a JOIN b ON a.id = b.a_id;
+SELECT col, COUNT(*) FROM tabla GROUP BY col HAVING COUNT(*) > 1;
+CREATE INDEX idx ON tabla(col);
+BEGIN; ... COMMIT;   -- o ROLLBACK</pre>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Primary key</th><td>Columna que identifica cada fila de forma única.</td></tr>
+      <tr><th>Foreign key</th><td>Columna que apunta a la clave de otra tabla.</td></tr>
+      <tr><th>JOIN</th><td>Combinar filas de dos tablas por su relación.</td></tr>
+      <tr><th>Índice</th><td>Estructura que acelera las búsquedas en una columna.</td></tr>
+      <tr><th>Transacción</th><td>Grupo de operaciones que pasan todas o ninguna.</td></tr>
+      <tr><th>ACID</th><td>Las garantías de una base relacional seria.</td></tr>
+      <tr><th>Inyección SQL</th><td>Ataque por pegar texto del usuario en el query. Se evita con parámetros.</td></tr>
+      <tr><th>ORM</th><td>Librería que traduce objetos de tu lenguaje a SQL.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Sabés modelar datos en tablas, consultarlos con SELECT, WHERE y JOIN, resumirlos con GROUP BY, acelerarlos con índices, y protegerlos con transacciones y consultas parametrizadas. Agarrá una base real (Supabase da Postgres gratis) y practicá con datos que te importen.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="11"><span class="dir">Anterior</span><span class="t">← SQL desde el código</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('sql-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('sql-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('sql-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('sql-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

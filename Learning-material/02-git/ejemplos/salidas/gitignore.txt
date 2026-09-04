@@ -1,0 +1,2 @@
+$ git status  (notas.txt es ignorado, no aparece)
+(vacío = todo limpio, notas.txt ignorado)

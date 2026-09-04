@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git, de 0 a producción</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Git y control de versiones</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Manual de estudio</div>
+  <h1>Git, de cero a trabajar en equipo</h1>
+  <p class="lead">Git es la herramienta que usa casi todo el que programa para guardar la historia de su código, probar cosas sin miedo y trabajar con otros sin pisarse. Este libro arranca sin dar nada por sabido y termina con vos manejando ramas, conflictos y flujos de equipo. Los bloques con <span class="tested">✓ salida real</span> son lo que devolvió la terminal de verdad.</p>
+  <h2>Cómo está armado</h2>
+  <ul>
+    <li><strong>Parte 1, fundamentos.</strong> Qué resuelve Git, el modelo de los tres estados, y tu primer repo funcionando.</li>
+    <li><strong>Parte 2, ramas y colaboración.</strong> Ramas, merge, el temido conflicto (resuelto paso a paso) y cómo deshacer cualquier cosa.</li>
+    <li><strong>Parte 3, GitHub.</strong> Remotos, push y pull, y el flujo con Pull Requests que usan los equipos.</li>
+    <li><strong>Parte 4, rescate.</strong> Los comandos que te salvan cuando algo se rompe, y una cheatsheet.</li>
+  </ul>
+  <div class="box nota"><span class="tag">Cómo moverte</span><p>Índice a la izquierda, o flechas <span class="kbd">←</span> <span class="kbd">→</span> del teclado. El libro recuerda dónde quedaste. Arriba, la barra de progreso y el tema claro/oscuro.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">¿Qué es Git? →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="1" data-title="¿Qué es Git?" id="que-es">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>¿Qué es Git y qué problema resuelve?</h1>
+  <p class="lead">Git es un sistema de control de versiones: guarda fotos del estado de tu proyecto a lo largo del tiempo, y te deja volver a cualquiera de ellas, comparar, y combinar el trabajo de varias personas.</p>
+  <h2>El dolor sin Git</h2>
+  <p>Todos empezamos igual: <code>proyecto_final.py</code>, después <code>proyecto_final_v2.py</code>, después <code>proyecto_final_ESTE_SI.py</code>. Cuando algo se rompe, no sabés qué cambió ni cuándo funcionaba. Y si sos dos personas editando el mismo archivo, uno pisa al otro.</p>
+  <p>Git resuelve las tres cosas de un saque: historia completa, capacidad de volver atrás, y una forma ordenada de fusionar trabajo de varios.</p>
+  <h2>Snapshots, no diferencias</h2>
+  <p>La idea mental clave: cada vez que guardás (un "commit"), Git saca una foto de todo tu proyecto en ese momento. Podés viajar a cualquier foto cuando quieras. Cada foto tiene un identificador único (un hash como <code>f1cee4b</code>), un autor, una fecha y un mensaje que explica qué cambiaste.</p>
+  <h2>Git no es GitHub</h2>
+  <p>Se confunden todo el tiempo. <strong>Git</strong> es el programa que corre en tu máquina y maneja la historia. <strong>GitHub</strong> es un servicio en internet donde subís tus repos para respaldarlos y compartirlos. Podés usar Git sin GitHub perfectamente. GitHub sin Git no existe. La Parte 3 se mete con GitHub; hasta entonces, todo pasa en tu compu.</p>
+  <div class="box nota"><span class="tag">La idea en una línea</span><p>Git es una máquina del tiempo para tu código: guardás fotos con nombre, y podés volver, comparar y combinar.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Los tres estados →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="2" data-title="Los tres estados" id="estados">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>El modelo mental: tres estados</h1>
+  <p class="lead">Entender esto de entrada te ahorra el 90% de la confusión con Git. Un archivo en Git pasa por tres lugares antes de quedar guardado en la historia.</p>
+  <h2>Los tres lugares</h2>
+  <ul>
+    <li><strong>Working directory.</strong> Tu carpeta de trabajo, los archivos como los estás editando ahora mismo.</li>
+    <li><strong>Staging area (el "index").</strong> Una sala de espera. Ponés acá los cambios que querés incluir en la próxima foto. Este paso intermedio es lo que te deja armar commits prolijos: elegís qué entra y qué no.</li>
+    <li><strong>Repository.</strong> La historia confirmada. Cuando hacés commit, lo que estaba en staging pasa a ser una foto permanente.</li>
+  </ul>
+  <h2>El flujo, siempre el mismo</h2>
+<pre>  working directory        staging area           repository
+   (editás)      --add-->   (preparás)  --commit->  (historia)
+
+   app.py  ✎                app.py  ✓               foto #3 ✓✓✓</pre>
+  <p>Editás archivos, elegís cuáles preparar con <code>git add</code>, y confirmás la foto con <code>git commit</code>. Ese ciclo lo vas a repetir miles de veces.</p>
+  <div class="box nota"><span class="tag">Por qué existe el staging</span><p>Te deja separar cambios en commits con sentido. Si tocaste dos cosas distintas, podés commitear una ahora (con su mensaje) y la otra después, en vez de mezclar todo en una foto confusa.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← ¿Qué es Git?</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Tu primer repo →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="3" data-title="Tu primer repo" id="primer-repo">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Tu primer repositorio</h1>
+  <p class="lead">Vamos a crear un repo real desde cero y hacer los primeros commits. Todo lo que sigue se ejecutó de verdad.</p>
+  <h2>Configuración, una sola vez</h2>
+  <p>Antes del primer commit, decile a Git quién sos. Esto queda guardado para todos tus repos:</p>
+  <div class="codehead"><span class="lang sh">shell</span></div>
+<pre>git config --global user.name "Carlos"
+git config --global user.email "carlos@ejemplo.com"</pre>
+  <h2>Crear el repo</h2>
+  <div class="codehead"><span class="lang sh">git init</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ git init
+Initialized empty Git repository in /home/.../proyecto/.git/</pre>
+  <p>Eso crea una carpeta oculta <code>.git</code> donde Git guarda toda la historia. El resto de tu carpeta sigue igual.</p>
+  <h2>Ver el estado</h2>
+  <p><code>git status</code> es el comando que más vas a usar. Te dice qué cambió y en qué estado está cada archivo:</p>
+  <div class="codehead"><span class="lang sh">git status</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ git status
+On branch main
+No commits yet
+Untracked files:
+	app.py
+nothing added to commit but untracked files present</pre>
+  <p><code>app.py</code> aparece como "untracked": Git lo ve pero todavía no lo sigue.</p>
+  <h2>Preparar y confirmar</h2>
+  <div class="codehead"><span class="lang sh">add + commit</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ git add app.py
+$ git commit -m "primer commit"
+[main (root-commit) f1cee4b] primer commit
+ 1 file changed, 1 insertion(+)</pre>
+  <p>Ya tenés tu primera foto. El <code>-m</code> es el mensaje: siempre explicá qué hiciste. Ese <code>f1cee4b</code> es el identificador único del commit.</p>
+  <h2>La historia</h2>
+  <div class="codehead"><span class="lang sh">git log --oneline</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ git log --oneline
+183929e agregar gitignore
+f4560de mejorar saludo y agregar README
+f1cee4b primer commit</pre>
+  <div class="box nota"><span class="tag">El ciclo que repetís siempre</span><p><code>git status</code> para ver dónde estás, <code>git add</code> para preparar, <code>git commit -m</code> para guardar. Tres comandos, el 80% del uso diario.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Los tres estados</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Ver cambios e ignorar →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="4" data-title="Ver cambios e ignorar" id="cambios">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Ver qué cambió, y qué ignorar</h1>
+  <p class="lead">Antes de commitear conviene mirar exactamente qué tocaste. Y hay archivos que nunca querés guardar. Git te da herramientas para las dos cosas.</p>
+  <h2>status y diff</h2>
+  <p>La versión corta de status (<code>-s</code>) es más rápida de leer: <code>M</code> es modificado, <code>??</code> es sin seguir. Y <code>git diff</code> te muestra línea por línea qué cambió:</p>
+  <div class="codehead"><span class="lang sh">status -s + diff</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ git status -s
+ M app.py
+?? README.md
+
+$ git diff app.py
+@@ -1 +1 @@
+-print('hola')
++print('hola mundo')</pre>
+  <p>Las líneas con <code>-</code> se van, las <code>+</code> entran. Leer el diff antes de commitear es un hábito que atrapa muchos errores.</p>
+  <h2>.gitignore: lo que no se guarda</h2>
+  <p>Hay cosas que jamás van al repo: contraseñas, archivos de configuración local, dependencias (<code>node_modules</code>), archivos generados. Las listás en un archivo <code>.gitignore</code> y Git las ignora.</p>
+  <div class="codehead"><span class="lang txt">.gitignore</span></div>
+<pre>node_modules/
+.env              # secretos y claves, NUNCA al repo
+__pycache__/
+*.log
+dist/</pre>
+  <div class="codehead"><span class="lang sh">resultado</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ git status -s
+(vacío = todo limpio, notas.txt ignorado)</pre>
+  <div class="box ojo"><span class="tag">Ojo, esto lastima</span><p>Si ya commiteaste un secreto, borrarlo en un commit nuevo no alcanza: sigue en la historia. Hay que reescribir la historia y, sobre todo, rotar ese secreto (cambiarlo). Poné el <code>.gitignore</code> antes del primer commit, no después.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Tu primer repo</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Ramas →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · Ramas y colaboración" data-num="5" data-title="Ramas" id="ramas">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Ramas: probar sin romper</h1>
+  <p class="lead">Una rama es una línea de trabajo paralela. Te deja desarrollar algo nuevo sin tocar la versión que funciona, y volver a fusionarlo cuando esté listo. Es lo que hace a Git tan potente para equipos.</p>
+  <h2>Por qué</h2>
+  <p>Tu rama principal (<code>main</code>) debería tener siempre código que funciona. Cuando arrancás una feature, creás una rama, trabajás ahí tranquilo, y solo cuando está lista la traés a <code>main</code>. Si la feature se cae, <code>main</code> nunca se enteró.</p>
+  <h2>Crear y moverse</h2>
+  <div class="codehead"><span class="lang sh">git switch -c feature/login</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ git switch -c feature/login
+Switched to a new branch 'feature/login'</pre>
+  <p><code>switch -c</code> crea la rama y te para en ella (el <code>-c</code> es "create"). Desde acá, cada commit va a esta rama, no a <code>main</code>. Para volver: <code>git switch main</code>.</p>
+  <div class="box nota"><span class="tag">switch y restore, los nuevos</span><p>Vas a ver mucho <code>git checkout</code> por internet: era el comando viejo que hacía de todo. Git lo dividió en dos más claros: <code>git switch</code> para cambiar de rama, <code>git restore</code> para descartar cambios. Los dos funcionan; usá los nuevos.</p></div>
+  <h3>Nombrar ramas</h3>
+  <p>Una convención común: <code>feature/login</code>, <code>fix/error-pago</code>, <code>docs/readme</code>. El prefijo dice de qué tipo es, y el resto qué toca. Prolijo y fácil de escanear.</p>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Ver cambios e ignorar</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Merge →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 2 · Ramas y colaboración" data-num="6" data-title="Merge" id="merge">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Fusionar ramas con merge</h1>
+  <p class="lead">Cuando tu rama está lista, la traés de vuelta a main con <code>git merge</code>. Hay dos formas en que Git lo hace, y conviene reconocerlas.</p>
+  <h2>Fast-forward: el caso simple</h2>
+  <p>Si <code>main</code> no cambió desde que te fuiste, Git simplemente adelanta el puntero. No hay nada que combinar, solo mover main hasta donde llegó tu rama.</p>
+  <div class="codehead"><span class="lang sh">merge fast-forward</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ git switch main
+$ git merge feature/login
+Updating 183929e..458d38c
+Fast-forward
+ app.py | 1 +
+ 1 file changed, 1 insertion(+)</pre>
+  <h2>Merge commit: cuando las dos ramas avanzaron</h2>
+  <p>Si <code>main</code> también recibió commits mientras trabajabas, Git combina las dos líneas y crea un commit especial de merge, con dos padres. Lo vas a ver en el gráfico de historia como una bifurcación que se vuelve a unir:</p>
+  <div class="codehead"><span class="lang sh">git log --oneline --graph --all</span><span class="tested">✓ salida real</span></div>
+<pre class="output">*   51d8f8c resolver conflicto de color: rojo
+|\
+| * a425c80 color azul
+* | fdb0aab color rojo
+|/
+* 458d38c agregar login
+* 183929e agregar gitignore
+* f1cee4b primer commit</pre>
+  <p>Ese diamante en el grafo es el merge: dos ramas que se separaron y se reunieron. Cuando las dos tocaron lo mismo, aparece un conflicto. Ese es el próximo capítulo.</p>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Ramas</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Conflictos →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 2 · Ramas y colaboración" data-num="7" data-title="Conflictos" id="conflictos">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>Conflictos, sin miedo</h1>
+  <p class="lead">Un conflicto pasa cuando dos ramas cambian la misma línea del mismo archivo, y Git no sabe cuál elegir. Suena aterrorífico la primera vez. Es de las cosas más simples de Git una vez que lo ves una vez.</p>
+  <h2>Cómo se ve</h2>
+  <p>Dos ramas cambiaron <code>config.py</code>: una puso el color en rojo, la otra en azul. Al mergear:</p>
+  <div class="codehead"><span class="lang sh">git merge feature/color</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ git merge feature/color
+Auto-merging config.py
+CONFLICT (add/add): Merge conflict in config.py
+Automatic merge failed; fix conflicts and then commit the result.</pre>
+  <p>Git no rompió nada. Paró y te pasó la decisión. Abrís el archivo y encontrás los marcadores:</p>
+  <div class="codehead"><span class="lang txt">config.py con el conflicto</span><span class="tested">✓ salida real</span></div>
+<pre class="output">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+color = "rojo"
+=======
+color = "azul"
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/color</pre>
+  <h2>Cómo se resuelve</h2>
+  <p>Arriba (<code>HEAD</code>) está lo que tenía tu rama actual. Abajo, lo que trae la otra. Tu tarea: editar el archivo para que quede como debe, borrando los marcadores. Elegís uno, el otro, o una mezcla. Dejás <code>config.py</code> así:</p>
+  <div class="codehead"><span class="lang txt">config.py resuelto</span></div>
+<pre>color = "rojo"</pre>
+  <p>Después le decís a Git que lo resolviste y confirmás el merge:</p>
+  <div class="codehead"><span class="lang sh">resolver</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ git add config.py
+$ git commit -m "resolver conflicto de color: rojo"
+commit de merge creado</pre>
+  <div class="box nota"><span class="tag">La clave</span><p>Un conflicto es Git preguntándote, no Git fallando. Editás, borrás los marcadores <code>&lt;&lt;&lt;</code> <code>===</code> <code>&gt;&gt;&gt;</code>, hacés add y commit. Nada más.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Merge</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Deshacer cosas →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 2 · Ramas y colaboración" data-num="8" data-title="Deshacer cosas" id="deshacer">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Deshacer casi cualquier cosa</h1>
+  <p class="lead">La gran ventaja de Git: rara vez perdés trabajo de verdad. Estos son los comandos para volver atrás, según qué querés deshacer.</p>
+  <h2>Descartar cambios sin commitear: restore</h2>
+  <div class="codehead"><span class="lang sh">git restore</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ git restore app.py
+app.py vuelto al último commit</pre>
+  <p>Tira a la basura lo que editaste desde el último commit. Cuidado, esto sí se pierde (no estaba guardado todavía).</p>
+  <h2>Guardar para después: stash</h2>
+  <p>Estás a mitad de algo y necesitás cambiar de rama ya. <code>stash</code> guarda tus cambios a un costado y te deja la carpeta limpia. Después los recuperás con <code>pop</code>:</p>
+  <div class="codehead"><span class="lang sh">stash</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ git stash
+Saved working directory and index state WIP on main
+$ git stash pop
+Changes not staged for commit:
+	modified:   app.py
+Dropped refs/stash@{0}</pre>
+  <h2>reset y revert: deshacer commits</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Comando</th><th>Qué hace</th><th>Cuándo</th></tr></thead>
+    <tbody>
+      <tr><th>git reset --soft</th><td>Deshace el commit pero deja los cambios preparados</td><td>Rehacer el último commit</td></tr>
+      <tr><th>git reset --hard</th><td>Deshace el commit y borra los cambios</td><td>Tirar todo lo último (peligroso)</td></tr>
+      <tr><th>git revert</th><td>Crea un commit nuevo que deshace otro</td><td>Deshacer algo ya compartido</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box ojo"><span class="tag">Regla de oro</span><p><code>reset --hard</code> reescribe la historia: úsalo solo en commits que todavía no compartiste. Si ya pusheaste, usá <code>revert</code>, que deshace agregando un commit y no rompe a los demás.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Conflictos</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Remotos y GitHub →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 3 · GitHub" data-num="9" data-title="Remotos y GitHub" id="remotos">
+  <div class="ch-eyebrow">Capítulo 9</div>
+  <h1>Remotos: subir a GitHub</h1>
+  <p class="lead">Hasta acá todo vivió en tu máquina. Un "remoto" es una copia del repo en internet (GitHub) que usás para respaldar y compartir. Estos son los comandos del día a día.</p>
+  <h2>Los cuatro que necesitás</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Comando</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><th>git clone &lt;url&gt;</th><td>Baja un repo de GitHub a tu máquina, con toda su historia.</td></tr>
+      <tr><th>git push</th><td>Sube tus commits locales al remoto.</td></tr>
+      <tr><th>git pull</th><td>Baja los commits nuevos del remoto y los fusiona con lo tuyo.</td></tr>
+      <tr><th>git fetch</th><td>Baja los cambios del remoto pero sin fusionar todavía. Para mirar antes de integrar.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Conectar un repo local a GitHub</h2>
+  <p>Creás el repo vacío en GitHub, y desde tu carpeta:</p>
+  <div class="codehead"><span class="lang sh">shell</span></div>
+<pre>git remote add origin https://github.com/usuario/proyecto.git
+git push -u origin main       <span class="cm"># la primera vez, -u recuerda el destino</span></pre>
+  <p><code>origin</code> es el nombre por convención del remoto principal. Después de la primera vez, alcanza con <code>git push</code> y <code>git pull</code>.</p>
+  <h2>El ritmo diario trabajando con otros</h2>
+  <ol>
+    <li><code>git pull</code> al empezar, para arrancar con lo último.</li>
+    <li>Trabajás, hacés commits en tu rama.</li>
+    <li><code>git push</code> para subir tu rama.</li>
+    <li>Abrís un Pull Request (próximo capítulo).</li>
+  </ol>
+  <div class="box ojo"><span class="tag">Autenticación</span><p>GitHub ya no acepta contraseña para push. Usás un token de acceso personal (PAT) o una clave SSH. Se configura una vez y listo. Nunca pongas el token en el código; va en la configuración de Git o del sistema.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Deshacer cosas</span></button><button class="navbtn next" data-goto="10"><span class="dir">Siguiente</span><span class="t">Pull Requests →</span></button></div>
+</section>
+
+<!-- 10 -->
+<section class="chapter" data-part="Parte 3 · GitHub" data-num="10" data-title="Pull Requests" id="pr">
+  <div class="ch-eyebrow">Capítulo 10</div>
+  <h1>El flujo con Pull Requests</h1>
+  <p class="lead">Un Pull Request (PR) es cómo se integra trabajo en equipo: proponés que tu rama se fusione a main, otros la revisan, y recién ahí se mergea. Es el corazón del trabajo colaborativo en GitHub.</p>
+  <h2>El flujo completo, paso a paso</h2>
+  <ol>
+    <li><strong>Rama.</strong> Creás <code>feature/algo</code> desde main y trabajás ahí.</li>
+    <li><strong>Push.</strong> Subís tu rama a GitHub con <code>git push -u origin feature/algo</code>.</li>
+    <li><strong>Abrís el PR.</strong> En GitHub, pedís fusionar tu rama a main. Escribís qué hiciste y por qué.</li>
+    <li><strong>Revisión.</strong> Un compañero lee tu código, comenta, pide cambios. Vos seguís pusheando a la misma rama y el PR se actualiza solo.</li>
+    <li><strong>Merge.</strong> Cuando está aprobado, se mergea a main. Muchos equipos corren tests automáticos antes de permitirlo (eso es CI, otro librito).</li>
+    <li><strong>Limpieza.</strong> Se borra la rama, ya cumplió.</li>
+  </ol>
+  <h2>Por qué se trabaja así</h2>
+  <p>El PR le da a todo cambio un momento de revisión antes de entrar a main. Se atrapan bugs, se comparte conocimiento, y queda registro de por qué se hizo cada cosa. Nadie mergea directo a main en un equipo serio.</p>
+  <div class="box nota"><span class="tag">Un buen PR</span><p>Chico y enfocado. Un PR que toca 40 archivos no lo revisa nadie bien. Título claro, descripción de qué y por qué, y si aplica, cómo probarlo. Facilitarle la vida al que revisa acelera todo.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="9"><span class="dir">Anterior</span><span class="t">← Remotos y GitHub</span></button><button class="navbtn next" data-goto="11"><span class="dir">Siguiente</span><span class="t">Buenas prácticas →</span></button></div>
+</section>
+
+<!-- 11 -->
+<section class="chapter" data-part="Parte 3 · GitHub" data-num="11" data-title="Buenas prácticas" id="practicas">
+  <div class="ch-eyebrow">Capítulo 11</div>
+  <h1>Commits y ramas que se entienden</h1>
+  <p class="lead">Git no te obliga a ser prolijo, pero tu yo del futuro y tus compañeros te lo van a agradecer. Estas son las costumbres que separan un repo legible de un pantano.</p>
+  <h2>Commits atómicos</h2>
+  <p>Un commit, una idea. Si arreglaste un bug y de paso renombraste diez variables, son dos commits. Así, si el bug fix rompe algo, lo podés revertir sin llevarte puesto el renombrado.</p>
+  <h2>Buenos mensajes</h2>
+  <p>La convención más usada hoy es <em>Conventional Commits</em>: un prefijo que dice el tipo, y una descripción corta en presente.</p>
+  <div class="codehead"><span class="lang txt">ejemplos</span></div>
+<pre>feat: agregar login con Google
+fix: corregir cálculo de impuestos en pedidos
+docs: actualizar README con pasos de instalación
+refactor: extraer validación de email a su función
+test: agregar tests del carrito</pre>
+  <p>La primera línea, corta (menos de 50 caracteres). Si hace falta más, dejás una línea en blanco y explayás abajo el porqué, que es lo que no se ve en el código.</p>
+  <h2>Reglas simples que evitan dolor</h2>
+  <ul>
+    <li>Commiteá seguido. Commits chicos son fáciles de entender y de revertir.</li>
+    <li><code>main</code> siempre funcionando. El trabajo en progreso va en ramas.</li>
+    <li>Pulleá antes de empezar, así arrancás con lo último y evitás conflictos.</li>
+    <li>Nunca commitees secretos ni <code>node_modules</code>. Para eso está el <code>.gitignore</code>.</li>
+  </ul>
+  <div class="navrow"><button class="navbtn" data-goto="10"><span class="dir">Anterior</span><span class="t">← Pull Requests</span></button><button class="navbtn next" data-goto="12"><span class="dir">Siguiente</span><span class="t">Rescate y cheatsheet →</span></button></div>
+</section>
+
+<!-- 12 -->
+<section class="chapter" data-part="Parte 4 · Rescate" data-num="12" data-title="Rescate y cheatsheet" id="rescate">
+  <div class="ch-eyebrow">Cierre</div>
+  <h1>Comandos de rescate y cheatsheet</h1>
+  <p class="lead">Los comandos que te salvan cuando algo salió mal, y una hoja de referencia para tener a mano.</p>
+  <h2>Cuando entrás en pánico</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Situación</th><th>Comando</th></tr></thead>
+    <tbody>
+      <tr><th>"Perdí un commit"</th><td><code>git reflog</code> lista todo lo que hiciste, hasta lo "borrado". Casi nada se pierde de verdad.</td></tr>
+      <tr><th>"Me equivoqué de rama al commitear"</th><td><code>git cherry-pick &lt;hash&gt;</code> copia ese commit a la rama correcta.</td></tr>
+      <tr><th>"¿Quién cambió esta línea?"</th><td><code>git blame archivo</code> muestra autor y commit de cada línea.</td></tr>
+      <tr><th>"¿Cuándo entró este bug?"</th><td><code>git bisect</code> hace una búsqueda binaria en la historia para encontrarlo.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Cheatsheet del día a día</h2>
+  <div class="codehead"><span class="lang sh">lo esencial</span></div>
+<pre>git status                 # ¿en qué estoy?
+git add archivo            # preparar un archivo
+git add -A                 # preparar todo
+git commit -m "mensaje"    # confirmar
+git log --oneline          # ver la historia
+git switch -c rama         # crear y cambiar de rama
+git switch main            # volver a main
+git merge rama             # fusionar
+git pull                   # traer del remoto
+git push                   # subir al remoto
+git restore archivo        # descartar cambios
+git stash / git stash pop  # guardar / recuperar a medias</pre>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Commit</th><td>Una foto guardada del proyecto, con su hash y mensaje.</td></tr>
+      <tr><th>Branch (rama)</th><td>Una línea de trabajo paralela.</td></tr>
+      <tr><th>HEAD</th><td>Un puntero a dónde estás parado ahora.</td></tr>
+      <tr><th>Remote (remoto)</th><td>Una copia del repo en internet, como GitHub.</td></tr>
+      <tr><th>origin</th><td>El nombre por defecto del remoto principal.</td></tr>
+      <tr><th>Merge</th><td>Combinar dos ramas.</td></tr>
+      <tr><th>PR</th><td>Pull Request: propuesta de fusionar una rama, con revisión.</td></tr>
+      <tr><th>Staging</th><td>La sala de espera de lo que entra al próximo commit.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Sabés guardar historia, trabajar en ramas, resolver conflictos, deshacer casi todo, y colaborar con PRs. El resto es práctica. Usá Git en todo lo que hagas, aunque trabajes solo. Se vuelve automático rápido.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="11"><span class="dir">Anterior</span><span class="t">← Buenas prácticas</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('git-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('git-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('git-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('git-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

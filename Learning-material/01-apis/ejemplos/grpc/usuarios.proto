@@ -1,0 +1,8 @@
+syntax = "proto3";
+package usuarios;
+
+service Usuarios {
+  rpc GetUsuario (UsuarioReq) returns (Usuario);
+}
+message UsuarioReq { int32 id = 1; }
+message Usuario { int32 id = 1; string nombre = 2; string email = 3; }

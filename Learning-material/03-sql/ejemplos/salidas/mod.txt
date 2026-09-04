@@ -1,0 +1,9 @@
+(tablas creadas y datos insertados)
+
+$ UPDATE (una fila)
+
+$ SELECT id,nombre,ciudad FROM usuarios WHERE id=4;
+id | nombre | ciudad      
+--------------------------
+4  | Sofia  | Buenos Aires
+

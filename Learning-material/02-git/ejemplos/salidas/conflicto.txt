@@ -1,0 +1,14 @@
+$ git merge feature/color
+Auto-merging config.py
+CONFLICT (add/add): Merge conflict in config.py
+Automatic merge failed; fix conflicts and then commit the result.
+
+--- config.py con los marcadores de conflicto ---
+<<<<<<< HEAD
+color = "rojo"
+=======
+color = "azul"
+>>>>>>> feature/color
+(resuelto: elegimos rojo, git add config.py)
+$ git commit
+commit de merge creado

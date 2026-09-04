@@ -1,0 +1,12 @@
+(tablas creadas y datos insertados)
+
+$ EXPLAIN QUERY PLAN (sin índice)
+id | parent | notused | detail      
+------------------------------------
+2  | 0      | 0       | SCAN pedidos
+
+$ EXPLAIN QUERY PLAN (con índice)
+id | parent | notused | detail                                                       
+-------------------------------------------------------------------------------------
+3  | 0      | 0       | SEARCH pedidos USING INDEX idx_pedidos_usuario (usuario_id=?)
+

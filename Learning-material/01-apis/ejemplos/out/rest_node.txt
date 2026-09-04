@@ -1,0 +1,22 @@
+### GET /usuarios/42
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 56
+ETag: W/"38-MB6wa00SHXjpgncNcVe7akdJVTo"
+Date: Fri, 04 Sep 2026 02:36:36 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"id":42,"nombre":"Carlos","email":"carlos@ejemplo.com"}
+### POST /usuarios
+HTTP/1.1 201 Created
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 50
+ETag: W/"32-oAr+I9Vm897auDpkBgsAtQAs+PU"
+Date: Fri, 04 Sep 2026 02:36:36 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"id":43,"nombre":"Ana","email":"ana@ejemplo.com"}

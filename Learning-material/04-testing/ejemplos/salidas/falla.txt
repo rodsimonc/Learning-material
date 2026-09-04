@@ -1,0 +1,22 @@
+$ pytest test_falla.py
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/claude/testdemo
+plugins: anyio-4.13.0, cov-7.1.0
+collected 1 item
+
+test_falla.py F                                                          [100%]
+
+=================================== FAILURES ===================================
+_________________________________ test_con_bug _________________________________
+
+    def test_con_bug():
+        # esperamos 250 pero pasamos mal los datos a proposito
+>       assert subtotal([(100, 2)]) == 250
+E       assert 200 == 250
+E        +  where 200 = subtotal([(100, 2)])
+
+test_falla.py:4: AssertionError
+=========================== short test summary info ============================
+FAILED test_falla.py::test_con_bug - assert 200 == 250
+============================== 1 failed in 0.02s ===============================

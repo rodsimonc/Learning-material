@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Cotizaciones"
+    targetNamespace="http://ejemplo.com/cotiz"
+    xmlns:tns="http://ejemplo.com/cotiz"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <message name="GetCotizacionRequest">
+    <part name="moneda" type="xsd:string"/>
+  </message>
+  <message name="GetCotizacionResponse">
+    <part name="valor" type="xsd:float"/>
+  </message>
+  <portType name="CotizacionesPort">
+    <operation name="GetCotizacion">
+      <input message="tns:GetCotizacionRequest"/>
+      <output message="tns:GetCotizacionResponse"/>
+    </operation>
+  </portType>
+  <binding name="CotizacionesBinding" type="tns:CotizacionesPort">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetCotizacion">
+      <soap:operation soapAction="GetCotizacion"/>
+      <input><soap:body use="encoded" namespace="http://ejemplo.com/cotiz"
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></input>
+      <output><soap:body use="encoded" namespace="http://ejemplo.com/cotiz"
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></output>
+    </operation>
+  </binding>
+  <service name="CotizacionesService">
+    <port name="CotizacionesPort" binding="tns:CotizacionesBinding">
+      <soap:address location="http://127.0.0.1:8007/cotiz"/>
+    </port>
+  </service>
+</definitions>

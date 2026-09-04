@@ -1,0 +1,5 @@
+$ git add app.py
+$ git commit -m "primer commit"
+[main (root-commit) f1cee4b] primer commit
+ 1 file changed, 1 insertion(+)
+ create mode 100644 app.py

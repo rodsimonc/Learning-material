@@ -1,0 +1,16 @@
+(tablas creadas y datos insertados)
+
+$ GROUP BY + HAVING: quién gastó más de 30000
+nombre | total    | cantidad
+----------------------------
+Carlos | 127000.0 | 3       
+Ana    | 93000.0  | 2       
+
+$ SELECT producto, COUNT(*) AS veces, AVG(monto) AS promedio FROM pedidos GROUP BY producto ORDER BY veces DESC;
+producto | veces | promedio
+---------------------------
+Teclado  | 2     | 25000.0 
+Monitor  | 2     | 90000.0 
+Mouse    | 1     | 12000.0 
+Cable    | 1     | 3000.0  
+

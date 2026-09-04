@@ -1,0 +1,9 @@
+$ git switch -c feature/login
+Switched to a new branch 'feature/login'
+$ git switch main
+Switched to branch 'main'
+$ git merge feature/login
+Updating 183929e..458d38c
+Fast-forward
+ app.py | 1 +
+ 1 file changed, 1 insertion(+)

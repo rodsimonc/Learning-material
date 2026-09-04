@@ -1,0 +1,23 @@
+(tablas creadas y datos insertados)
+
+$ SELECT nombre, ciudad FROM usuarios;
+nombre | ciudad       
+----------------------
+Carlos | Mar del Plata
+Ana    | Rosario      
+Luis   | Rosario      
+Sofia  | Córdoba      
+
+$ SELECT * FROM usuarios WHERE ciudad = 'Rosario';
+id | nombre | ciudad 
+---------------------
+2  | Ana    | Rosario
+3  | Luis   | Rosario
+
+$ SELECT ... ORDER BY monto DESC LIMIT 3
+producto | monto  
+------------------
+Monitor  | 90000.0
+Monitor  | 90000.0
+Teclado  | 25000.0
+

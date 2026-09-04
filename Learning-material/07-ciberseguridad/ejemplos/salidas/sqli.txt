@@ -1,0 +1,10 @@
+### Entrada del atacante: "' OR '1'='1"
+
+VULNERABLE (concatenando):
+  SQL armado: SELECT id, usuario FROM usuarios WHERE usuario = '' OR '1'='1'
+  resultado: [(1, 'carlos'), (2, 'ana'), (3, 'admin')]
+  -> devolvió TODA la tabla. El atacante entró sin usuario válido.
+
+SEGURO (parametrizado):
+  resultado: []
+  -> vacío. El ataque se trató como un nombre de usuario literal.

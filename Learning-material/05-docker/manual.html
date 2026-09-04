@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docker, de 0 a deploy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Docker y contenedores</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Manual de estudio</div>
+  <h1>Docker, de cero a deploy</h1>
+  <p class="lead">Docker empaqueta tu app con todo lo que necesita para correr, de modo que funcione igual en tu máquina, en la de tu compañero y en el servidor. Este libro va de "¿qué es un contenedor?" a subir una imagen y correrla en producción, con Dockerfiles reales para apps de Python y Node.</p>
+  <div class="box ojo"><span class="tag">Sobre los ejemplos</span><p>Los Dockerfiles, el <code>docker-compose.yml</code> y los comandos de este libro están listos para correr y son los mismos que usarías en un proyecto. Las salidas de consola que se muestran son ilustrativas: representan lo que verías al ejecutarlos, no una captura de esta sesión (correr Docker necesita un daemon que este entorno no tiene).</p></div>
+  <h2>Cómo está armado</h2>
+  <ul>
+    <li><strong>Parte 1, fundamentos.</strong> Qué es un contenedor, y la diferencia entre imagen y contenedor.</li>
+    <li><strong>Parte 2, construir.</strong> Tu primera imagen con un Dockerfile, en Python y Node, y cómo hacerlas chicas y rápidas.</li>
+    <li><strong>Parte 3, correr y orquestar.</strong> Correr contenedores y levantar varios servicios juntos con Compose.</li>
+    <li><strong>Parte 4, a producción.</strong> Imágenes seguras, registry y deploy.</li>
+  </ul>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">¿Qué es un contenedor? →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="1" data-title="¿Qué es un contenedor?" id="contenedor">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Qué es un contenedor</h1>
+  <p class="lead">Un contenedor es tu app empaquetada junto a su sistema operativo mínimo, sus dependencias y su configuración, corriendo aislada del resto de la máquina. Todo lo que necesita para funcionar viaja adentro.</p>
+  <h2>El problema que resuelve</h2>
+  <p>"En mi máquina anda". La frase más repetida y odiada del desarrollo. Tu código funciona con tu versión de Python, tus librerías, tu sistema. En el servidor hay otras versiones y explota. Docker mata ese problema: empaquetás todo el entorno, y ese paquete corre idéntico en cualquier lado.</p>
+  <h2>Contenedor vs máquina virtual</h2>
+  <p>Una máquina virtual emula una computadora entera, con su sistema operativo completo. Pesa gigas y arranca en minutos. Un contenedor comparte el kernel del sistema anfitrión y solo empaqueta lo de tu app. Pesa megas y arranca en segundos.</p>
+<pre>   Máquina virtual                 Contenedores
+  +----------------+          +------+ +------+ +------+
+  |    tu app      |          | app1 | | app2 | | app3 |
+  |  librerías     |          +------+ +------+ +------+
+  |  SO completo   |          |   Docker Engine     |
+  +----------------+          +---------------------+
+  |   hipervisor   |          |   SO anfitrión      |
+  +----------------+          +---------------------+
+     pesado, lento               liviano, rápido</pre>
+  <p>Por eso podés correr diez contenedores en una máquina donde entrarían una o dos VMs.</p>
+  <div class="box nota"><span class="tag">La idea en una línea</span><p>Un contenedor es una caja sellada con tu app y todo su entorno adentro, que corre igual en cualquier máquina que tenga Docker.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Imágenes vs contenedores →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="2" data-title="Imágenes vs contenedores" id="imagenes">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Imagen vs contenedor</h1>
+  <p class="lead">Se confunden todo el tiempo, pero la distinción es simple y hay que tenerla clara para no perderse.</p>
+  <h2>La imagen es el molde, el contenedor es la pieza</h2>
+  <ul>
+    <li>Una <strong>imagen</strong> es una plantilla inmutable, de solo lectura: tu app empaquetada. Se construye una vez.</li>
+    <li>Un <strong>contenedor</strong> es una instancia viva de una imagen, corriendo. De una imagen podés levantar muchos contenedores iguales.</li>
+  </ul>
+  <p>La analogía clásica: la imagen es la clase, el contenedor es el objeto. O la imagen es la receta, el contenedor es la torta. Cocinás una receta muchas veces.</p>
+  <h2>El registry: donde viven las imágenes</h2>
+  <p>Las imágenes se comparten a través de un <strong>registry</strong>, como Docker Hub. Bajás imágenes ya hechas (<code>postgres</code>, <code>python</code>, <code>node</code>) y subís las tuyas. Es el "GitHub de las imágenes".</p>
+  <h2>Capas</h2>
+  <p>Una imagen se arma en capas apiladas: una por cada instrucción del Dockerfile. Docker reutiliza (cachea) las capas que no cambiaron, así que reconstruir es rápido si solo tocaste el código. Esto explica un truco importante que vas a ver en el próximo capítulo: copiar las dependencias antes que el código.</p>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← ¿Qué es un contenedor?</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Tu primera imagen (Python) →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · Construir" data-num="3" data-title="Primera imagen (Python)" id="python">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Tu primera imagen: una app Python</h1>
+  <p class="lead">El Dockerfile es la receta: una lista de instrucciones para construir la imagen. Vamos a dockerizar la API de FastAPI del librito de APIs.</p>
+  <h2>El Dockerfile</h2>
+  <div class="codehead"><span class="lang txt">Dockerfile</span></div>
+<pre>FROM python:3.11-slim          <span class="cm"># imagen base: Python liviano</span>
+WORKDIR /app                   <span class="cm"># carpeta de trabajo adentro</span>
+
+<span class="cm"># 1) copiar SOLO las dependencias primero (para cachear)</span>
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+<span class="cm"># 2) copiar el resto del código</span>
+COPY . .
+
+RUN useradd -m appuser         <span class="cm"># no correr como root</span>
+USER appuser
+
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]</pre>
+  <h2>Qué hace cada instrucción</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Instrucción</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><th>FROM</th><td>De qué imagen base partís. Casi siempre una oficial.</td></tr>
+      <tr><th>WORKDIR</th><td>La carpeta donde se ejecuta todo lo demás.</td></tr>
+      <tr><th>COPY</th><td>Copia archivos de tu máquina a la imagen.</td></tr>
+      <tr><th>RUN</th><td>Ejecuta un comando durante el build (instalar, crear usuario).</td></tr>
+      <tr><th>EXPOSE</th><td>Documenta qué puerto usa la app.</td></tr>
+      <tr><th>CMD</th><td>El comando que corre cuando arranca el contenedor.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Construir y ver</h2>
+  <div class="codehead"><span class="lang sh">shell</span></div>
+<pre>docker build -t mi-api .        <span class="cm"># construye la imagen, la nombra "mi-api"</span></pre>
+  <div class="codehead"><span class="lang txt">así se ve</span></div>
+<pre>[+] Building 12.4s (10/10) FINISHED
+ => [1/5] FROM python:3.11-slim
+ => [2/5] WORKDIR /app
+ => [3/5] COPY requirements.txt .
+ => [4/5] RUN pip install --no-cache-dir -r requirements.txt
+ => [5/5] COPY . .
+ => exporting to image
+ => => naming to docker.io/library/mi-api</pre>
+  <div class="box nota"><span class="tag">Por qué copiar requirements primero</span><p>Si copiás el código y después instalás, cada cambio de código invalida la caché y reinstala todo. Copiando las dependencias antes, Docker cachea esa capa: mientras <code>requirements.txt</code> no cambie, no reinstala nada. Builds de segundos en vez de minutos.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Imágenes vs contenedores</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Imagen de Node →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · Construir" data-num="4" data-title="Imagen de Node" id="node">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>La misma idea en Node</h1>
+  <p class="lead">Un Dockerfile de Node sigue el mismo patrón, con el mismo truco de caché aplicado a <code>package.json</code>.</p>
+  <div class="codehead"><span class="lang txt">Dockerfile</span></div>
+<pre>FROM node:20-slim
+WORKDIR /app
+
+<span class="cm"># copiar package.json primero para cachear npm install</span>
+COPY package*.json ./
+RUN npm install --omit=dev
+
+COPY . .
+USER node                       <span class="cm"># la imagen de node ya trae este usuario</span>
+EXPOSE 3000
+CMD ["node", "server.js"]</pre>
+  <p>Mismo esquema que Python: base, carpeta, dependencias primero, código después, usuario no-root, comando de arranque. El <code>--omit=dev</code> saltea las dependencias de desarrollo, que no hacen falta en producción y solo agrandan la imagen.</p>
+  <h2>.dockerignore: no copiar basura</h2>
+  <p>Igual que <code>.gitignore</code>, pero para builds. Evita meter <code>node_modules</code>, secretos y archivos pesados dentro de la imagen:</p>
+  <div class="codehead"><span class="lang txt">.dockerignore</span></div>
+<pre>node_modules/
+npm-debug.log
+.env
+.git</pre>
+  <p>Sin esto, copiarías tu <code>node_modules</code> local (que puede pesar cientos de megas y estar compilado para otro sistema) dentro de la imagen. Un <code>.dockerignore</code> bien puesto hace la imagen más chica y el build más rápido.</p>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Primera imagen (Python)</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Imágenes chicas →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · Construir" data-num="5" data-title="Imágenes chicas" id="multistage">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Imágenes chicas con multi-stage</h1>
+  <p class="lead">Una imagen liviana se baja más rápido, arranca antes y tiene menos superficie de ataque. La técnica clave para lograrlo es el multi-stage build.</p>
+  <h2>El problema</h2>
+  <p>Para construir tu app a veces necesitás herramientas pesadas (compiladores, el toolchain de build). Pero para correrla, no. Si todo eso queda en la imagen final, cargás cientos de megas al pedo.</p>
+  <h2>La solución: dos etapas</h2>
+  <p>Construís en una etapa con todas las herramientas, y copiás solo el resultado a una etapa final mínima:</p>
+  <div class="codehead"><span class="lang txt">Dockerfile.multistage</span></div>
+<pre><span class="cm"># --- etapa 1: build (con todo el toolchain) ---</span>
+FROM node:20 AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build              <span class="cm"># genera /app/dist</span>
+
+<span class="cm"># --- etapa 2: runtime (chica, sin herramientas) ---</span>
+FROM node:20-slim
+WORKDIR /app
+COPY --from=build /app/dist ./dist   <span class="cm"># solo traigo el resultado</span>
+COPY package*.json ./
+RUN npm install --omit=dev
+USER node
+CMD ["node", "dist/server.js"]</pre>
+  <p>El <code>COPY --from=build</code> es la magia: agarra archivos de la primera etapa y los mete en la segunda. Todo el toolchain de la etapa 1 queda descartado. La imagen final tiene solo lo necesario para correr.</p>
+  <div class="box nota"><span class="tag">Elegí bien la base</span><p>Las variantes <code>-slim</code> y <code>alpine</code> son mucho más chicas que las completas. <code>python:3.11</code> pesa ~1 GB; <code>python:3.11-slim</code>, ~150 MB. Empezá siempre por la slim y agregá lo que falte.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Imagen de Node</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Correr contenedores →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 3 · Correr y orquestar" data-num="6" data-title="Correr contenedores" id="run">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Correr contenedores</h1>
+  <p class="lead">Con la imagen construida, <code>docker run</code> la pone a correr. Estos son los flags que vas a usar casi siempre.</p>
+  <h2>Lo básico</h2>
+  <div class="codehead"><span class="lang sh">shell</span></div>
+<pre>docker run -p 8000:8000 mi-api</pre>
+  <p>El <code>-p 8000:8000</code> mapea el puerto: el 8000 de tu máquina al 8000 del contenedor. Sin esto, la app corre pero no la podés alcanzar desde afuera.</p>
+  <h2>Los flags esenciales</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Flag</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><th>-p 8000:8000</th><td>Mapea un puerto de tu máquina al del contenedor.</td></tr>
+      <tr><th>-d</th><td>Corre en segundo plano (detached), te devuelve la terminal.</td></tr>
+      <tr><th>-e VAR=valor</th><td>Pasa una variable de entorno (config, secretos).</td></tr>
+      <tr><th>-v datos:/ruta</th><td>Monta un volumen para que los datos sobrevivan al contenedor.</td></tr>
+      <tr><th>--name api</th><td>Le pone un nombre para referirte a él después.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Manejar lo que corre</h2>
+  <div class="codehead"><span class="lang sh">shell</span></div>
+<pre>docker ps                  # ver contenedores corriendo
+docker logs api            # ver los logs de uno
+docker exec -it api bash   # entrar a una terminal adentro
+docker stop api            # frenarlo
+docker rm api              # borrarlo</pre>
+  <div class="box ojo"><span class="tag">Los contenedores son efímeros</span><p>Cuando borrás un contenedor, se va todo lo que escribió adentro. Por eso los datos que tienen que persistir (una base, archivos subidos) van en <strong>volúmenes</strong>, que viven fuera del ciclo de vida del contenedor. El próximo capítulo lo muestra.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Imágenes chicas</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Docker Compose →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 3 · Correr y orquestar" data-num="7" data-title="Docker Compose" id="compose">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>Varios servicios con Compose</h1>
+  <p class="lead">Una app real casi nunca es un solo contenedor: es tu API más una base de datos, quizás un cache. Levantar cada uno a mano con su <code>docker run</code> es un dolor. Compose lo describe todo en un archivo y lo levanta con un comando.</p>
+  <h2>El docker-compose.yml</h2>
+  <div class="codehead"><span class="lang sh">docker-compose.yml</span></div>
+<pre>services:
+  api:
+    build: ./app-python
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgres://user:pass@db:5432/miapp
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: miapp
+    volumes:
+      - datos:/var/lib/postgresql/data    <span class="cm"># los datos sobreviven</span>
+
+volumes:
+  datos:</pre>
+  <h2>Lo que hace por vos</h2>
+  <p>Con <code>docker compose up</code> levanta los dos servicios juntos. Y les arma una red interna: la API le habla a la base usando el nombre <code>db</code> como si fuera un dominio (viste <code>@db:5432</code> en la URL). No tenés que averiguar IPs ni configurar nada de red.</p>
+  <div class="codehead"><span class="lang sh">shell</span></div>
+<pre>docker compose up -d      # levanta todo en segundo plano
+docker compose logs -f    # ver los logs de todos
+docker compose down       # frenar y limpiar todo</pre>
+  <div class="box nota"><span class="tag">depends_on y el orden</span><p><code>depends_on</code> arranca la base antes que la API, pero no espera a que esté lista para aceptar conexiones. En producción, tu app debería reintentar la conexión a la base al arrancar, por las dudas.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Correr contenedores</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Imágenes seguras →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 4 · A producción" data-num="8" data-title="Imágenes seguras" id="seguras">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Imágenes seguras y livianas</h1>
+  <p class="lead">Una imagen que va a producción tiene que ser chica, y no ser un regalo para un atacante. Estas son las reglas que más rinden.</p>
+  <h2>No corras como root</h2>
+  <p>Por defecto, un contenedor corre como root. Si alguien escapa del proceso, es root en un entorno con acceso. Creá un usuario sin privilegios y usalo, como hicimos en los Dockerfiles anteriores con <code>USER appuser</code> y <code>USER node</code>.</p>
+  <h2>Los secretos no van en la imagen</h2>
+  <div class="box ojo"><span class="tag">Nunca hardcodees secretos</span><p>Jamás pongas claves, tokens o contraseñas con <code>ENV</code> en el Dockerfile ni los copies dentro de la imagen. Quedan grabados en las capas y cualquiera que baje la imagen los ve. Los secretos se pasan al correr, con <code>-e</code>, un archivo <code>.env</code> montado, o el gestor de secretos del proveedor.</p></div>
+  <h2>Tags concretos, no latest</h2>
+  <p>Usá <code>python:3.11-slim</code>, no <code>python:latest</code>. <code>latest</code> cambia con el tiempo y un día tu build se rompe solo porque la base cambió. Fijar la versión hace los builds reproducibles.</p>
+  <h2>Menos es más seguro</h2>
+  <p>Cada cosa que metés en la imagen es una cosa más que puede tener una vulnerabilidad. Bases <code>slim</code>, multi-stage, y solo las dependencias de producción. Una imagen mínima es más segura por definición: hay menos para atacar. Herramientas como <code>docker scan</code> o Trivy te revisan la imagen en busca de vulnerabilidades conocidas.</p>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Docker Compose</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Deploy →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 4 · A producción" data-num="9" data-title="Deploy" id="deploy">
+  <div class="ch-eyebrow">Capítulo 9</div>
+  <h1>Del build al deploy</h1>
+  <p class="lead">Ya tenés la imagen. Ahora, cómo llega a un servidor y empieza a atender tráfico de verdad.</p>
+  <h2>Subir la imagen a un registry</h2>
+  <p>El servidor no va a construir la imagen: la va a bajar de un registry, igual que vos bajás <code>postgres</code>. Primero la subís:</p>
+  <div class="codehead"><span class="lang sh">shell</span></div>
+<pre>docker tag mi-api usuario/mi-api:1.0     # etiquetar con tu usuario y versión
+docker push usuario/mi-api:1.0           # subir al registry (Docker Hub, GHCR, etc.)</pre>
+  <h2>Correrla en el servidor</h2>
+  <p>En el servidor, con Docker instalado, la bajás y la corrés:</p>
+  <div class="codehead"><span class="lang sh">shell</span></div>
+<pre>docker pull usuario/mi-api:1.0
+docker run -d -p 80:8000 --env-file .env usuario/mi-api:1.0</pre>
+  <h2>El camino corto: plataformas gestionadas</h2>
+  <p>Configurar un servidor a mano es trabajo. Hoy muchos proveedores toman tu repo o tu imagen y se encargan del resto: Railway, Render, Fly.io, Google Cloud Run. Vos les das el Dockerfile, ellos construyen, despliegan, manejan HTTPS y escalan. Para empezar y para proyectos chicos, es lo más rápido.</p>
+  <div class="box nota"><span class="tag">Cómo cierra con el resto</span><p>El flujo completo aparece en el librito de CI/CD: cada push a main corre los tests, construye la imagen, la sube al registry y la despliega, todo automático. Docker es la pieza que hace ese pipeline posible.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Imágenes seguras</span></button><button class="navbtn next" data-goto="10"><span class="dir">Siguiente</span><span class="t">Cheatsheet →</span></button></div>
+</section>
+
+<!-- 10 -->
+<section class="chapter" data-part="Parte 4 · A producción" data-num="10" data-title="Cheatsheet" id="cierre">
+  <div class="ch-eyebrow">Cierre</div>
+  <h1>Cheatsheet y glosario</h1>
+  <h2>Comandos del día a día</h2>
+  <div class="codehead"><span class="lang sh">imágenes</span></div>
+<pre>docker build -t nombre .        # construir imagen desde el Dockerfile
+docker images                   # listar imágenes
+docker pull imagen              # bajar del registry
+docker push usuario/imagen:tag  # subir al registry</pre>
+  <div class="codehead"><span class="lang sh">contenedores</span></div>
+<pre>docker run -d -p 8000:8000 nombre   # correr en segundo plano
+docker ps                           # ver los que corren
+docker logs -f contenedor           # ver logs en vivo
+docker exec -it contenedor bash     # entrar adentro
+docker stop / rm contenedor         # frenar / borrar</pre>
+  <div class="codehead"><span class="lang sh">compose</span></div>
+<pre>docker compose up -d      # levantar todo
+docker compose down       # bajar todo
+docker compose logs -f    # ver logs de todos</pre>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Imagen</th><td>Plantilla inmutable con tu app empaquetada.</td></tr>
+      <tr><th>Contenedor</th><td>Instancia viva de una imagen, corriendo.</td></tr>
+      <tr><th>Dockerfile</th><td>La receta para construir una imagen.</td></tr>
+      <tr><th>Registry</th><td>Repositorio de imágenes (Docker Hub, GHCR).</td></tr>
+      <tr><th>Capa</th><td>Cada paso del Dockerfile; se cachean para acelerar builds.</td></tr>
+      <tr><th>Volumen</th><td>Almacenamiento que sobrevive al contenedor.</td></tr>
+      <tr><th>Compose</th><td>Definir y levantar varios contenedores juntos.</td></tr>
+      <tr><th>Multi-stage</th><td>Construir en una etapa y quedarte solo con el resultado.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Sabés qué es un contenedor, escribir un Dockerfile para Python y Node, hacer imágenes chicas con multi-stage, correr y orquestar con Compose, y el camino a producción. Agarrá una app que ya tengas y dockerizala: es el mejor ejercicio.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="9"><span class="dir">Anterior</span><span class="t">← Deploy</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('docker-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('docker-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('docker-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('docker-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

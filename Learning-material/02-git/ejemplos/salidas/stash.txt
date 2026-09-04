@@ -1,0 +1,11 @@
+$ git stash   (guardo cambios a medio hacer)
+Saved working directory and index state WIP on main: 51d8f8c resolver conflicto de color: rojo
+$ git stash pop
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   app.py
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped refs/stash@{0} (7f74f1beb3456a445fbdaf045ded6a94939e4ba7)

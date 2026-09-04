@@ -1,0 +1,4 @@
+$ git log --oneline
+183929e agregar gitignore
+f4560de mejorar saludo y agregar README
+f1cee4b primer commit

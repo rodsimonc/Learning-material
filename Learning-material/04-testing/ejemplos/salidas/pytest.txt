@@ -1,0 +1,16 @@
+$ pytest -v
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/claude/testdemo
+plugins: anyio-4.13.0, cov-7.1.0
+collecting ... collected 6 items
+
+test_carrito.py::test_subtotal_suma_bien PASSED                          [ 16%]
+test_carrito.py::test_subtotal_carrito_vacio PASSED                      [ 33%]
+test_carrito.py::test_descuento[100-0-100] PASSED                        [ 50%]
+test_carrito.py::test_descuento[100-10-90] PASSED                        [ 66%]
+test_carrito.py::test_descuento[100-100-0] PASSED                        [ 83%]
+test_carrito.py::test_descuento_invalido_lanza_error PASSED              [100%]
+
+============================== 6 passed in 0.02s ===============================

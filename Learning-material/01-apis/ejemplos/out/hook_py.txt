@@ -1,0 +1,5 @@
+### Webhook (Python): el 'proveedor' postea a tu endpoint; firma HMAC
+legitimo  -> 200 {'recibido': True}
+falsificado -> 400 {'detail': 'firma invalida'}
+--- log del receiver (lo que imprimio al recibir) ---
+[receiver] evento OK: pago.exitoso monto=2500

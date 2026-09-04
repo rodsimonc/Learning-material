@@ -1,0 +1,6 @@
+misma contraseña, hash 1: $2b$12$jpH0nHw9o89vHklwAybIY.29yDg5C0YL214Zp4jaQOyMf ...
+misma contraseña, hash 2: $2b$12$6xkVRP91D3bxPxrqA5RHgOcLZmlSLhwPOQhkTRXcdxMIh ...
+-> distintos, por la sal aleatoria. Eso frena las 'rainbow tables'.
+
+verificar login correcto: True
+verificar login incorrecto: False

@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tipos de API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    /* neutrals: graphite with a faint blue bias */
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;        /* teal, links + interactive */
+    --accent-soft: #d7edef;
+    --code-bg: #f3f1ec;
+    --code-ink: #2a2f3a;
+    /* per-protocol identity hues (drawn from each project's own brand) */
+    --rest: #0e7c86;
+    --soap: #4756b8;
+    --graphql: #d81b8c;
+    --grpc: #2b7fd4;
+    --ws: #c07a17;
+    --hook: #2f9e5b;
+    --shadow: 0 1px 2px rgba(20,28,44,.06), 0 8px 24px rgba(20,28,44,.06);
+    --maxw: 940px;
+    --read: 68ch;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151b;
+      --surface: #1a1f28;
+      --surface-2: #222836;
+      --ink: #e8ebf0;
+      --ink-soft: #b3bcca;
+      --ink-faint: #8791a1;
+      --line: #2c333f;
+      --line-strong: #3a4351;
+      --accent: #3fc0cc;
+      --accent-soft: #123037;
+      --code-bg: #14171d;
+      --code-ink: #d3d7de;
+      --rest: #3fc0cc;
+      --soap: #8b96ea;
+      --graphql: #f472bc;
+      --grpc: #6bb0f0;
+      --ws: #e0a94a;
+      --hook: #57c983;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151b;
+    --surface: #1a1f28;
+    --surface-2: #222836;
+    --ink: #e8ebf0;
+    --ink-soft: #b3bcca;
+    --ink-faint: #8791a1;
+    --line: #2c333f;
+    --line-strong: #3a4351;
+    --accent: #3fc0cc;
+    --accent-soft: #123037;
+    --code-bg: #14171d;
+    --code-ink: #d3d7de;
+    --rest: #3fc0cc;
+    --soap: #8b96ea;
+    --graphql: #f472bc;
+    --grpc: #6bb0f0;
+    --ws: #e0a94a;
+    --hook: #57c983;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  p, li { max-width: var(--read); color: var(--ink-soft); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1, h2, h3 { color: var(--ink); text-wrap: balance; font-family: "Bricolage Grotesque", "IBM Plex Sans", sans-serif; line-height: 1.1; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  /* ---- top bar ---- */
+  header.top {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .top-inner { max-width: var(--maxw); margin: 0 auto; padding: 10px 24px; display: flex; align-items: center; gap: 16px; }
+  .brand { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); white-space: nowrap; }
+  nav.jump { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+  nav.jump a {
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 500;
+    padding: 5px 9px; border-radius: 6px; color: var(--ink-soft);
+  }
+  nav.jump a:hover { background: var(--surface-2); text-decoration: none; }
+  .toggle {
+    border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---- hero ---- */
+  .hero { padding: 56px 0 40px; }
+  .eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .hero h1 { font-size: clamp(38px, 6vw, 62px); font-weight: 800; margin: 14px 0 0; letter-spacing: -.02em; }
+  .hero .lead { font-size: 19px; margin-top: 18px; color: var(--ink-soft); }
+  .hero .lead strong { color: var(--ink); font-weight: 600; }
+
+  /* chips row under hero */
+  .taxo { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 10px; margin-top: 28px; }
+  .taxo a {
+    display: block; padding: 12px 14px; border-radius: 10px; background: var(--surface);
+    border: 1px solid var(--line); box-shadow: var(--shadow); color: var(--ink);
+  }
+  .taxo a:hover { text-decoration: none; border-color: var(--tone); transform: translateY(-2px); transition: .15s; }
+  .taxo .name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .taxo .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--tone); flex: none; }
+  .taxo .kind { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-faint); margin-top: 3px; }
+
+  /* ---- section ---- */
+  section.proto { padding: 40px 0 8px; scroll-margin-top: 64px; border-top: 1px solid var(--line); }
+  section.proto:first-of-type { border-top: none; }
+  .proto-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .proto-head .num { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--tone); font-weight: 600; }
+  .proto-head h2 { font-size: clamp(26px, 4vw, 34px); font-weight: 700; margin: 0; }
+  .proto-head .full { color: var(--ink-faint); font-size: 15px; font-family: "IBM Plex Mono", monospace; }
+  .tagline { font-size: 18px; color: var(--ink); margin: 12px 0 4px; max-width: var(--read); font-weight: 500; }
+
+  pre {
+    background: var(--code-bg); color: var(--code-ink);
+    border: 1px solid var(--line); border-left: 3px solid var(--tone);
+    border-radius: 10px; padding: 16px 18px; overflow-x: auto;
+    font-size: 13.5px; line-height: 1.55; margin: 18px 0;
+  }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--tone); font-weight: 600; }
+  .code-label { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); margin: 16px 0 -6px; }
+
+  .verdict { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0 6px; }
+  @media (max-width: 620px) { .verdict { grid-template-columns: 1fr; } }
+  .verdict div { padding: 14px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); }
+  .verdict h3 { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 8px; }
+  .verdict .yes h3 { color: var(--hook); }
+  .verdict .no h3 { color: #d0553f; }
+  :root[data-theme="dark"] .verdict .no h3, :root:not([data-theme="light"]) .verdict .no h3 { color: #f08163; }
+  .verdict ul { margin: 0; padding-left: 18px; }
+  .verdict li { font-size: 14.5px; margin: 4px 0; }
+
+  /* ---- comparison table ---- */
+  .table-wrap { overflow-x: auto; margin: 22px 0; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 14px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); color: var(--ink); font-weight: 600; font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; position: sticky; top: 0; }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  tbody th .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; }
+  tbody tr:last-child td, tbody tr:last-child th { border-bottom: none; }
+  tbody td { color: var(--ink-soft); }
+  tbody tr:hover td, tbody tr:hover th { background: var(--surface); }
+
+  /* ---- decision block ---- */
+  .decide { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px 24px 22px; box-shadow: var(--shadow); margin: 22px 0; }
+  .qa { border-bottom: 1px solid var(--line); padding: 16px 0; }
+  .qa:last-child { border-bottom: none; }
+  .qa .q { font-weight: 600; color: var(--ink); font-size: 16px; }
+  .qa .a { margin: 6px 0 0; }
+  .qa .a b { color: var(--accent); }
+
+  .callout { background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 10px; padding: 14px 18px; margin: 20px 0; }
+  .callout p { color: var(--ink); margin: 0; max-width: none; }
+
+  footer { border-top: 1px solid var(--line); margin-top: 48px; padding: 26px 0 60px; }
+  footer p { font-size: 13.5px; color: var(--ink-faint); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <span class="brand">Guía · APIs</span>
+    <nav class="jump">
+      <a href="#rest">REST</a>
+      <a href="#soap">SOAP</a>
+      <a href="#graphql">GraphQL</a>
+      <a href="#grpc">gRPC</a>
+      <a href="#ws">WebSockets</a>
+      <a href="#hooks">Webhooks</a>
+      <a href="#tabla">Tabla</a>
+      <a href="#elegir">Elegir</a>
+    </nav>
+    <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">Referencia práctica</div>
+    <h1>Los tipos de API que vas a encontrar</h1>
+    <p class="lead">Todas mueven datos entre sistemas. La diferencia está en <strong>cómo</strong> hablan: el transporte, el formato, quién pide y quién empuja, y qué tan rígido es el contrato. Acá tenés cada estilo con un ejemplo real de request y response, y cuándo conviene o no.</p>
+
+    <div class="taxo">
+      <a href="#rest" style="--tone:var(--rest)"><span class="name"><span class="dot"></span>REST</span><span class="kind">HTTP · JSON · recursos</span></a>
+      <a href="#soap" style="--tone:var(--soap)"><span class="name"><span class="dot"></span>SOAP</span><span class="kind">XML · contrato WSDL</span></a>
+      <a href="#graphql" style="--tone:var(--graphql)"><span class="name"><span class="dot"></span>GraphQL</span><span class="kind">1 endpoint · query</span></a>
+      <a href="#grpc" style="--tone:var(--grpc)"><span class="name"><span class="dot"></span>gRPC</span><span class="kind">HTTP/2 · protobuf</span></a>
+      <a href="#ws" style="--tone:var(--ws)"><span class="name"><span class="dot"></span>WebSockets</span><span class="kind">canal bidireccional</span></a>
+      <a href="#hooks" style="--tone:var(--hook)"><span class="name"><span class="dot"></span>Webhooks</span><span class="kind">el server te avisa</span></a>
+    </div>
+  </section>
+
+  <!-- REST -->
+  <section class="proto" id="rest" style="--tone:var(--rest)">
+    <div class="proto-head">
+      <span class="num">01</span>
+      <h2>REST</h2>
+      <span class="full">Representational State Transfer</span>
+    </div>
+    <p class="tagline">El estándar de facto. Todo es un recurso con una URL, y usás los verbos de HTTP para operar sobre él.</p>
+    <p>REST no es un protocolo, es un estilo de diseño sobre HTTP. La idea central: cada cosa (un usuario, un pedido, una factura) tiene una dirección, y el método HTTP dice qué querés hacer. GET para leer, POST para crear, PUT/PATCH para modificar, DELETE para borrar. El servidor no guarda estado de tu sesión entre llamadas, así que cada request lleva todo lo que necesita.</p>
+
+    <div class="code-label">Request · leer un usuario</div>
+    <pre><span class="cm"># pedís el recurso por su URL</span>
+<b>GET</b> /api/users/42 HTTP/1.1
+Host: api.tienda.com
+Authorization: Bearer eyJhbGci...
+Accept: application/json</pre>
+
+    <div class="code-label">Response · 200 OK</div>
+    <pre>{
+  "id": 42,
+  "nombre": "Carlos Rodríguez",
+  "email": "carlos@ejemplo.com",
+  "pedidos": <b>"/api/users/42/pedidos"</b>   <span class="cm"># enlace al recurso relacionado</span>
+}</pre>
+
+    <div class="code-label">Request · crear un pedido</div>
+    <pre><b>POST</b> /api/users/42/pedidos HTTP/1.1
+Content-Type: application/json
+
+{ "producto_id": 991, "cantidad": 2 }
+
+<span class="cm"># respuesta: 201 Created + el pedido nuevo en el body</span></pre>
+
+    <p>Lo que lo hizo ganar: es predecible. Si conocés una API REST, conocés casi todas. Se cachea gratis con la infraestructura web que ya existe (CDN, proxies), se prueba con <code>curl</code> o Postman, y cualquier lenguaje sabe hablar HTTP y JSON.</p>
+
+    <div class="verdict">
+      <div class="yes"><h3>Usalo cuando</h3><ul>
+        <li>Exponés una API pública o para terceros</li>
+        <li>El modelo de datos entra bien en "recursos" (CRUD clásico)</li>
+        <li>Querés aprovechar caché HTTP y herramientas estándar</li>
+      </ul></div>
+      <div class="no"><h3>Evitalo cuando</h3><ul>
+        <li>El cliente pide muchos recursos anidados y termina haciendo 8 llamadas (over/under-fetching)</li>
+        <li>Necesitás tiempo real o streaming continuo</li>
+        <li>El contrato entre cliente y server tiene que ser estricto y tipado</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- SOAP -->
+  <section class="proto" id="soap" style="--tone:var(--soap)">
+    <div class="proto-head">
+      <span class="num">02</span>
+      <h2>SOAP</h2>
+      <span class="full">Simple Object Access Protocol</span>
+    </div>
+    <p class="tagline">El veterano rígido. Un protocolo formal, todo en XML, con un contrato que define cada operación antes de escribir una línea.</p>
+    <p>SOAP es anterior a REST y sigue vivo donde importa la formalidad: bancos, seguros, sistemas gubernamentales, ERPs viejos. Cada mensaje va envuelto en un "envelope" XML. El contrato lo define un archivo WSDL que describe operaciones, tipos y errores; a partir de él muchos lenguajes te generan el cliente automáticamente. Trae estándares para seguridad a nivel mensaje (WS-Security), transacciones y garantías de entrega.</p>
+
+    <div class="code-label">Request · POST a un endpoint único</div>
+    <pre><b>POST</b> /servicio/cotizaciones HTTP/1.1
+Content-Type: text/xml; charset=utf-8
+
+&lt;soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"&gt;
+  &lt;soap:Body&gt;
+    &lt;<b>GetCotizacion</b>&gt;
+      &lt;moneda&gt;USD&lt;/moneda&gt;
+    &lt;/<b>GetCotizacion</b>&gt;
+  &lt;/soap:Body&gt;
+&lt;/soap:Envelope&gt;</pre>
+
+    <div class="code-label">Response</div>
+    <pre>&lt;soap:Envelope&gt;
+  &lt;soap:Body&gt;
+    &lt;GetCotizacionResponse&gt;
+      &lt;valor&gt;<b>1350.50</b>&lt;/valor&gt;
+    &lt;/GetCotizacionResponse&gt;
+  &lt;/soap:Body&gt;
+&lt;/soap:Envelope&gt;</pre>
+
+    <p>El costo es la verbosidad y la rigidez. El XML pesa, el envelope agrega ruido, y cambiar el contrato es un trámite. Pero esa misma rigidez es la razón por la que un sistema de pagos de hace 15 años sigue funcionando sin sorpresas.</p>
+
+    <div class="verdict">
+      <div class="yes"><h3>Usalo cuando</h3><ul>
+        <li>Integrás con banca, seguros o sistemas legacy que ya hablan SOAP</li>
+        <li>Necesitás seguridad y transacciones formales a nivel mensaje</li>
+        <li>El contrato tiene que ser un documento firme y auditable</li>
+      </ul></div>
+      <div class="no"><h3>Evitalo cuando</h3><ul>
+        <li>Arrancás algo nuevo sin obligación de compatibilidad</li>
+        <li>Trabajás con apps móviles o web donde el peso importa</li>
+        <li>Querés iterar rápido sin regenerar contratos</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- GraphQL -->
+  <section class="proto" id="graphql" style="--tone:var(--graphql)">
+    <div class="proto-head">
+      <span class="num">03</span>
+      <h2>GraphQL</h2>
+      <span class="full">creado por Facebook, 2015</span>
+    </div>
+    <p class="tagline">Vos pedís exactamente los campos que querés, ni uno más. Un solo endpoint, y la respuesta tiene la forma de tu pregunta.</p>
+    <p>GraphQL nació para resolver el dolor de REST en apps con pantallas complejas: en vez de pegarle a <code>/users</code>, después a <code>/users/42/pedidos</code> y después a <code>/pedidos/7/items</code>, mandás una sola query que describe todo el árbol que necesitás. El server responde con esa estructura y nada más. Un solo endpoint (<code>/graphql</code>), casi siempre por POST, y un schema fuertemente tipado que documenta la API sola.</p>
+
+    <div class="code-label">Request · una query pide lo justo</div>
+    <pre><b>POST</b> /graphql
+{
+  usuario(id: 42) {
+    nombre
+    pedidos(ultimos: 2) {
+      fecha
+      items { producto cantidad }
+    }
+  }
+}</pre>
+
+    <div class="code-label">Response · misma forma que la query</div>
+    <pre>{ "data": {
+  "usuario": {
+    "nombre": "Carlos Rodríguez",
+    "pedidos": [
+      { "fecha": "2026-08-01", "items": [{ "producto": "Teclado", "cantidad": 1 }] }
+    ]
+  }
+}}</pre>
+
+    <p>Ganás flexibilidad brutal para el frontend: cambiás la pantalla sin tocar el backend. El precio lo paga el servidor. El caché HTTP ya no aplica igual (todo es POST al mismo endpoint), una query mal armada puede pedir medio universo, y armar el backend con sus "resolvers" tiene más curva.</p>
+
+    <div class="verdict">
+      <div class="yes"><h3>Usalo cuando</h3><ul>
+        <li>Tenés muchos clientes distintos (web, móvil) con necesidades de datos diferentes</li>
+        <li>Las pantallas combinan datos de varias fuentes</li>
+        <li>Querés que el frontend evolucione sin pedir endpoints nuevos</li>
+      </ul></div>
+      <div class="no"><h3>Evitalo cuando</h3><ul>
+        <li>La API es simple y CRUD basta</li>
+        <li>Dependés mucho del caché HTTP a nivel CDN</li>
+        <li>No querés cargar con la complejidad del server y el control de queries</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- gRPC -->
+  <section class="proto" id="grpc" style="--tone:var(--grpc)">
+    <div class="proto-head">
+      <span class="num">04</span>
+      <h2>gRPC</h2>
+      <span class="full">gRPC Remote Procedure Call · Google</span>
+    </div>
+    <p class="tagline">No pensás en recursos ni URLs: llamás a una función remota como si fuera local. Rápido, binario, tipado, ideal entre servicios.</p>
+    <p>gRPC es un estilo RPC: definís métodos ("dame el usuario 42") en un archivo <code>.proto</code>, y una herramienta genera el código de cliente y server en el lenguaje que uses. Va sobre HTTP/2 y serializa con Protocol Buffers, un formato binario que pesa mucho menos que JSON. Soporta streaming en las dos direcciones. El costo: un navegador no lo consume directo (necesita un proxy), así que casi siempre vive puertas adentro, entre microservicios.</p>
+
+    <div class="code-label">Contrato · el archivo .proto</div>
+    <pre><span class="cm">// define el servicio y los tipos, una sola fuente de verdad</span>
+service Usuarios {
+  rpc <b>GetUsuario</b> (UsuarioReq) returns (Usuario);
+}
+message UsuarioReq { int32 id = 1; }
+message Usuario { int32 id = 1; string nombre = 2; }</pre>
+
+    <div class="code-label">Cliente · llamás el método como una función</div>
+    <pre><span class="cm"># el código de abajo lo generó gRPC desde el .proto</span>
+resp = client.<b>GetUsuario</b>(id=42)
+print(resp.nombre)   <span class="cm"># "Carlos Rodríguez"</span></pre>
+
+    <p>Entre servicios es difícil de superar: baja latencia, poco ancho de banda, contrato estricto que rompe en tiempo de compilación si alguien cambia algo. Por eso es el default para comunicación interna en arquitecturas de microservicios.</p>
+
+    <div class="verdict">
+      <div class="yes"><h3>Usalo cuando</h3><ul>
+        <li>Comunicás microservicios internos y la performance cuenta</li>
+        <li>Necesitás streaming (por ejemplo, telemetría o chat entre servicios)</li>
+        <li>Querés contratos tipados que se validan al compilar</li>
+      </ul></div>
+      <div class="no"><h3>Evitalo cuando</h3><ul>
+        <li>El cliente es un navegador y no querés montar un proxy</li>
+        <li>Necesitás que terceros integren fácil con <code>curl</code></li>
+        <li>La legibilidad del payload en texto plano te importa para debug rápido</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- WebSockets -->
+  <section class="proto" id="ws" style="--tone:var(--ws)">
+    <div class="proto-head">
+      <span class="num">05</span>
+      <h2>WebSockets</h2>
+      <span class="full">canal persistente y bidireccional</span>
+    </div>
+    <p class="tagline">HTTP es pedí-y-esperá. WebSockets abre un caño abierto en las dos direcciones: el server te empuja datos sin que preguntes.</p>
+    <p>En HTTP normal el cliente pregunta y el server responde, se corta, y para saber si hay algo nuevo tenés que volver a preguntar (polling). WebSockets rompe eso: arranca con un "upgrade" sobre HTTP y a partir de ahí queda una conexión abierta por donde ambos lados mandan mensajes cuando quieren. Un chat, un ticker de precios, la posición de un delivery en un mapa, un documento colaborativo: todo eso vive acá.</p>
+
+    <div class="code-label">Handshake · el cliente pide upgrade</div>
+    <pre><b>GET</b> /chat HTTP/1.1
+Host: app.ejemplo.com
+<b>Upgrade: websocket</b>
+Connection: Upgrade
+
+<span class="cm"># server responde: 101 Switching Protocols
+# de acá en más la conexión queda abierta</span></pre>
+
+    <div class="code-label">Mensajes · en cualquier dirección, cuando pasa algo</div>
+    <pre><span class="cm">// cliente -&gt;</span>  { "tipo": "mensaje", "texto": "hola" }
+<span class="cm">// server -&gt;</span>  { "tipo": "mensaje", "de": "Ana", "texto": "buenas" }
+<span class="cm">// server -&gt;</span>  { "tipo": "escribiendo", "de": "Ana" }   <span class="cm">// nadie lo pidió</span></pre>
+
+    <p>El costo es que la conexión abierta consume recursos y complica el escalado: cada usuario conectado es estado vivo en tu server, y hay que manejar reconexiones cuando se cae la red. Si solo necesitás que el server empuje (sin que el cliente responda por el mismo canal), <code>Server-Sent Events</code> es una alternativa más liviana.</p>
+
+    <div class="verdict">
+      <div class="yes"><h3>Usalo cuando</h3><ul>
+        <li>Necesitás tiempo real de verdad (chat, juegos, colaboración en vivo)</li>
+        <li>El server tiene que empujar cambios apenas ocurren</li>
+        <li>El flujo es de ida y vuelta constante</li>
+      </ul></div>
+      <div class="no"><h3>Evitalo cuando</h3><ul>
+        <li>Alcanza con pedir datos cada tanto (usá REST)</li>
+        <li>Solo el server empuja y el cliente nunca responde (usá SSE)</li>
+        <li>No querés lidiar con estado de conexiones y reconexiones</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- Webhooks -->
+  <section class="proto" id="hooks" style="--tone:var(--hook)">
+    <div class="proto-head">
+      <span class="num">06</span>
+      <h2>Webhooks</h2>
+      <span class="full">"HTTP reverso" · callbacks</span>
+    </div>
+    <p class="tagline">Al revés que todo lo demás: vos exponés una URL y el servicio ajeno te hace un POST cuando pasa algo que te interesa. Dejás de preguntar.</p>
+    <p>Un webhook no es un protocolo nuevo, es un patrón sobre HTTP. En vez de que tu app le pregunte a Stripe cada 5 segundos "¿ya pagó?", registrás una URL tuya y Stripe le pega un POST a esa URL en el momento exacto en que el pago se confirma. El evento llega solo. Es la forma normal de reaccionar a cosas que pasan en sistemas de terceros: pagos, mails abiertos, un push a GitHub, un mensaje entrante.</p>
+
+    <div class="code-label">Tu endpoint recibe el evento</div>
+    <pre><span class="cm"># Stripe le pega a la URL que registraste</span>
+<b>POST</b> /webhooks/stripe HTTP/1.1
+Stripe-Signature: t=1725,v1=5a2f...   <span class="cm"># firma: verificá que es real</span>
+
+{
+  "type": <b>"payment_intent.succeeded"</b>,
+  "data": { "amount": 2500, "currency": "usd" }
+}
+
+<span class="cm"># respondé 200 rápido, y procesá aparte</span></pre>
+
+    <p>Dos reglas que se aprenden a los golpes: <strong>verificá la firma</strong> (cualquiera podría postear a tu URL) y <strong>respondé rápido con 200</strong>, encolando el trabajo pesado, porque si tardás el proveedor reintenta y te llega el evento repetido. Por eso conviene que tu handler sea idempotente: el mismo evento dos veces no debe cobrar dos veces.</p>
+
+    <div class="verdict">
+      <div class="yes"><h3>Usalo cuando</h3><ul>
+        <li>Tenés que reaccionar a eventos de un servicio externo (pagos, CI, mensajería)</li>
+        <li>El polling sería un desperdicio o llegaría tarde</li>
+        <li>Querés integraciones desacopladas y en tiempo casi real</li>
+      </ul></div>
+      <div class="no"><h3>Evitalo cuando</h3><ul>
+        <li>Necesitás una respuesta sincrónica ya (pedí, no esperes un callback)</li>
+        <li>No podés exponer una URL pública que reciba tráfico</li>
+        <li>El orden y la entrega exacta de cada evento son críticos sin lógica extra</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- Tabla -->
+  <section class="proto" id="tabla" style="--tone:var(--accent)">
+    <div class="proto-head">
+      <span class="num">07</span>
+      <h2>La tabla comparativa</h2>
+    </div>
+    <p class="tagline">Todo lo anterior, lado a lado.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Estilo</th>
+            <th>Transporte</th>
+            <th>Formato</th>
+            <th>Modelo</th>
+            <th>Contrato</th>
+            <th>Tiempo real</th>
+            <th>Mejor para</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="dot" style="background:var(--rest)"></span>REST</th>
+            <td>HTTP/1.1</td><td>JSON</td><td>Recursos + verbos</td><td>Informal (OpenAPI)</td><td>No</td>
+            <td>APIs públicas, CRUD</td>
+          </tr>
+          <tr>
+            <th><span class="dot" style="background:var(--soap)"></span>SOAP</th>
+            <td>HTTP, otros</td><td>XML</td><td>Operaciones</td><td>Estricto (WSDL)</td><td>No</td>
+            <td>Banca, legacy, formalidad</td>
+          </tr>
+          <tr>
+            <th><span class="dot" style="background:var(--graphql)"></span>GraphQL</th>
+            <td>HTTP (1 endpoint)</td><td>JSON</td><td>Query de campos</td><td>Estricto (schema)</td><td>Parcial (subscriptions)</td>
+            <td>Frontends con datos variados</td>
+          </tr>
+          <tr>
+            <th><span class="dot" style="background:var(--grpc)"></span>gRPC</th>
+            <td>HTTP/2</td><td>Protobuf (binario)</td><td>Llamada a función</td><td>Estricto (.proto)</td><td>Sí (streaming)</td>
+            <td>Microservicios internos</td>
+          </tr>
+          <tr>
+            <th><span class="dot" style="background:var(--ws)"></span>WebSockets</th>
+            <td>TCP (upgrade HTTP)</td><td>Libre (JSON, binario)</td><td>Mensajes bidireccionales</td><td>Vos lo definís</td><td>Sí</td>
+            <td>Chat, juegos, colaboración</td>
+          </tr>
+          <tr>
+            <th><span class="dot" style="background:var(--hook)"></span>Webhooks</th>
+            <td>HTTP (POST entrante)</td><td>JSON</td><td>Evento empujado</td><td>Del proveedor</td><td>Casi real</td>
+            <td>Reaccionar a eventos externos</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout"><p>Nota: no son mutuamente excluyentes. Un sistema real mezcla varios. REST para la API pública, gRPC entre los servicios internos, WebSockets para el chat y webhooks para escuchar a Stripe. Conviven todo el tiempo.</p></div>
+  </section>
+
+  <!-- Elegir -->
+  <section class="proto" id="elegir" style="--tone:var(--accent)">
+    <div class="proto-head">
+      <span class="num">08</span>
+      <h2>Cómo elegir, rápido</h2>
+    </div>
+    <p class="tagline">Cinco preguntas que resuelven el 90% de los casos.</p>
+    <div class="decide">
+      <div class="qa">
+        <p class="q">¿API pública o para terceros que integren fácil?</p>
+        <p class="a"><b>REST.</b> Es lo que todos esperan y lo que mejor documentan las herramientas.</p>
+      </div>
+      <div class="qa">
+        <p class="q">¿El frontend necesita datos muy distintos según la pantalla?</p>
+        <p class="a"><b>GraphQL.</b> Cada cliente pide lo suyo sin multiplicar endpoints.</p>
+      </div>
+      <div class="qa">
+        <p class="q">¿Comunicación interna entre servicios, con foco en performance?</p>
+        <p class="a"><b>gRPC.</b> Binario, tipado y con streaming. El estándar puertas adentro.</p>
+      </div>
+      <div class="qa">
+        <p class="q">¿Tiempo real con ida y vuelta (chat, en vivo)?</p>
+        <p class="a"><b>WebSockets.</b> Si solo empuja el server, mirá Server-Sent Events antes.</p>
+      </div>
+      <div class="qa">
+        <p class="q">¿Reaccionar a algo que pasa en un servicio ajeno?</p>
+        <p class="a"><b>Webhooks.</b> Registrás tu URL y el evento te llega solo. Verificá la firma.</p>
+      </div>
+      <div class="qa">
+        <p class="q">¿Integrás con banca o un sistema viejo que ya lo pide?</p>
+        <p class="a"><b>SOAP.</b> Rara vez lo elegís de cero, pero cuando toca, toca.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Guía de referencia · nivel práctico intermedio. Los ejemplos son ilustrativos y están simplificados para mostrar la forma de cada estilo, no para copiar y pegar en producción.</p>
+  </footer>
+
+</main>
+
+<script>
+  (function () {
+    var btn = document.getElementById('themeBtn');
+    var root = document.documentElement;
+    function current() {
+      var set = root.getAttribute('data-theme');
+      if (set) return set;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    btn.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('api-guide-theme', next); } catch (e) {}
+    });
+    try {
+      var saved = localStorage.getItem('api-guide-theme');
+      if (saved) root.setAttribute('data-theme', saved);
+    } catch (e) {}
+  })();
+</script>
+<style media="print">
+  @page { margin: 16mm 14mm; }
+  header.top { display: none !important; }
+  html, body { background: #ffffff !important; }
+  :root { --bg:#fff; --surface:#fff; --surface-2:#f2f3f5; --ink:#16202e; --ink-soft:#33404f; --ink-faint:#5f6b7a; --line:#d7dbe2; --line-strong:#c3c9d3; --code-bg:#f5f4ef; --code-ink:#242832; }
+  .hero { padding-top: 8px; }
+  section.proto { break-inside: avoid-page; page-break-inside: avoid; }
+  pre, .verdict, .table-wrap, .decide, .qa, .callout { break-inside: avoid; page-break-inside: avoid; }
+  .taxo a, .verdict div, .decide, .table-wrap { box-shadow: none !important; }
+  a { color: var(--ink) !important; text-decoration: none !important; }
+  .hero h1 { font-size: 40px; }
+</style>
+</head>
+</html>

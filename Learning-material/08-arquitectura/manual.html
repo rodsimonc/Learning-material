@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arquitectura de software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Arquitectura de software</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Manual de estudio</div>
+  <h1>Arquitectura de software</h1>
+  <p class="lead">La arquitectura son las decisiones de fondo sobre cómo se organiza un sistema: las que son caras de cambiar después. Este libro te da el vocabulario y los criterios para entender monolitos, microservicios, capas y escalado, y para decidir con cabeza en vez de copiar lo que está de moda.</p>
+  <div class="box nota"><span class="tag">Un libro de criterio, no de recetas</span><p>A diferencia de los otros libritos, este tiene menos código y más decisiones. La arquitectura se trata de trade-offs: casi nunca hay una opción "correcta", hay opciones con distintos costos. El objetivo es que sepas cuáles son.</p></div>
+  <h2>Cómo está armado</h2>
+  <ul>
+    <li><strong>Parte 1, fundamentos.</strong> Qué es la arquitectura, y las dos ideas que la sostienen: acoplamiento y cohesión.</li>
+    <li><strong>Parte 2, estructurar una app.</strong> Capas y separación de responsabilidades.</li>
+    <li><strong>Parte 3, escalar.</strong> Monolito vs microservicios, comunicación, bases y escalado.</li>
+    <li><strong>Parte 4, decidir.</strong> Patrones útiles y cómo elegir sin sobre-diseñar.</li>
+  </ul>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">¿Qué es la arquitectura? →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="1" data-title="¿Qué es la arquitectura?" id="que-es">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Qué es la arquitectura de software</h1>
+  <p class="lead">Una definición práctica: la arquitectura es el conjunto de decisiones importantes que son difíciles de cambiar más adelante. Elegir un nombre de variable no es arquitectura. Elegir si tu sistema es un monolito o veinte servicios, sí.</p>
+  <h2>Por qué importa</h2>
+  <p>El código lo reescribís un martes cualquiera. La arquitectura, una vez que tenés miles de usuarios encima, es una operación a corazón abierto. Las buenas decisiones tempranas te dan un sistema que crece sin dolor; las malas, uno que se vuelve más lento y frágil con cada feature.</p>
+  <h2>Atributos de calidad</h2>
+  <p>La arquitectura no se juzga por si "funciona", sino por qué tan bien cumple ciertas propiedades. Las que más pesan:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Atributo</th><th>La pregunta que responde</th></tr></thead>
+    <tbody>
+      <tr><th>Escalabilidad</th><td>¿Aguanta 100x más usuarios sin reescribirse?</td></tr>
+      <tr><th>Mantenibilidad</th><td>¿Se puede entender y cambiar sin romper todo?</td></tr>
+      <tr><th>Disponibilidad</th><td>¿Sigue andando cuando una parte falla?</td></tr>
+      <tr><th>Rendimiento</th><td>¿Responde rápido bajo carga?</td></tr>
+      <tr><th>Seguridad</th><td>¿Protege los datos y limita el daño de una brecha?</td></tr>
+    </tbody>
+  </table></div>
+  <p>El truco es que se pelean entre sí. Más disponibilidad suele costar más complejidad. Más rendimiento a veces resigna mantenibilidad. Arquitectar es elegir qué priorizar para <em>tu</em> caso.</p>
+  <div class="box nota"><span class="tag">La frase que resume todo</span><p>"It depends". Depende. Cualquiera que te dé una respuesta arquitectónica sin preguntar por tu contexto (cuántos usuarios, qué equipo, qué presupuesto) te está vendiendo una moda, no una solución.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Acoplamiento y cohesión →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="2" data-title="Acoplamiento y cohesión" id="acoplamiento">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Acoplamiento y cohesión</h1>
+  <p class="lead">Si te llevás dos ideas de todo el libro, que sean estas. Casi toda decisión de arquitectura se puede leer como "bajar el acoplamiento" y "subir la cohesión".</p>
+  <h2>Acoplamiento: qué tan atadas están las partes</h2>
+  <p>Dos módulos están muy acoplados cuando cambiar uno obliga a cambiar el otro. Alto acoplamiento es malo: tocás una cosa y se rompen tres que no esperabas. El objetivo es <strong>bajo acoplamiento</strong>: que las partes se conozcan lo mínimo, y se hablen por interfaces claras.</p>
+  <h2>Cohesión: qué tan enfocada está cada parte</h2>
+  <p>Un módulo es cohesivo cuando todo lo que tiene adentro pertenece junto, sirve a un mismo propósito. Baja cohesión es un archivo "utils" que hace de todo. El objetivo es <strong>alta cohesión</strong>: cada parte hace una cosa y la hace bien.</p>
+<pre>  MAL                              BIEN
+  alto acoplamiento                bajo acoplamiento
+  baja cohesión                    alta cohesión
+
+  [A]===[B]                        [A]---[B]
+   ‖  X  ‖    todo enredado         |     |    conexiones limpias
+  [C]===[D]                        [C]---[D]    cada caja, un propósito</pre>
+  <p>Esta pareja aparece en cada nivel: entre funciones, entre clases, entre módulos, entre servicios. Un buen diseño, a cualquier escala, es alta cohesión adentro y bajo acoplamiento afuera.</p>
+  <div class="box nota"><span class="tag">La prueba práctica</span><p>Preguntate: "si cambio esto, ¿cuántas otras cosas tengo que tocar?". Si la respuesta es "muchas", tenés demasiado acoplamiento. "Si busco la lógica de pagos, ¿está en un solo lugar?". Si está desparramada, te falta cohesión.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← ¿Qué es la arquitectura?</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Arquitectura en capas →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · Estructurar una app" data-num="3" data-title="Arquitectura en capas" id="capas">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Arquitectura en capas</h1>
+  <p class="lead">La forma más común de organizar una aplicación: separarla en capas horizontales, donde cada una tiene un rol y solo habla con la de al lado. Es el punto de partida de casi todo backend.</p>
+  <h2>Las tres capas clásicas</h2>
+<pre>  ┌─────────────────────────────┐
+  │  Presentación (API / UI)    │  recibe requests, devuelve respuestas
+  ├─────────────────────────────┤
+  │  Lógica de negocio          │  las reglas: qué se puede y qué no
+  ├─────────────────────────────┤
+  │  Acceso a datos             │  hablar con la base de datos
+  └─────────────────────────────┘
+              │
+        ┌───────────┐
+        │ Base datos│
+        └───────────┘</pre>
+  <ul>
+    <li><strong>Presentación.</strong> El borde: la API REST del librito de APIs, o la interfaz. Recibe la request, valida el formato, y delega. No tiene reglas de negocio.</li>
+    <li><strong>Lógica de negocio.</strong> El cerebro. "Un pedido no se puede confirmar sin stock", "el descuento máximo es 30%". Acá viven las reglas, sin saber nada de HTTP ni de SQL.</li>
+    <li><strong>Acceso a datos.</strong> Traduce entre la lógica y la base. La lógica pide "guardá este pedido"; esta capa sabe el SQL.</li>
+  </ul>
+  <h2>Por qué conviene</h2>
+  <p>Cada capa se puede entender, testear y cambiar por separado. Cambiás de base de datos tocando solo la capa de datos. Agregás una app móvil sumando presentación, sin tocar la lógica. Es acoplamiento bajo y cohesión alta aplicados a la app entera.</p>
+  <div class="box ojo"><span class="tag">La regla de oro de las capas</span><p>Las dependencias van en una sola dirección: presentación conoce a lógica, lógica conoce a datos, nunca al revés. La capa de datos no debe saber que existe una API arriba. Si la lógica de negocio importa algo de HTTP, algo se mezcló.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Acoplamiento y cohesión</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Separar responsabilidades →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · Estructurar una app" data-num="4" data-title="Separar responsabilidades" id="patrones">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Separar responsabilidades</h1>
+  <p class="lead">Dentro de las capas hay patrones probados para no terminar con un archivo de 3000 líneas que hace todo. Los nombres varían, la idea es siempre la misma: darle a cada cosa un lugar.</p>
+  <h2>MVC, el patrón clásico</h2>
+  <p>Model-View-Controller separa en tres:</p>
+  <ul>
+    <li><strong>Model:</strong> los datos y las reglas sobre ellos.</li>
+    <li><strong>View:</strong> lo que ve el usuario (o el JSON que devuelve la API).</li>
+    <li><strong>Controller:</strong> recibe la acción del usuario, coordina al model y elige la view.</li>
+  </ul>
+  <p>Es la base de frameworks como Django, Rails y muchos más.</p>
+  <h2>Servicios y repositorios</h2>
+  <p>Dos piezas que ordenan la capa de lógica y datos:</p>
+  <ul>
+    <li>Un <strong>service</strong> concentra una operación de negocio completa: <code>PedidoService.confirmar()</code> chequea stock, calcula total, guarda. El controller solo lo llama.</li>
+    <li>Un <strong>repository</strong> esconde el acceso a datos detrás de métodos con sentido: <code>pedidos.guardar(p)</code>, <code>pedidos.buscar_por_usuario(id)</code>. La lógica no ve SQL, ve un repositorio.</li>
+  </ul>
+<pre>  Controller  →  Service        →  Repository  →  Base
+  (recibe)       (regla negocio)   (persistencia)</pre>
+  <div class="box nota"><span class="tag">El principio detrás de todo</span><p>Single Responsibility: cada clase o módulo debería tener una sola razón para cambiar. Si tu clase de usuario maneja login, manda mails y arma reportes, tiene tres razones para cambiar y va a doler. Separalas.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Arquitectura en capas</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Monolito vs microservicios →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 3 · Escalar" data-num="5" data-title="Monolito vs microservicios" id="monolito">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Monolito vs microservicios</h1>
+  <p class="lead">El debate más ruidoso de la arquitectura moderna, y el más malentendido. No hay ganador: hay una elección según tu tamaño y tu equipo.</p>
+  <h2>Las dos formas</h2>
+<pre>  MONOLITO                        MICROSERVICIOS
+  ┌───────────────┐               ┌─────┐ ┌─────┐ ┌─────┐
+  │  usuarios     │               │users│ │pagos│ │envío│
+  │  pagos        │               └──┬──┘ └──┬──┘ └──┬──┘
+  │  envíos       │                  │       │       │
+  │  (una app,    │               ┌──┴──┐ ┌──┴──┐ ┌──┴──┐
+  │   una base)   │               │ db  │ │ db  │ │ db  │
+  └───────────────┘               └─────┘ └─────┘ └─────┘
+  todo junto                      cada servicio, su app y su base</pre>
+  <p>El <strong>monolito</strong> es una sola aplicación con todo adentro. Los <strong>microservicios</strong> parten el sistema en servicios chicos e independientes, cada uno con su base, que se comunican por red (con las APIs del primer librito).</p>
+  <h2>Los trade-offs</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Monolito</th><th>Microservicios</th></tr></thead>
+    <tbody>
+      <tr><th>Empezar</th><td>Simple y rápido</td><td>Complejo desde el día uno</td></tr>
+      <tr><th>Desplegar</th><td>Una cosa, fácil</td><td>Muchas piezas, orquestación</td></tr>
+      <tr><th>Escalar</th><td>Todo junto o nada</td><td>Cada servicio por separado</td></tr>
+      <tr><th>Equipos</th><td>Se pisan en el mismo código</td><td>Cada equipo, su servicio</td></tr>
+      <tr><th>Debugging</th><td>Todo en un lugar</td><td>Rastrear entre servicios y red</td></tr>
+      <tr><th>Falla</th><td>Se cae todo</td><td>Se cae una parte (si está bien hecho)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box ojo"><span class="tag">El consejo que da casi todo el que lo vivió</span><p>Empezá con un monolito. Los microservicios resuelven problemas de escala y de organización que no tenés hasta que sos grande, y a cambio te cobran una complejidad enorme de entrada. Muchas startups se hundieron manteniendo veinte servicios para diez usuarios. Un "monolito bien modularizado" te lleva muy lejos, y si un día necesitás partirlo, se parte.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Separar responsabilidades</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Comunicación entre servicios →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 3 · Escalar" data-num="6" data-title="Comunicación entre servicios" id="comunicacion">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Cómo se hablan los servicios</h1>
+  <p class="lead">Apenas tenés más de una pieza, aparece la pregunta de cómo se comunican. Hay dos estilos, y elegir bien evita muchos dolores.</p>
+  <h2>Sincrónico: pedir y esperar</h2>
+  <p>Un servicio le pega a otro y espera la respuesta, como una llamada telefónica. Es lo que hacen REST y gRPC (primer librito). Simple y directo, pero acopla: si el servicio de pagos está lento, el que lo llamó también se cuelga esperando.</p>
+<pre>  [pedidos] ──llama y espera──▶ [pagos]
+            ◀─── responde ────</pre>
+  <h2>Asincrónico: dejar un mensaje</h2>
+  <p>Un servicio deja un mensaje en una cola y sigue con su vida. Otro lo procesa cuando puede, como mandar un mail en vez de llamar. Se usa una <strong>cola de mensajes</strong> (RabbitMQ, Kafka, SQS) en el medio.</p>
+<pre>  [pedidos] ──deja mensaje──▶ [ cola ] ──▶ [envíos]
+   sigue sin esperar                        procesa cuando puede</pre>
+  <p>Desacopla fuerte: si el servicio de envíos se cae, los mensajes se acumulan en la cola y se procesan cuando vuelve. Nada se pierde. El costo es más complejidad y que las cosas pasan "en algún momento", no al instante.</p>
+  <div class="box nota"><span class="tag">Cuándo cada uno</span><p>Sincrónico cuando necesitás la respuesta ya para seguir (validar un pago antes de confirmar). Asincrónico cuando la tarea puede esperar y no querés que una falla arrastre a las demás (mandar el mail de confirmación, generar un reporte). Los sistemas reales mezclan los dos.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Monolito vs microservicios</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Bases de datos a escala →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 3 · Escalar" data-num="7" data-title="Bases de datos a escala" id="datos">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>Bases de datos cuando crece la cosa</h1>
+  <p class="lead">La base suele ser el primer cuello de botella cuando una app se hace popular. Estas son las técnicas para que aguante, de la más simple a la más pesada.</p>
+  <h2>Cache: no le pegues a la base si no hace falta</h2>
+  <p>Lo primero y lo que más rinde. Guardás en memoria (Redis) los datos que se piden mucho y cambian poco. La base descansa, las respuestas vuelan.</p>
+<pre>  app ──▶ ¿está en cache (Redis)? ──sí──▶ devuelve rápido
+                  │no
+                  ▼
+                base ──▶ guarda en cache y devuelve</pre>
+  <h2>Réplicas de lectura</h2>
+  <p>La mayoría de las apps leen mucho más de lo que escriben. Ponés copias de la base solo para leer: las escrituras van a la principal, las lecturas se reparten entre las réplicas. Escala las lecturas sin tocar el código de negocio.</p>
+  <h2>Sharding: partir los datos</h2>
+  <p>Cuando ni las réplicas alcanzan, partís los datos entre varias bases: usuarios de la A a la M en una, de la N a la Z en otra. Escala mucho, pero complica todo (las consultas que cruzan shards son un dolor). Es artillería pesada, para cuando de verdad la necesitás.</p>
+  <div class="box ojo"><span class="tag">El orden importa</span><p>Cache primero, réplicas después, sharding al final y solo si no queda otra. Cada paso agrega complejidad. Muchísimas apps viven felices para siempre con una sola base bien indexada (librito de SQL) y un cache. No saltes al sharding porque suena impresionante.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Comunicación entre servicios</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Escalar la app →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 3 · Escalar" data-num="8" data-title="Escalar la app" id="escalar">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Escalar la aplicación</h1>
+  <p class="lead">Aparte de la base, la app misma tiene que aguantar más carga. Hay dos formas de crecer, y una propiedad que hace posible la buena.</p>
+  <h2>Vertical vs horizontal</h2>
+  <ul>
+    <li><strong>Vertical:</strong> una máquina más grande, con más CPU y RAM. Simple, pero tiene techo y un solo punto de falla.</li>
+    <li><strong>Horizontal:</strong> más máquinas iguales, con la carga repartida entre ellas. Escala casi sin límite y tolera fallas: si una se cae, las demás siguen.</li>
+  </ul>
+<pre>  VERTICAL                 HORIZONTAL
+  ┌──────────┐             ┌──┐ ┌──┐ ┌──┐ ┌──┐
+  │  server  │             │s1│ │s2│ │s3│ │s4│
+  │  más     │             └──┘ └──┘ └──┘ └──┘
+  │  grande  │                ▲
+  └──────────┘             load balancer reparte</pre>
+  <h2>El load balancer</h2>
+  <p>Cuando tenés varias copias de la app, un balanceador de carga adelante reparte las requests entre ellas. El usuario le pega a una sola dirección; el balanceador decide qué copia atiende.</p>
+  <h2>Stateless: la clave que lo hace posible</h2>
+  <p>Para que cualquier copia atienda cualquier request, las copias no pueden guardar estado propio. Si el server A recuerda que estás logueado y el balanceador te manda al B, se rompe. Por eso el estado va afuera: la sesión en Redis, los datos en la base. Las copias de la app son intercambiables. Es la misma idea "stateless" del librito de APIs, ahora como base del escalado.</p>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Bases de datos a escala</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Patrones útiles →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 4 · Decidir" data-num="9" data-title="Patrones útiles" id="patrones2">
+  <div class="ch-eyebrow">Capítulo 9</div>
+  <h1>Algunos patrones que vas a cruzar</h1>
+  <p class="lead">Nombres que aparecen en toda discusión de arquitectura. No para usarlos todos, sino para entenderlos cuando alguien los menciona.</p>
+  <h2>API Gateway</h2>
+  <p>Una única puerta de entrada delante de tus servicios. El cliente le pega al gateway, y este rutea al servicio que corresponde, y de paso centraliza autenticación, rate limiting y logs. Evita que cada cliente tenga que conocer veinte direcciones.</p>
+<pre>  cliente ──▶ [API Gateway] ──▶ [users]
+                    ├────────▶ [pagos]
+                    └────────▶ [envíos]</pre>
+  <h2>Event-driven</h2>
+  <p>En vez de que los servicios se llamen entre sí, emiten "eventos" ("pedido confirmado") a los que otros reaccionan. El servicio de pedidos no sabe quién escucha; envíos, facturación y mails reaccionan por su cuenta. Máximo desacoplamiento, sobre la comunicación asincrónica del capítulo 6.</p>
+  <h2>CQRS, en una línea</h2>
+  <p>Separar el modelo de escritura del de lectura, cuando tienen necesidades muy distintas. Potente y complejo. Sabé que existe; rara vez lo vas a necesitar temprano.</p>
+  <div class="box nota"><span class="tag">Los patrones son herramientas, no metas</span><p>El objetivo nunca es "usar CQRS" o "hacer event-driven". El objetivo es resolver un problema real. Si no tenés el problema que el patrón resuelve, el patrón solo te suma complejidad. Aprendelos para reconocer cuándo aplican, no para meterlos a la fuerza.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Escalar la app</span></button><button class="navbtn next" data-goto="10"><span class="dir">Siguiente</span><span class="t">Cómo decidir →</span></button></div>
+</section>
+
+<!-- 10 -->
+<section class="chapter" data-part="Parte 4 · Decidir" data-num="10" data-title="Cómo decidir" id="decidir">
+  <div class="ch-eyebrow">Capítulo 10</div>
+  <h1>Cómo tomar decisiones de arquitectura</h1>
+  <p class="lead">Ya tenés el vocabulario. Ahora, el criterio para usarlo sin caer en las trampas más comunes.</p>
+  <h2>Empezá simple</h2>
+  <p>El error más caro es diseñar para una escala que no tenés. Microservicios, sharding, event-driven: todo eso resuelve problemas de sistemas grandes. Arrancá con lo más simple que funcione (un monolito en capas, una base), y agregá complejidad solo cuando un problema real te la pida. Es más fácil partir un monolito ordenado que unir veinte servicios mal pensados.</p>
+  <h2>Optimizá para el cambio, no para la perfección</h2>
+  <p>No vas a acertar todo de entrada, y está bien. Una buena arquitectura no es la que adivinó el futuro: es la que se deja cambiar cuando el futuro llega. Bajo acoplamiento y alta cohesión (capítulo 2) son justamente lo que te da esa flexibilidad.</p>
+  <h2>Documentá el porqué</h2>
+  <p>Cuando tomes una decisión importante, anotá por qué la tomaste y qué alternativas descartaste (un ADR, Architecture Decision Record, es una nota corta para esto). Tu yo del futuro, o el que herede el sistema, va a agradecer saber el razonamiento, no solo el resultado.</p>
+  <div class="box ojo"><span class="tag">Las dos trampas gemelas</span><p>Sobre-diseñar: agregar complejidad para problemas que no tenés. Sub-diseñar: no separar nada y terminar con un plato de fideos. El punto justo se encuentra con experiencia, pero la regla base ayuda: agregá estructura cuando el dolor la justifique, no antes ni mucho después.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="9"><span class="dir">Anterior</span><span class="t">← Patrones útiles</span></button><button class="navbtn next" data-goto="11"><span class="dir">Siguiente</span><span class="t">Glosario →</span></button></div>
+</section>
+
+<!-- 11 -->
+<section class="chapter" data-part="Parte 4 · Decidir" data-num="11" data-title="Glosario y próximos pasos" id="cierre">
+  <div class="ch-eyebrow">Cierre</div>
+  <h1>Glosario y próximos pasos</h1>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Acoplamiento</th><td>Qué tan atadas están las partes entre sí. Se busca bajo.</td></tr>
+      <tr><th>Cohesión</th><td>Qué tan enfocada está cada parte. Se busca alta.</td></tr>
+      <tr><th>Capas</th><td>Dividir la app en presentación, lógica y datos.</td></tr>
+      <tr><th>Monolito</th><td>Toda la app en una sola pieza y una base.</td></tr>
+      <tr><th>Microservicios</th><td>Servicios chicos e independientes que se comunican por red.</td></tr>
+      <tr><th>Cola de mensajes</th><td>Intermediario para comunicación asincrónica entre servicios.</td></tr>
+      <tr><th>Réplica</th><td>Copia de la base para repartir las lecturas.</td></tr>
+      <tr><th>Sharding</th><td>Partir los datos entre varias bases.</td></tr>
+      <tr><th>Load balancer</th><td>Reparte las requests entre varias copias de la app.</td></tr>
+      <tr><th>Stateless</th><td>La app no guarda estado propio; cualquier copia atiende cualquier request.</td></tr>
+      <tr><th>API Gateway</th><td>Puerta única de entrada delante de varios servicios.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Próximos pasos</h2>
+  <ol>
+    <li>Tomá una app tuya y dibujá sus capas. ¿La lógica está separada del HTTP y del SQL, o todo mezclado?</li>
+    <li>Buscá el acoplamiento: ¿qué cambio te obliga a tocar muchas partes? Ahí hay algo para desacoplar.</li>
+    <li>Leé arquitecturas reales: muchas empresas publican cómo están armadas. Ver decisiones concretas enseña más que la teoría.</li>
+    <li>La próxima vez que sientas la tentación de un patrón complejo, preguntate qué problema real resuelve para vos hoy.</li>
+  </ol>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Tenés el vocabulario y el criterio: acoplamiento y cohesión, capas, monolito vs microservicios, cómo escalar bases y apps, y sobre todo, cuándo NO complicar. La mejor arquitectura para empezar casi siempre es la más simple que resuelve tu problema de hoy. La complejidad se gana cuando el dolor la pide.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="10"><span class="dir">Anterior</span><span class="t">← Cómo decidir</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('arq-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('arq-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('arq-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('arq-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

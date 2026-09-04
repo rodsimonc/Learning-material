@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testing, de 0 a producción</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Testing con pytest y jest</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Manual de estudio</div>
+  <h1>Testing, de cero a tests que te cubren</h1>
+  <p class="lead">Los tests son código que prueba tu código. Te dan la confianza de cambiar cosas sin romper lo que ya andaba. Este libro va de no haber escrito un test en tu vida a cubrir una función, manejar errores y medir cobertura, en pytest (Python) y jest (Node). Los bloques con <span class="tested">✓ salida real</span> son corridas de verdad.</p>
+  <h2>Cómo está armado</h2>
+  <ul>
+    <li><strong>Parte 1, fundamentos.</strong> Por qué testear y cómo es un test por dentro.</li>
+    <li><strong>Parte 2, pytest y jest.</strong> Los dos frameworks desde cero, casos múltiples, errores, y cómo leer un test que falla.</li>
+    <li><strong>Parte 3, más allá.</strong> Mocks, tests de integración y cobertura.</li>
+    <li><strong>Parte 4, a producción.</strong> TDD, buenas prácticas y cheatsheet.</li>
+  </ul>
+  <div class="box nota"><span class="tag">Cómo moverte</span><p>Índice a la izquierda, o flechas <span class="kbd">←</span> <span class="kbd">→</span>. Recuerda dónde quedaste.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">¿Por qué testear? →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="1" data-title="¿Por qué testear?" id="porque">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Por qué vale la pena testear</h1>
+  <p class="lead">Testear parece tiempo perdido hasta la primera vez que un test atrapa un bug antes de que llegue a producción. Ahí cambia la cabeza.</p>
+  <h2>Qué te da</h2>
+  <ul>
+    <li><strong>Confianza para cambiar.</strong> Con tests, tocás código viejo sin miedo: si rompés algo, un test se pone rojo al instante.</li>
+    <li><strong>Atrapar regresiones.</strong> Una regresión es cuando arreglás A y sin querer rompés B. Los tests de B te avisan.</li>
+    <li><strong>Documentación viva.</strong> Un buen test muestra cómo se usa una función y qué se espera de ella.</li>
+    <li><strong>Menos debugging manual.</strong> En vez de probar a mano en el navegador cada vez, corrés los tests y listo.</li>
+  </ul>
+  <h2>La pirámide de tests</h2>
+  <p>No todos los tests son iguales. Se organizan en una pirámide: muchos abajo, pocos arriba.</p>
+<pre>          /\
+         /e2e\        pocos: prueban todo junto, como un usuario real. Lentos.
+        /------\
+       /  integ  \    algunos: prueban que varias piezas funcionen juntas.
+      /------------\
+     /     unit     \ muchos: prueban una función aislada. Rápidos y baratos.
+    /----------------\</pre>
+  <ul>
+    <li><strong>Unit.</strong> Prueban una función sola, sin base de datos ni red. Rapidísimos. La base de todo.</li>
+    <li><strong>Integración.</strong> Prueban que varias piezas se entiendan: tu API contra una base real, por ejemplo.</li>
+    <li><strong>End-to-end (e2e).</strong> Simulan a un usuario usando la app entera. Los más valiosos y los más caros de mantener.</li>
+  </ul>
+  <div class="box nota"><span class="tag">La estrategia</span><p>Muchos tests unitarios (rápidos, precisos), algunos de integración, y pocos e2e para los flujos críticos. Este libro se enfoca en los unitarios, que son donde más rinde empezar.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Anatomía de un test →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="2" data-title="Anatomía de un test" id="anatomia">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Cómo es un test por dentro</h1>
+  <p class="lead">Todo test, en cualquier lenguaje, tiene la misma forma de tres pasos. Si entendés esto, entendés todos los frameworks.</p>
+  <h2>Arrange, Act, Assert</h2>
+  <ol>
+    <li><strong>Arrange (preparar).</strong> Armás los datos que necesita la prueba.</li>
+    <li><strong>Act (actuar).</strong> Llamás a la función que querés probar.</li>
+    <li><strong>Assert (afirmar).</strong> Verificás que el resultado sea el esperado. Si no lo es, el test falla.</li>
+  </ol>
+  <div class="codehead"><span class="lang py">los tres pasos</span></div>
+<pre>def test_subtotal_suma_bien():
+    items = [(100, 2), (50, 1)]        <span class="cm"># 1. arrange</span>
+    resultado = subtotal(items)        <span class="cm"># 2. act</span>
+    assert resultado == 250            <span class="cm"># 3. assert</span></pre>
+  <h2>El corazón: el assert</h2>
+  <p>Un <code>assert</code> es una afirmación que tiene que ser verdadera. Si <code>subtotal(items)</code> no da 250, el assert falla y el framework te marca el test en rojo con el detalle. Un test sin assert no prueba nada.</p>
+  <div class="box nota"><span class="tag">Un test, una cosa</span><p>Cada test debería verificar una sola cosa, y su nombre debería decir qué. <code>test_carrito_vacio_da_cero</code> es mejor que <code>test_carrito</code>. Cuando falle, el nombre solo ya te dice qué se rompió.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← ¿Por qué testear?</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">pytest desde 0 →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · pytest y jest" data-num="3" data-title="pytest desde 0" id="pytest">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>pytest desde cero</h1>
+  <p class="lead">pytest es el framework de testing más usado en Python. Simple: escribís funciones que empiezan con <code>test_</code> y usás <code>assert</code>. Nada de ceremonia.</p>
+  <h2>El código a probar</h2>
+  <div class="codehead"><span class="lang py">carrito.py</span></div>
+<pre>def subtotal(items):
+    """items: lista de (precio, cantidad)."""
+    return sum(precio * cant for precio, cant in items)
+
+def aplicar_descuento(monto, porcentaje):
+    if not 0 &lt;= porcentaje &lt;= 100:
+        raise ValueError("porcentaje debe estar entre 0 y 100")
+    return monto * (1 - porcentaje / 100)</pre>
+  <h2>Los tests</h2>
+  <div class="codehead"><span class="lang py">test_carrito.py</span></div>
+<pre>from carrito import subtotal
+
+def test_subtotal_suma_bien():
+    assert subtotal([(100, 2), (50, 1)]) == 250
+
+def test_subtotal_carrito_vacio():
+    assert subtotal([]) == 0</pre>
+  <h2>Correrlos</h2>
+  <p>Instalás con <code>pip install pytest</code> y corrés <code>pytest -v</code>. El <code>-v</code> muestra cada test:</p>
+  <div class="codehead"><span class="lang sh">pytest -v</span><span class="tested">✓ salida real</span></div>
+<pre class="output">============== test session starts ==============
+collected 6 items
+
+test_carrito.py::test_subtotal_suma_bien PASSED          [ 16%]
+test_carrito.py::test_subtotal_carrito_vacio PASSED      [ 33%]
+test_carrito.py::test_descuento[100-0-100] PASSED        [ 50%]
+test_carrito.py::test_descuento[100-10-90] PASSED        [ 66%]
+test_carrito.py::test_descuento[100-100-0] PASSED        [ 83%]
+test_carrito.py::test_descuento_invalido_lanza_error PASSED [100%]
+
+============== 6 passed in 0.02s ==============</pre>
+  <p>Verde y a otra cosa. pytest encuentra solo los archivos <code>test_*.py</code> y las funciones <code>test_*</code>. Los tests con corchetes (<code>[100-10-90]</code>) vienen del próximo truco.</p>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Anatomía de un test</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">jest desde 0 →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · pytest y jest" data-num="4" data-title="jest desde 0" id="jest">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>jest desde cero</h1>
+  <p class="lead">jest es el framework de testing más usado en el mundo JavaScript. La estructura es un poco más explícita que pytest, pero la idea es idéntica.</p>
+  <h2>El código y los tests</h2>
+  <div class="codehead"><span class="lang js">carrito.js</span></div>
+<pre>function subtotal(items) {
+  return items.reduce((acc, [precio, cant]) => acc + precio * cant, 0);
+}
+function aplicarDescuento(monto, porcentaje) {
+  if (porcentaje &lt; 0 || porcentaje &gt; 100) throw new Error("porcentaje invalido");
+  return monto * (1 - porcentaje / 100);
+}
+module.exports = { subtotal, aplicarDescuento };</pre>
+  <div class="codehead"><span class="lang js">carrito.test.js</span></div>
+<pre>const { subtotal } = require("./carrito");
+
+test("subtotal suma bien", () => {
+  expect(subtotal([[100, 2], [50, 1]])).toBe(250);
+});
+
+test("carrito vacio da 0", () => {
+  expect(subtotal([])).toBe(0);
+});</pre>
+  <p>En jest, <code>test("nombre", fn)</code> define un test, y <code>expect(x).toBe(y)</code> es el assert. Los "matchers" como <code>toBe</code>, <code>toEqual</code>, <code>toThrow</code> son las distintas afirmaciones que podés hacer.</p>
+  <h2>Correrlos</h2>
+  <div class="codehead"><span class="lang sh">npx jest</span><span class="tested">✓ salida real</span></div>
+<pre class="output">Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        0.553 s
+Ran all test suites.</pre>
+  <p>jest encuentra solo los archivos <code>*.test.js</code>. Mismo resultado que pytest, otra sintaxis.</p>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← pytest desde 0</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Casos múltiples →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · pytest y jest" data-num="5" data-title="Casos múltiples" id="casos">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Un test, muchos casos</h1>
+  <p class="lead">Casi nunca alcanza con probar un solo valor. Querés probar el caso normal, el borde, el vacío, el límite. Copiar y pegar el test cambiando el número es feo. Los dos frameworks tienen una solución elegante.</p>
+  <h2>pytest: parametrize</h2>
+  <p>Con un decorador, corrés el mismo test con muchos juegos de datos. Cada uno cuenta como un test aparte:</p>
+  <div class="codehead"><span class="lang py">python</span></div>
+<pre>import pytest
+from carrito import aplicar_descuento
+
+@pytest.mark.parametrize("monto,pct,esperado", [
+    (100, 0,   100),   <span class="cm"># sin descuento</span>
+    (100, 10,  90),    <span class="cm"># caso normal</span>
+    (100, 100, 0),     <span class="cm"># borde: 100% off</span>
+])
+def test_descuento(monto, pct, esperado):
+    assert aplicar_descuento(monto, pct) == esperado</pre>
+  <p>Eso generó los tres tests con corchetes que viste en la salida del capítulo 3: <code>test_descuento[100-10-90]</code>. Un test, tres casos, y si uno falla sabés cuál.</p>
+  <h2>jest: test.each</h2>
+  <div class="codehead"><span class="lang js">javascript</span></div>
+<pre>test.each([
+  [100, 0,   100],
+  [100, 10,  90],
+  [100, 100, 0],
+])("descuento(%i, %i) = %i", (monto, pct, esperado) => {
+  expect(aplicarDescuento(monto, pct)).toBe(esperado);
+});</pre>
+  <div class="box nota"><span class="tag">Pensá en los bordes</span><p>Los bugs viven en los extremos: el cero, el vacío, el negativo, el máximo, el uno. Cuando escribas casos, no pruebes solo el "camino feliz". El valor de una tabla de casos es que te obliga a pensar en los raros.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← jest desde 0</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Testear errores →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 2 · pytest y jest" data-num="6" data-title="Testear errores" id="errores">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Testear que algo falle a propósito</h1>
+  <p class="lead">A veces lo correcto es que tu función lance un error. Si le pasan un descuento de 150%, tiene que quejarse. Testear que el error ocurra es tan importante como testear el caso bueno.</p>
+  <h2>pytest: pytest.raises</h2>
+  <div class="codehead"><span class="lang py">python</span></div>
+<pre>import pytest
+from carrito import aplicar_descuento
+
+def test_descuento_invalido_lanza_error():
+    with pytest.raises(ValueError):
+        aplicar_descuento(100, 150)   <span class="cm"># 150% no existe, debe fallar</span></pre>
+  <p>El test pasa si adentro del <code>with</code> se lanza un <code>ValueError</code>. Si la función no falla cuando debería, el test se pone rojo. Lo viste pasar en la salida del capítulo 3.</p>
+  <h2>jest: toThrow</h2>
+  <div class="codehead"><span class="lang js">javascript</span></div>
+<pre>test("descuento invalido lanza error", () => {
+  expect(() => aplicarDescuento(100, 150)).toThrow();
+});</pre>
+  <p>Fijate el detalle: le pasás una función (<code>() =&gt; ...</code>) a <code>expect</code>, no el resultado. jest la ejecuta y verifica que tire error.</p>
+  <div class="box nota"><span class="tag">Probá también lo que NO debe pasar</span><p>Un buen set de tests cubre las tres zonas: entradas válidas (funciona), entradas inválidas (falla bien), y bordes (el límite exacto). Las tres juntas te dan confianza real.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Casos múltiples</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Cuando un test falla →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 2 · pytest y jest" data-num="7" data-title="Cuando un test falla" id="falla">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>Leer un test que falla</h1>
+  <p class="lead">El momento en que un test se pone rojo es donde te devuelve la inversión. Pero solo si sabés leer lo que te dice. La buena noticia: pytest y jest son muy claros.</p>
+  <h2>Un fallo real</h2>
+  <p>Escribimos un test que espera 250 pero el código da 200. Esto es lo que muestra pytest, tal cual:</p>
+  <div class="codehead"><span class="lang sh">pytest (test que falla)</span><span class="tested">✓ salida real</span></div>
+<pre class="output">=================== FAILURES ===================
+_________________ test_con_bug _________________
+
+    def test_con_bug():
+&gt;       assert subtotal([(100, 2)]) == 250
+E       assert 200 == 250
+E        +  where 200 = subtotal([(100, 2)])
+
+test_falla.py:4: AssertionError
+=============== short test summary info ===============
+FAILED test_falla.py::test_con_bug - assert 200 == 250</pre>
+  <h2>Cómo se lee</h2>
+  <p>Todo lo que necesitás está ahí. La línea que falló (<code>assert ... == 250</code>). El valor real contra el esperado (<code>assert 200 == 250</code>). De dónde salió el 200 (<code>where 200 = subtotal(...)</code>). Y la ubicación exacta (<code>test_falla.py:4</code>).</p>
+  <p>Con eso ya sabés si el bug está en el código o en el test. Acá el código devolvió 200 cuando esperábamos 250: o la función tiene un bug, o el test espera mal. Investigás esas cuatro líneas, no toda la app.</p>
+  <div class="box nota"><span class="tag">Un test rojo es una buena noticia</span><p>Significa que el test hizo su trabajo: atrapó algo antes que un usuario. El objetivo no es que nunca fallen, es que fallen acá y ahora, en tu máquina, y no en producción.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Testear errores</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Mocks →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 3 · Más allá" data-num="8" data-title="Mocks" id="mocks">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Mocks: aislar lo que no controlás</h1>
+  <p class="lead">Tu función llama a una API de pagos externa. No querés cobrarle a nadie de verdad cada vez que corrés los tests, ni depender de que esa API esté online. Un mock es un doble de mentira que reemplaza esa dependencia.</p>
+  <h2>Por qué</h2>
+  <p>Un test unitario tiene que ser rápido, repetible y no depender del mundo exterior. Si tu código llama a la red, a la base o al reloj, esas partes se reemplazan por mocks que devuelven lo que vos decidas. Así probás tu lógica, no la de terceros.</p>
+  <h2>pytest</h2>
+  <div class="codehead"><span class="lang py">python</span></div>
+<pre>from unittest.mock import patch
+
+def test_procesar_pago_ok():
+    <span class="cm"># reemplazamos la llamada real a la API por una falsa</span>
+    with patch("pagos.cobrar_api", return_value={"ok": True}):
+        resultado = procesar_pago(100)
+    assert resultado == "confirmado"</pre>
+  <h2>jest</h2>
+  <div class="codehead"><span class="lang js">javascript</span></div>
+<pre>jest.mock("./pagos");
+const pagos = require("./pagos");
+
+test("procesar pago ok", () => {
+  pagos.cobrarApi.mockReturnValue({ ok: true });   // doble falso
+  expect(procesarPago(100)).toBe("confirmado");
+});</pre>
+  <div class="box ojo"><span class="tag">No abuses del mock</span><p>Si mockeás todo, terminás probando tus mocks y no tu código. Mockeá solo lo externo y lento (red, base, servicios de terceros). La lógica tuya se prueba de verdad, sin doble.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Cuando un test falla</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Tests de integración →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 3 · Más allá" data-num="9" data-title="Tests de integración" id="integracion">
+  <div class="ch-eyebrow">Capítulo 9</div>
+  <h1>Tests de integración</h1>
+  <p class="lead">Los unitarios prueban piezas sueltas. Los de integración prueban que esas piezas se entiendan entre sí: tu API respondiendo de verdad, tu código hablando con una base real.</p>
+  <h2>Probar una API</h2>
+  <p>En vez de mockear, levantás la app en modo de prueba y le pegás como lo haría un cliente. Si construiste la API del librito de APIs, esto le cae justo.</p>
+  <div class="codehead"><span class="lang py">python (FastAPI + TestClient)</span></div>
+<pre>from fastapi.testclient import TestClient
+from main import app
+
+client = TestClient(app)
+
+def test_leer_usuario():
+    r = client.get("/usuarios/42")
+    assert r.status_code == 200
+    assert r.json()["nombre"] == "Carlos"
+
+def test_usuario_inexistente_da_404():
+    r = client.get("/usuarios/999")
+    assert r.status_code == 404</pre>
+  <div class="codehead"><span class="lang js">javascript (Express + supertest)</span></div>
+<pre>const request = require("supertest");
+const app = require("./server");
+
+test("GET /usuarios/42 devuelve 200", async () => {
+  const r = await request(app).get("/usuarios/42");
+  expect(r.status).toBe(200);
+  expect(r.body.nombre).toBe("Carlos");
+});</pre>
+  <p>Estos tests prueban el circuito completo: ruteo, lógica, formato de respuesta y códigos de estado. Son los que te avisan cuando una pieza dejó de encajar con otra.</p>
+  <div class="box nota"><span class="tag">Base de datos en los tests</span><p>Para tests de integración con base, se usa una base de prueba separada (o SQLite en memoria) que se crea y se borra en cada corrida. Así los tests no pisan datos reales y arrancan siempre limpios.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Mocks</span></button><button class="navbtn next" data-goto="10"><span class="dir">Siguiente</span><span class="t">Cobertura →</span></button></div>
+</section>
+
+<!-- 10 -->
+<section class="chapter" data-part="Parte 3 · Más allá" data-num="10" data-title="Cobertura" id="cobertura">
+  <div class="ch-eyebrow">Capítulo 10</div>
+  <h1>Cobertura: cuánto de tu código se prueba</h1>
+  <p class="lead">La cobertura (coverage) mide qué porcentaje de tu código ejecutan los tests. Es una brújula útil, con una trampa que conviene conocer.</p>
+  <h2>Medirla</h2>
+  <p>En Python, <code>pytest --cov</code>. Te dice qué líneas se corrieron y cuáles quedaron sin tocar:</p>
+  <div class="codehead"><span class="lang sh">pytest --cov=carrito</span><span class="tested">✓ salida real</span></div>
+<pre class="output">Name         Stmts   Miss  Cover   Missing
+------------------------------------------
+carrito.py       6      0   100%
+------------------------------------------
+TOTAL            6      0   100%
+6 passed in 0.03s</pre>
+  <p>100%: los tests ejecutaron las 6 líneas. La columna <code>Missing</code> te lista las líneas sin cubrir, así sabés qué te falta testear. En jest es <code>jest --coverage</code>.</p>
+  <h2>La trampa</h2>
+  <div class="box ojo"><span class="tag">100% no es 100% seguro</span><p>La cobertura mide si una línea se ejecutó, no si la probaste bien. Podés ejecutar una línea sin un solo assert que verifique su resultado. Un 100% con tests flojos vale menos que un 70% con tests que verifican de verdad. Usá la cobertura para encontrar zonas sin tocar, no como nota final.</p></div>
+  <p>Un objetivo razonable en la práctica: 70 a 80% en el código importante, con foco en la lógica que duele si se rompe. Perseguir el 100% a toda costa suele ser tiempo mal gastado.</p>
+  <div class="navrow"><button class="navbtn" data-goto="9"><span class="dir">Anterior</span><span class="t">← Tests de integración</span></button><button class="navbtn next" data-goto="11"><span class="dir">Siguiente</span><span class="t">TDD y cheatsheet →</span></button></div>
+</section>
+
+<!-- 11 -->
+<section class="chapter" data-part="Parte 4 · A producción" data-num="11" data-title="TDD y cheatsheet" id="cierre">
+  <div class="ch-eyebrow">Cierre</div>
+  <h1>TDD, buenas prácticas y cheatsheet</h1>
+  <p class="lead">Una técnica popular, las costumbres que hacen tests mantenibles, y una hoja de referencia.</p>
+  <h2>TDD: el test primero</h2>
+  <p>Test-Driven Development le da vuelta el orden: escribís el test antes que el código. El ciclo es rojo, verde, refactor.</p>
+  <ol>
+    <li><strong>Rojo.</strong> Escribís un test de algo que todavía no existe. Falla, obvio.</li>
+    <li><strong>Verde.</strong> Escribís el mínimo código para que pase.</li>
+    <li><strong>Refactor.</strong> Mejorás el código con la red de seguridad del test puesta.</li>
+  </ol>
+  <p>No hace falta usar TDD siempre, pero probarlo te enseña a escribir código más testeable y a pensar qué tiene que hacer una función antes de escribirla.</p>
+  <h2>Buenas prácticas</h2>
+  <ul>
+    <li>Tests rápidos y aislados: que no dependan del orden ni de datos de otro test.</li>
+    <li>Nombres que describen: cuando falla, el nombre solo dice qué se rompió.</li>
+    <li>Un motivo de fallo por test. Muchos asserts sin relación esconden qué falló.</li>
+    <li>Corré los tests seguido, y en cada push (eso es CI, el próximo librito).</li>
+  </ul>
+  <h2>Cheatsheet</h2>
+  <div class="codehead"><span class="lang sh">pytest</span></div>
+<pre>pytest                # corre todos
+pytest -v             # muestra cada test
+pytest archivo.py     # un archivo
+pytest -k "descuento" # solo los que matchean el nombre
+pytest --cov=paquete  # con cobertura</pre>
+  <div class="codehead"><span class="lang sh">jest</span></div>
+<pre>npx jest              # corre todos
+npx jest --watch      # re-corre al guardar
+npx jest carrito      # los que matchean
+npx jest --coverage   # con cobertura</pre>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Assert</th><td>Afirmación que debe ser verdadera, o el test falla.</td></tr>
+      <tr><th>Unit test</th><td>Prueba una función aislada.</td></tr>
+      <tr><th>Integración</th><td>Prueba que varias piezas funcionen juntas.</td></tr>
+      <tr><th>Mock</th><td>Doble falso que reemplaza una dependencia externa.</td></tr>
+      <tr><th>Fixture</th><td>Datos o estado preparados para varios tests.</td></tr>
+      <tr><th>Cobertura</th><td>Porcentaje de código que ejecutan los tests.</td></tr>
+      <tr><th>Regresión</th><td>Bug nuevo que aparece al cambiar otra cosa.</td></tr>
+      <tr><th>TDD</th><td>Escribir el test antes que el código.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Sabés escribir tests unitarios en pytest y jest, cubrir casos y errores, leer un fallo, usar mocks y medir cobertura. Empezá simple: agregá un test a cada función nueva que escribas. El hábito rinde solo.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="10"><span class="dir">Anterior</span><span class="t">← Cobertura</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('test-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('test-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('test-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('test-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

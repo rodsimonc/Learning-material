@@ -1,0 +1,6 @@
+### WebSocket (Python): conexion abierta, ida y vuelta
+<- server: {"tipo": "bienvenida", "texto": "conectado"}
+-> yo:     hola
+<- server: {"tipo": "eco", "recibido": "hola"}
+-> yo:     como va
+<- server: {"tipo": "eco", "recibido": "como va"}

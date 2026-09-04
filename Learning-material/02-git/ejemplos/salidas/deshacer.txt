@@ -1,0 +1,2 @@
+$ git restore app.py   (descarta cambios sin commitear)
+app.py vuelto al último commit

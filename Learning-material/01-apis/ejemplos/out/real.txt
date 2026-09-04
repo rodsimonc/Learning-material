@@ -1,0 +1,18 @@
+### 1) curl: el llamado mas basico (GET)
+$ curl -s https://jsonplaceholder.typicode.com/todos/1
+{
+  "userId": 1,
+  "id": 1,
+  "title": "delectus aut autem",
+  "completed": false
+}
+
+### 2) Python (requests)
+status: 200
+json: {'userId': 1, 'id': 1, 'title': 'delectus aut autem', 'completed': False}
+POST status: 201
+creado: {'title': 'estudiar APIs', 'completed': False, 'userId': 1, 'id': 101}
+
+### 3) Node (fetch nativo, Node 18+)
+status: 200
+json: { userId: 1, id: 1, title: 'delectus aut autem', completed: false }
