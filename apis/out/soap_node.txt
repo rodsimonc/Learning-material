@@ -1,0 +1,4 @@
+### SOAP (Node): cliente generado desde el WSDL llama GetCotizacion('USD')
+valor devuelto: 1350.5
+--- envelope XML que volvio del server ---
+<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"  xmlns:tns="http://ejemplo.com/cotiz"><soap:Body><tns:GetCotizacionResponse><tns:valor>1350.5</tns:valor></tns:GetCotizacionResponse></soap:Body></soap:Envelope>

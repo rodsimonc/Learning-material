@@ -1,0 +1,4 @@
+### Cliente gRPC (Python) llama GetUsuario(id=42) sobre HTTP/2 + protobuf
+id: 42
+nombre: Carlos
+email: carlos@ejemplo.com

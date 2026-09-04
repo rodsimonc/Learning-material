@@ -1,0 +1,6 @@
+### Webhook (Node): mismo patron, firma HMAC + timingSafeEqual
+legitimo   -> 200 { recibido: true }
+falsificado -> 400 { detail: 'firma invalida' }
+--- log del receiver ---
+receiver en :8006
+[receiver] evento OK: pago.exitoso monto=2500

@@ -1,0 +1,9 @@
+### SOAP cross-language: server en Node, cliente en Python (zeep) usando el mismo WSDL
+valor devuelto: 1350.5
+
+### El request de ida (envelope XML crudo) y la respuesta
+--- POST /cotiz  (body) ---
+<soap:Envelope ...><soap:Body><tns:GetCotizacion><moneda>USD</moneda></tns:GetCotizacion></soap:Body></soap:Envelope>
+--- respuesta ---
+HTTP 200
+<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"  xmlns:tns="http://ejemplo.com/cotiz"><soap:Body><tns:GetCotizacionResponse><tns:valor>1350.5</tns:valor></tns:GetCotizacionResponse></soap:Body></soap:Envelope>
