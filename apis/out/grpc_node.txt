@@ -1,4 +1,0 @@
-### Cliente gRPC (Node) llama GetUsuario(id=42) — mismo .proto que el server Python
-id: 42
-nombre: Carlos
-email: carlos@ejemplo.com

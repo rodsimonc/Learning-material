@@ -1,5 +1,0 @@
-### POST /graphql  (pido solo nombre + producto de cada item)
---- query enviada ---
-{ usuario(id: 42) { nombre pedidos { fecha items { producto cantidad } } } }
---- respuesta ---
-{"data": {"usuario": {"nombre": "Carlos", "pedidos": [{"fecha": "2026-08-01", "items": [{"producto": "Teclado", "cantidad": 1}]}]}}}
