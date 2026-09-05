@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel · Sabores del Barrio</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#1c2430;--mut:#66727f;--line:#e7ebef;--ac:#c0392b;--ac2:#0d6b6b;--ac3:#b4551d}
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:var(--ink);color:#fff;padding:18px 24px}
+  header h1{margin:0;font-size:1.15rem}
+  header p{margin:2px 0 0;color:#aeb8c4;font-size:.85rem}
+  .wrap{max-width:1040px;margin:0 auto;padding:22px}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:8px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .kpi .n{font-size:1.7rem;font-weight:800}
+  .kpi .l{color:var(--mut);font-size:.82rem;text-transform:uppercase;letter-spacing:.03em}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .card h2{margin:0 0 12px;font-size:.95rem}
+  .full{grid-column:1/-1}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  td,th{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}
+  th{color:var(--mut);font-weight:600}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .alerta{background:#fdecea;border-color:#f5c6c2}
+  .alerta .tag{color:var(--ac);font-weight:700}
+  canvas{width:100%;height:auto}
+  @media(max-width:720px){.kpis,.grid{grid-template-columns:1fr}}
+</style></head><body>
+<header><h1>Sabores del Barrio · Panel interno</h1><p>Últimos 30 días · datos reales del ejemplo</p></header>
+<div class="wrap">
+  <div class="kpis">
+    <div class="kpi"><div class="n" id="k-ped"></div><div class="l">Pedidos</div></div>
+    <div class="kpi"><div class="n" id="k-fac"></div><div class="l">Facturado</div></div>
+    <div class="kpi"><div class="n" id="k-tic"></div><div class="l">Ticket promedio</div></div>
+  </div>
+  <div class="grid">
+    <div class="card full"><h2>Facturación por día</h2><canvas id="c-dia" width="1000" height="240"></canvas></div>
+    <div class="card"><h2>Pedidos por hora (picos de consumo)</h2><canvas id="c-hora" width="500" height="300"></canvas></div>
+    <div class="card"><h2>Top productos</h2><table id="t-top"></table></div>
+    <div class="card"><h2>Combos más frecuentes</h2><table id="t-combo"></table></div>
+    <div class="card alerta"><h2><span class="tag">Reponer</span> Stock bajo</h2><table id="t-stock"></table></div>
+  </div>
+</div>
+<script>
+const D = {"resumen": {"pedidos": 200, "facturado": 2320900.0, "ticket_promedio": 11604.5}, "top": [{"nombre": "Gaseosa 500ml", "unidades": 98, "facturado": 176400.0}, {"nombre": "Empanada de carne", "unidades": 89, "facturado": 106800.0}, {"nombre": "Flan casero", "unidades": 84, "facturado": 294000.0}, {"nombre": "Cerveza artesanal", "unidades": 52, "facturado": 166400.0}, {"nombre": "Milanesa con papas", "unidades": 50, "facturado": 475000.0}], "combos": [{"producto_a": "Empanada de carne", "producto_b": "Gaseosa 500ml", "veces": 47}, {"producto_a": "Pizza napolitana", "producto_b": "Cerveza artesanal", "veces": 34}, {"producto_a": "Pizza napolitana", "producto_b": "Flan casero", "veces": 34}, {"producto_a": "Cerveza artesanal", "producto_b": "Flan casero", "veces": 34}, {"producto_a": "Milanesa con papas", "producto_b": "Flan casero", "veces": 27}], "por_hora": [{"hora": 11, "pedidos": 6}, {"hora": 12, "pedidos": 25}, {"hora": 13, "pedidos": 35}, {"hora": 14, "pedidos": 15}, {"hora": 15, "pedidos": 3}, {"hora": 16, "pedidos": 4}, {"hora": 17, "pedidos": 3}, {"hora": 18, "pedidos": 7}, {"hora": 19, "pedidos": 2}, {"hora": 20, "pedidos": 29}, {"hora": 21, "pedidos": 39}, {"hora": 22, "pedidos": 26}, {"hora": 23, "pedidos": 6}], "por_dia": [{"dia": "2026-08-07", "facturado": 45700.0, "pedidos": 4}, {"dia": "2026-08-08", "facturado": 59900.0, "pedidos": 5}, {"dia": "2026-08-09", "facturado": 149100.0, "pedidos": 11}, {"dia": "2026-08-10", "facturado": 56600.0, "pedidos": 5}, {"dia": "2026-08-11", "facturado": 77300.0, "pedidos": 6}, {"dia": "2026-08-12", "facturado": 119600.0, "pedidos": 8}, {"dia": "2026-08-13", "facturado": 112800.0, "pedidos": 9}, {"dia": "2026-08-14", "facturado": 128000.0, "pedidos": 11}, {"dia": "2026-08-15", "facturado": 124200.0, "pedidos": 11}, {"dia": "2026-08-16", "facturado": 70900.0, "pedidos": 7}, {"dia": "2026-08-17", "facturado": 86300.0, "pedidos": 8}, {"dia": "2026-08-18", "facturado": 62200.0, "pedidos": 5}, {"dia": "2026-08-19", "facturado": 80200.0, "pedidos": 7}, {"dia": "2026-08-20", "facturado": 118900.0, "pedidos": 9}, {"dia": "2026-08-21", "facturado": 49100.0, "pedidos": 4}, {"dia": "2026-08-22", "facturado": 89700.0, "pedidos": 9}, {"dia": "2026-08-23", "facturado": 71000.0, "pedidos": 7}, {"dia": "2026-08-24", "facturado": 50100.0, "pedidos": 5}, {"dia": "2026-08-25", "facturado": 57300.0, "pedidos": 5}, {"dia": "2026-08-26", "facturado": 22600.0, "pedidos": 3}, {"dia": "2026-08-27", "facturado": 38000.0, "pedidos": 4}, {"dia": "2026-08-28", "facturado": 50700.0, "pedidos": 5}, {"dia": "2026-08-29", "facturado": 107700.0, "pedidos": 8}, {"dia": "2026-08-30", "facturado": 110200.0, "pedidos": 9}, {"dia": "2026-08-31", "facturado": 53900.0, "pedidos": 5}, {"dia": "2026-09-01", "facturado": 64900.0, "pedidos": 6}, {"dia": "2026-09-02", "facturado": 60200.0, "pedidos": 6}, {"dia": "2026-09-03", "facturado": 49100.0, "pedidos": 4}, {"dia": "2026-09-04", "facturado": 80500.0, "pedidos": 8}, {"dia": "2026-09-05", "facturado": 74200.0, "pedidos": 6}], "stock_bajo": [{"nombre": "Helado 1/4", "stock": 4, "stock_min": 6}, {"nombre": "Cerveza artesanal", "stock": 8, "stock_min": 10}]};
+const money = n => "$" + n.toLocaleString("es-AR");
+document.getElementById("k-ped").textContent = D.resumen.pedidos;
+document.getElementById("k-fac").textContent = money(Math.round(D.resumen.facturado));
+document.getElementById("k-tic").textContent = money(Math.round(D.resumen.ticket_promedio));
+
+function barsV(id, labels, values, color){
+  const cv=document.getElementById(id), x=cv.getContext("2d"), W=cv.width,H=cv.height,p=28;
+  const max=Math.max(...values), bw=(W-p*2)/values.length;
+  x.clearRect(0,0,W,H); x.font="10px system-ui"; x.fillStyle="#66727f";
+  values.forEach((v,i)=>{ const h=(v/max)*(H-p*2), bx=p+i*bw, by=H-p-h;
+    x.fillStyle=color; x.fillRect(bx+2,by,bw-4,h);
+    x.fillStyle="#66727f"; x.textAlign="center"; x.fillText(labels[i],bx+bw/2,H-p+12);
+  });
+}
+function lineC(id, labels, values, color){
+  const cv=document.getElementById(id), x=cv.getContext("2d"), W=cv.width,H=cv.height,p=34;
+  const max=Math.max(...values); x.clearRect(0,0,W,H);
+  x.strokeStyle=color; x.lineWidth=2; x.beginPath();
+  values.forEach((v,i)=>{ const px=p+i*((W-p*2)/(values.length-1)), py=H-p-(v/max)*(H-p*2);
+    i?x.lineTo(px,py):x.moveTo(px,py); });
+  x.stroke();
+  x.fillStyle=color+"22"; x.lineTo(W-p,H-p); x.lineTo(p,H-p); x.closePath(); x.fill();
+  x.fillStyle="#66727f"; x.font="9px system-ui"; x.textAlign="center";
+  labels.forEach((l,i)=>{ if(i%5===0){const px=p+i*((W-p*2)/(values.length-1)); x.fillText(l.slice(5),px,H-p+12);} });
+}
+lineC("c-dia", D.por_dia.map(r=>r.dia), D.por_dia.map(r=>r.facturado), "#0d6b6b");
+barsV("c-hora", D.por_hora.map(r=>String(r.hora)), D.por_hora.map(r=>r.pedidos), "#c0392b");
+
+document.getElementById("t-top").innerHTML =
+  "<tr><th>Producto</th><th>Unid.</th><th>Facturado</th></tr>" +
+  D.top.map(r=>`<tr><td>${r.nombre}</td><td class=num>${r.unidades}</td><td class=num>${money(Math.round(r.facturado))}</td></tr>`).join("");
+document.getElementById("t-combo").innerHTML =
+  "<tr><th>Se piden juntos</th><th>Pedidos</th></tr>" +
+  D.combos.map(r=>`<tr><td>${r.producto_a} + ${r.producto_b}</td><td class=num>${r.veces}</td></tr>`).join("");
+document.getElementById("t-stock").innerHTML =
+  "<tr><th>Producto</th><th>Stock</th><th>Mín.</th></tr>" +
+  D.stock_bajo.map(r=>`<tr><td>${r.nombre}</td><td class=num>${r.stock}</td><td class=num>${r.stock_min}</td></tr>`).join("");
+</script>
+</body></html>

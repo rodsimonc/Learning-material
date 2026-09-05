@@ -1,0 +1,32 @@
+=== DASHBOARD · salida real (200 pedidos, último mes) ===
+
+Resumen: 200 pedidos | facturado $2,320,900 | ticket promedio $11,604
+
+Top productos (unidades / facturado):
+    98 u   $  176,400   Gaseosa 500ml
+    89 u   $  106,800   Empanada de carne
+    84 u   $  294,000   Flan casero
+    52 u   $  166,400   Cerveza artesanal
+    50 u   $  475,000   Milanesa con papas
+
+Combos más frecuentes (qué se pide junto):
+   47 pedidos   Empanada de carne + Gaseosa 500ml
+   34 pedidos   Pizza napolitana + Cerveza artesanal
+   34 pedidos   Pizza napolitana + Flan casero
+   34 pedidos   Cerveza artesanal + Flan casero
+   27 pedidos   Milanesa con papas + Flan casero
+
+Pedidos por hora:
+  11:00    6  ###
+  12:00   25  ############
+  13:00   35  #################
+  14:00   15  #######
+  15:00    3  #
+  16:00    4  ##
+  17:00    3  #
+  18:00    7  ###
+  19:00    2  #
+  20:00   29  ##############
+  21:00   39  ###################
+  22:00   26  #############
+  23:00    6  ###
