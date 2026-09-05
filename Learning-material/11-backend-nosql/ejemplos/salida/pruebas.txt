@@ -1,0 +1,28 @@
+=== BACKEND NoSQL · salida real de pruebas ===
+(FastAPI + pymongo + MongoDB 7.0 corriendo local, CRUD de /tareas)
+
+== crear dos documentos ==
+{'id': '6a9b7c6c119cffb180f0d21c', 'titulo': 'Aprender NoSQL', 'hecha': False}
+{'id': '6a9b7c6c119cffb180f0d21d', 'titulo': 'Deploy a Atlas', 'hecha': False}
+== listar ==
+[{'id': '...21c', 'titulo': 'Aprender NoSQL', 'hecha': False}, {'id': '...21d', 'titulo': 'Deploy a Atlas', 'hecha': False}]
+== actualizar la 1 (PUT) ==
+{'id': '6a9b7c6c119cffb180f0d21c', 'titulo': 'Aprender NoSQL', 'hecha': True}
+== ver la 1 ==
+{'id': '6a9b7c6c119cffb180f0d21c', 'titulo': 'Aprender NoSQL', 'hecha': True}
+== borrar la 2 ==
+{'borrada': '6a9b7c6c119cffb180f0d21d'}
+== listar final ==
+[{'id': '6a9b7c6c119cffb180f0d21c', 'titulo': 'Aprender NoSQL', 'hecha': True}]
+== id que no existe ==
+404 {'detail': 'no existe'}
+
+=== Queries crudas Mongo (coleccion productos) ===
+== precio > 20 ($gt) ==
+{'nombre': 'Teclado', 'precio': 25}
+{'nombre': 'Monitor', 'precio': 200}
+== con stock y tag gaming ==
+{'nombre': 'Teclado'}
+{'nombre': 'Monitor'}
+== agregacion: precio promedio ($avg) ==
+[{'_id': None, 'promedio': 80.0}]

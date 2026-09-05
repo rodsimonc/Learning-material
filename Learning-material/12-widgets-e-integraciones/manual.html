@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Widgets y artilugios en tu página</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Frontend · widgets e integraciones</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Frontend · Widgets y artilugios</div>
+  <h1>Widgets: generarlos e integrarlos en tu página</h1>
+  <p class="lead">Un mapa, un chat, un video de YouTube, un carrusel, un botón de pago, una insignia: todos son widgets, piezas que hacen una cosa y viven dentro de tu página. Este librito te enseña las dos caras: embeber widgets de terceros e construir los tuyos, con código real y probado en el navegador.</p>
+  <div class="box nota"><span class="tag">Código real y probado</span><p>Los widgets propios de este libro (un acordeón y un web component) se corrieron en un navegador de verdad. Los bloques con <span class="tested">✓ salida real</span> son el resultado de esas pruebas. El código completo está en <code>ejemplos/widgets/</code>.</p></div>
+  <h2>Qué vas a poder hacer al terminar</h2>
+  <p>Embeber un mapa, un video o un chat en minutos; construir tus propios widgets con JavaScript; hacer un web component reutilizable; conectar un widget a una API; y cargarlos sin frenar la página ni abrir agujeros de seguridad.</p>
+  <div class="box nota"><span class="tag">Cómo moverte</span><p>Índice a la izquierda, o flechas <span class="kbd">←</span> <span class="kbd">→</span>. El libro recuerda dónde quedaste.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">Qué es un widget →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Conceptos" data-num="1" data-title="Qué es un widget" id="que-es">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Qué es un widget y qué es un artilugio</h1>
+  <p class="lead">Un widget es una pieza autónoma de interfaz que hace una tarea concreta y se puede insertar en una página. "Artilugio" es lo mismo en criollo: ese chiche que sumás a tu sitio. Lo importante es de dónde viene.</p>
+  <h2>Las dos grandes familias</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>Qué es</th><th>Ejemplos</th></tr></thead>
+    <tbody>
+      <tr><th>De terceros</th><td>Lo hizo otra empresa; vos lo embebés con un fragmento de código que te dan</td><td>Mapa, video de YouTube, chat, botón de pago, comentarios</td></tr>
+      <tr><th>Propio</th><td>Lo construís vos con HTML, CSS y JavaScript</td><td>Carrusel, acordeón, modal, calculadora, contador</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Cuál te conviene</h2>
+  <p>Si es algo complejo y no es tu negocio (un mapa con calles del mundo, un procesador de pagos), embebé el de terceros: años de trabajo resueltos con un copiar y pegar. Si es algo específico de tu página y simple (un acordeón de preguntas, un menú), construilo vos: control total, cero dependencias, más liviano.</p>
+  <div class="box nota"><span class="tag">La decisión de fondo</span><p>Cada widget de terceros es código de otro corriendo en tu página: cómodo, pero suma peso, dependencia y a veces riesgo de privacidad (capítulo 10). Lo propio es más trabajo pero es tuyo. La regla sana: terceros para lo difícil y ajeno, propio para lo simple y tuyo.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Cómo se embebe →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 2 · Embeber terceros" data-num="2" data-title="Cómo se embebe" id="embeber">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Los tres mecanismos para embeber</h1>
+  <p class="lead">Cuando un servicio te da "el código para pegar en tu web", casi siempre es una de tres formas. Reconocerlas te deja entender qué estás pegando en vez de copiar a ciegas.</p>
+  <h2>1. iframe: una página adentro de otra</h2>
+  <p>Un <code>&lt;iframe&gt;</code> mete otra página web completa dentro de un recuadro de la tuya. Es como una ventana a otro sitio. Así funcionan los mapas de Google y los videos de YouTube.</p>
+  <div class="codehead"><span class="lang html">iframe</span></div>
+<pre>&lt;iframe src="https://www.youtube.com/embed/VIDEO_ID"
+        width="560" height="315"
+        allowfullscreen&gt;&lt;/iframe&gt;</pre>
+  <h2>2. script: código que se inserta solo</h2>
+  <p>Un <code>&lt;script src="..."&gt;</code> descarga código del tercero que dibuja el widget donde vos le digas. Así funcionan los chats de soporte, los de comentarios y muchos analytics.</p>
+  <div class="codehead"><span class="lang html">script embed</span></div>
+<pre>&lt;div id="mi-chat"&gt;&lt;/div&gt;
+&lt;script src="https://servicio-de-chat.com/widget.js" async&gt;&lt;/script&gt;</pre>
+  <h2>3. embed / oEmbed: pegar un link</h2>
+  <p>Algunas plataformas convierten un simple link en el contenido (un tweet, un posteo). A veces es un script, a veces lo resuelve la plataforma. Es la versión más simple para el usuario.</p>
+  <div class="box ojo"><span class="tag">iframe o script, la diferencia que importa</span><p>El iframe está aislado: el contenido de adentro no puede tocar tu página, es más seguro. El script corre con acceso total a tu página: más potente, pero le estás dando las llaves a código de otro. Por eso, cuando podés elegir, un iframe es la opción más segura. Lo vemos en detalle en el capítulo 10.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← Qué es un widget</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Widgets comunes →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · Embeber terceros" data-num="3" data-title="Widgets comunes" id="comunes">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Los widgets de terceros más comunes</h1>
+  <p class="lead">Estos son los que vas a integrar una y otra vez. La mecánica es siempre la misma: vas al servicio, configurás, te da un fragmento, lo pegás.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Widget</th><th>Servicio típico</th><th>Cómo entra</th></tr></thead>
+    <tbody>
+      <tr><th>Mapa</th><td>Google Maps, OpenStreetMap</td><td>iframe o script</td></tr>
+      <tr><th>Video</th><td>YouTube, Vimeo</td><td>iframe</td></tr>
+      <tr><th>Chat / soporte</th><td>Tawk.to, Intercom, Crisp</td><td>script</td></tr>
+      <tr><th>Formulario</th><td>Google Forms, Typeform</td><td>iframe o script</td></tr>
+      <tr><th>Pago</th><td>Mercado Pago, Stripe, PayPal</td><td>script (botón)</td></tr>
+      <tr><th>Redes sociales</th><td>Instagram, X, YouTube</td><td>embed / script</td></tr>
+      <tr><th>Comentarios</th><td>Disqus</td><td>script</td></tr>
+      <tr><th>Analítica</th><td>Google Analytics, Plausible</td><td>script</td></tr>
+    </tbody>
+  </table></div>
+  <h2>El patrón que se repite</h2>
+  <p>Casi todos siguen el mismo flujo: te registrás en el servicio, configurás el widget (qué mapa, qué formulario), copiás el fragmento que te dan, y lo pegás en tu HTML donde querés que aparezca. Diez minutos y lo tenés.</p>
+  <div class="box nota"><span class="tag">Los pagos son un caso aparte</span><p>Un botón de pago se embebe fácil, pero cobrar de verdad tiene un backend detrás y reglas serias de seguridad. Nunca manejes datos de tarjetas en tu frontend: el widget del proveedor los toma en su propio entorno seguro. Del lado tuyo, solo el botón.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Cómo se embebe</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Integrar un mapa →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · Embeber terceros" data-num="4" data-title="Integrar un mapa" id="mapa">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Paso a paso: integrar un mapa</h1>
+  <p class="lead">El mapa es el widget que casi toda página de negocio necesita. Dos caminos: el rápido con iframe, y el potente con una librería.</p>
+  <h2>Opción rápida: iframe de Google Maps</h2>
+  <ol>
+    <li>Buscás tu dirección en Google Maps.</li>
+    <li>Compartir → Insertar un mapa → copiás el <code>&lt;iframe&gt;</code>.</li>
+    <li>Lo pegás en tu HTML. Listo, mapa funcionando sin escribir código.</li>
+  </ol>
+  <h2>Opción potente: Leaflet (mapa propio, gratis)</h2>
+  <p>Si querés marcadores, estilos y control, usás una librería como Leaflet con mapas de OpenStreetMap. Es gratis y no necesita API key. Cargás su CSS y su JS, ponés un contenedor, y lo inicializás.</p>
+  <div class="codehead"><span class="lang html">Leaflet en 3 pasos</span></div>
+<pre>&lt;!-- 1. estilos y librería (en el &lt;head&gt;) --&gt;
+&lt;link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"&gt;
+&lt;script src="https://unpkg.com/leaflet/dist/leaflet.js"&gt;&lt;/script&gt;
+
+&lt;!-- 2. el contenedor --&gt;
+&lt;div id="mapa" style="height: 300px"&gt;&lt;/div&gt;
+
+&lt;!-- 3. inicializar --&gt;
+&lt;script&gt;
+  const mapa = L.map('mapa').setView([-31.42, -64.18], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa);
+  L.marker([-31.42, -64.18]).addTo(mapa).bindPopup('Acá estamos');
+&lt;/script&gt;</pre>
+  <div class="box nota"><span class="tag">Cargar librerías de un CDN</span><p>Ese <code>unpkg.com</code> es un CDN: un servidor que sirve librerías listas para usar. Es la forma más rápida de sumar una librería sin instalar nada. Para un proyecto serio conviene fijar la versión exacta (por ejemplo <code>leaflet@1.9.4</code>) para que no se rompa cuando saquen una nueva.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Widgets comunes</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Integrar por script →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · Embeber terceros" data-num="5" data-title="Integrar por script" id="script">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Paso a paso: un widget por script (chat)</h1>
+  <p class="lead">Los widgets de chat y de analítica entran por script. Es el mecanismo más común y el que más cuidado pide, porque ese código corre con acceso a tu página.</p>
+  <h2>El flujo típico</h2>
+  <ol>
+    <li>Te registrás en el servicio de chat (por ejemplo Tawk.to, que tiene plan gratis).</li>
+    <li>Te da un fragmento de script con tu identificador único.</li>
+    <li>Lo pegás antes de cerrar el <code>&lt;/body&gt;</code> de tu HTML.</li>
+    <li>El script se descarga y dibuja la burbuja de chat en tu página, solo.</li>
+  </ol>
+  <div class="codehead"><span class="lang html">forma del fragmento (ejemplo)</span></div>
+<pre>&lt;!-- pegar antes de &lt;/body&gt; --&gt;
+&lt;script&gt;
+  var s = document.createElement('script');
+  s.src = 'https://embed.tawk.to/TU_ID/default';
+  s.async = true;
+  document.body.appendChild(s);
+&lt;/script&gt;</pre>
+  <h2>El atributo async</h2>
+  <p>Fijate en el <code>async</code>: le dice al navegador que descargue el script sin frenar el resto de la página. Sin eso, un widget lento haría esperar a todo tu contenido. Es la regla de oro con scripts de terceros, y la vemos más en el capítulo 9.</p>
+  <div class="box ojo"><span class="tag">Estás confiando en ese servidor</span><p>Un script de terceros puede leer y modificar toda tu página, incluidos los formularios. Si ese servicio es hackeado o malicioso, tu página también lo es. Sumá solo scripts de servicios serios y conocidos, y los mínimos necesarios. Cada uno es una puerta.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Integrar un mapa</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Construir el tuyo →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 3 · Construir los tuyos" data-num="6" data-title="Construir el tuyo" id="propio">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Construir tu propio widget</h1>
+  <p class="lead">Los widgets simples y específicos conviene hacerlos vos: un acordeón, un modal, un carrusel, un contador. Con lo que ya sabés de JavaScript y el DOM, alcanza. Vamos con un acordeón real y probado.</p>
+  <h2>El patrón de un widget propio</h2>
+  <p>Casi todos siguen la misma receta: HTML para la estructura, CSS para el aspecto, y JavaScript que escucha eventos y cambia el estado. Un acordeón: botones que, al clic, abren o cierran su panel.</p>
+  <div class="codehead"><span class="lang js">el JS del acordeón (ejemplos/widgets)</span></div>
+<pre>document.querySelectorAll('.acc-head').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var abierto = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!abierto));
+    var panel = btn.nextElementSibling;
+    panel.style.maxHeight = abierto ? '0' : panel.scrollHeight + 'px';
+  });
+});</pre>
+  <p>Simple y sólido: usa <code>aria-expanded</code> (que sirve de estado y de accesibilidad a la vez, como viste en el librito de accesibilidad) y anima la altura del panel. Sin librerías, sin dependencias.</p>
+  <h2>Probado de verdad</h2>
+  <div class="codehead"><span class="lang sh">prueba en navegador</span><span class="tested">✓ salida real</span></div>
+<pre class="output">acordeón antes:            aria-expanded="false"
+click en el encabezado...
+acordeón después:          aria-expanded="true"
+panel abierto (maxHeight): 50px   &lt;- el panel se expandió</pre>
+  <div class="box nota"><span class="tag">Accesible desde el principio</span><p>Un widget propio bien hecho maneja el teclado y los lectores de pantalla. El acordeón usa un <code>&lt;button&gt;</code> real (funciona con Enter y con foco) y <code>aria-expanded</code> para anunciar el estado. Hacerlo accesible desde el arranque es mucho más fácil que agregarlo después.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Integrar por script</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Widget con API →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 3 · Construir los tuyos" data-num="7" data-title="Widget con API" id="api">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>Un widget que consume una API</h1>
+  <p class="lead">Los widgets más útiles muestran datos vivos: el clima, una cotización, los últimos posteos. Para eso, tu widget le pide datos a una API con <code>fetch</code> (del primer librito de la colección) y los dibuja.</p>
+  <h2>El patrón: pedir, esperar, mostrar</h2>
+  <p>Un widget de clima real, con la API pública de open-meteo (no necesita key). Muestra "cargando", pide los datos, y cuando llegan los pinta. Si falla, avisa.</p>
+  <div class="codehead"><span class="lang js">widget de clima (ejemplos/widgets)</span></div>
+<pre>const URL = 'https://api.open-meteo.com/v1/forecast' +
+            '?latitude=-31.42&longitude=-64.18&current=temperature_2m';
+
+fetch(URL)
+  .then(r =&gt; r.json())
+  .then(d =&gt; {
+    document.getElementById('temp').textContent = d.current.temperature_2m + ' °C';
+    document.getElementById('estado').textContent = 'actualizado ' + d.current.time;
+  })
+  .catch(() =&gt; {
+    document.getElementById('temp').textContent = 'sin conexión';
+  });</pre>
+  <h2>La API responde de verdad</h2>
+  <div class="codehead"><span class="lang sh">respuesta real de la API</span><span class="tested">✓ salida real</span></div>
+<pre class="output">GET api.open-meteo.com/v1/forecast?...&current=temperature_2m
+{
+  "current_units": { "temperature_2m": "°C" },
+  "current": { "time": "2026-09-05T02:15", "temperature_2m": 12.3 }
+}</pre>
+  <p>El widget lee <code>d.current.temperature_2m</code> de esa respuesta y lo muestra. El resultado en pantalla: un recuadro que dice "12.3 °C". Datos reales, sin backend propio, sin API key.</p>
+  <div class="box ojo"><span class="tag">Siempre manejá los tres estados</span><p>Un widget con API tiene tres momentos: cargando, éxito y error. Mostrá algo en cada uno. El "cargando" evita el salto feo; el "error" evita que quede colgado el "cargando" para siempre si la API no responde. Es lo mismo que viste en el librito de conexión front-back.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Construir el tuyo</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Web Components →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 3 · Construir los tuyos" data-num="8" data-title="Web Components" id="web-components">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Web Components: tu widget como una etiqueta propia</h1>
+  <p class="lead">Acá está lo más pro del librito. Un web component te deja crear tu propia etiqueta HTML, tipo <code>&lt;mi-insignia&gt;</code>, que funciona en cualquier página y encapsula su estilo. Es la forma nativa del navegador de hacer widgets reutilizables de verdad.</p>
+  <h2>Por qué son especiales</h2>
+  <p>Un web component es autónomo: trae su HTML, su CSS y su lógica adentro, aislados del resto de la página con el "shadow DOM". Sus estilos no se escapan ni le entran los de afuera. Lo definís una vez y lo usás como cualquier etiqueta, incluso en otro proyecto.</p>
+  <div class="codehead"><span class="lang js">definir &lt;mi-insignia&gt; (ejemplos/widgets)</span></div>
+<pre>class MiInsignia extends HTMLElement {
+  connectedCallback() {
+    const texto = this.getAttribute('texto') || 'badge';
+    const color = this.getAttribute('color') || '#333';
+    const raiz = this.attachShadow({ mode: 'open' });  // aislado
+    raiz.innerHTML =
+      '&lt;style&gt;span{background:' + color + ';color:#fff;padding:4px 10px;' +
+      'border-radius:999px}&lt;/style&gt;&lt;span&gt;' + texto + '&lt;/span&gt;';
+  }
+}
+customElements.define('mi-insignia', MiInsignia);</pre>
+  <p>Y en el HTML lo usás como una etiqueta más, con sus propios atributos:</p>
+  <div class="codehead"><span class="lang html">usarlo</span></div>
+<pre>&lt;mi-insignia texto="Probado" color="#0d6b6b"&gt;&lt;/mi-insignia&gt;
+&lt;mi-insignia texto="Reutilizable" color="#b4551d"&gt;&lt;/mi-insignia&gt;</pre>
+  <h2>Probado de verdad</h2>
+  <div class="codehead"><span class="lang sh">prueba en navegador</span><span class="tested">✓ salida real</span></div>
+<pre class="output">render dentro del shadow DOM: "Probado"
+web components en la página: 2   &lt;- la misma etiqueta, reutilizada con distintos atributos</pre>
+  <div class="box nota"><span class="tag">La idea detrás de React y compañía</span><p>Este concepto (componentes reutilizables y encapsulados) es la base de frameworks como React, Vue o Angular. Los web components son la versión nativa, sin librerías. Entender esto acá te prepara para dar el salto a un framework cuando quieras.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Widget con API</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Rendimiento →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 4 · Producción" data-num="9" data-title="Rendimiento" id="rendimiento">
+  <div class="ch-eyebrow">Capítulo 9</div>
+  <h1>Que los widgets no frenen tu página</h1>
+  <p class="lead">El mayor peligro de sumar widgets, sobre todo de terceros, es que hagan lento tu sitio. Cada uno descarga código y a veces datos. Estas son las reglas para que no te cueste caro.</p>
+  <h2>async y defer en los scripts</h2>
+  <p>Un <code>&lt;script&gt;</code> normal frena la carga de la página hasta que se descarga. Con <code>async</code> o <code>defer</code>, el navegador sigue mostrando tu contenido y carga el script en paralelo. Los widgets de terceros van siempre con uno de los dos.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Atributo</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><th>async</th><td>Descarga en paralelo y ejecuta apenas está listo. Para widgets independientes (chat, analytics).</td></tr>
+      <tr><th>defer</th><td>Descarga en paralelo y ejecuta al final, en orden. Para scripts que dependen del HTML ya cargado.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Carga diferida (lazy load)</h2>
+  <p>Un mapa o un video que están abajo de todo no hace falta cargarlos hasta que el usuario baje. Cargarlos recién cuando aparecen en pantalla (lazy load) ahorra muchísimo en la carga inicial. Para iframes hay un atributo directo:</p>
+  <div class="codehead"><span class="lang html">iframe con carga diferida</span></div>
+<pre>&lt;iframe src="..." loading="lazy"&gt;&lt;/iframe&gt;</pre>
+  <div class="box ojo"><span class="tag">Cada widget tiene un costo</span><p>Sumar cinco widgets de terceros puede duplicar el peso de tu página y hundir el puntaje de rendimiento (librito de rendimiento). Antes de agregar uno, preguntate si vale lo que cuesta. El widget más rápido es el que no pusiste.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Web Components</span></button><button class="navbtn next" data-goto="10"><span class="dir">Siguiente</span><span class="t">Seguridad y privacidad →</span></button></div>
+</section>
+
+<!-- 10 -->
+<section class="chapter" data-part="Parte 4 · Producción" data-num="10" data-title="Seguridad y privacidad" id="seguridad">
+  <div class="ch-eyebrow">Capítulo 10</div>
+  <h1>Seguridad y privacidad de los widgets</h1>
+  <p class="lead">Meter código de otro en tu página tiene implicancias serias. Nada del otro mundo si sabés las reglas, pero ignorarlas es cómo se filtran datos y se cuelan ataques.</p>
+  <h2>El script de terceros ve todo</h2>
+  <p>Como vimos, un <code>&lt;script&gt;</code> de otro corre con acceso completo a tu página: puede leer lo que el usuario escribe en un formulario. Por eso: sumá solo servicios confiables, los mínimos, y mantené la lista corta. Un iframe, en cambio, está aislado y no puede tocar tu página, así que cuando puedas elegir, preferilo.</p>
+  <h2>Aislar un iframe con sandbox</h2>
+  <p>Si embebés contenido que no controlás del todo, el atributo <code>sandbox</code> le quita permisos al iframe (ejecutar scripts, abrir ventanas), y se los devolvés solo si hacen falta.</p>
+  <div class="codehead"><span class="lang html">iframe con sandbox</span></div>
+<pre>&lt;iframe src="..." sandbox="allow-scripts"&gt;&lt;/iframe&gt;</pre>
+  <h2>CSP: la lista de invitados</h2>
+  <p>Una Content Security Policy (del librito de seguridad web) le dice al navegador de qué dominios se permite cargar scripts. Es tu mejor defensa contra que se cuele un script no autorizado. Cada widget de terceros suma su dominio a esa lista, a conciencia.</p>
+  <div class="box ojo"><span class="tag">Privacidad y consentimiento</span><p>Muchos widgets (analytics, redes, mapas) ponen cookies y rastrean al usuario. En muchos lugares eso oblige a pedir consentimiento antes de cargarlos, con el cartel de cookies. La práctica correcta: no cargues esos widgets hasta que la persona acepte. No es solo legal, es respeto por quien te visita.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="9"><span class="dir">Anterior</span><span class="t">← Rendimiento</span></button><button class="navbtn next" data-goto="11"><span class="dir">Siguiente</span><span class="t">Widgets con IA →</span></button></div>
+</section>
+
+<!-- 11 -->
+<section class="chapter" data-part="Parte 5 · Con IA" data-num="11" data-title="Widgets con IA" id="ia">
+  <div class="ch-eyebrow">Capítulo 11</div>
+  <h1>Generar widgets con ayuda de IA</h1>
+  <p class="lead">Construir widgets propios es de las cosas donde la IA de hoy más ayuda: es código autónomo, acotado y con un objetivo claro, justo lo que sale bien pedido a una herramienta.</p>
+  <h2>Para qué es excelente</h2>
+  <ul>
+    <li><strong>Generar el widget completo:</strong> "Hacé un carrusel de imágenes en JavaScript vanilla, accesible, con botones de anterior y siguiente." Sale funcional en segundos.</li>
+    <li><strong>Convertirlo en web component:</strong> "Convertí este acordeón en un web component reutilizable." Ideal para encapsular lo que ya tenés.</li>
+    <li><strong>Integrar un widget de API:</strong> "Hacé un widget que muestre el clima de una ciudad usando open-meteo." Te arma el fetch y el render.</li>
+    <li><strong>Explicar un embed:</strong> pegás el fragmento que te dio un servicio y pedís que te explique qué hace antes de confiar en él.</li>
+  </ul>
+  <h2>Cómo pedirlo bien</h2>
+  <p>Sé específico con la tecnología (JS vanilla, o el framework que uses), pedí que sea accesible, y aclarale que no uses librerías si querés algo liviano. Cuanto más concreto el pedido, menos vueltas.</p>
+  <div class="box ojo"><span class="tag">Revisá lo que embebés, siempre</span><p>La IA es genial para widgets propios, pero cuidado si te sugiere embeber un script de terceros: verificá que el servicio sea real y confiable antes de pegarlo, porque estás dándole acceso a tu página (capítulo 10). Y revisá el código generado: que maneje los estados de error, que sea accesible, que no traiga dependencias de más.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="10"><span class="dir">Anterior</span><span class="t">← Seguridad y privacidad</span></button><button class="navbtn next" data-goto="12"><span class="dir">Siguiente</span><span class="t">Checklist y cierre →</span></button></div>
+</section>
+
+<!-- 12 -->
+<section class="chapter" data-part="Cierre" data-num="12" data-title="Checklist y cierre" id="cierre">
+  <div class="ch-eyebrow">Fin del librito</div>
+  <h1>Checklist y cierre</h1>
+  <p class="lead">Ya sabés sumarle vida a una página: embeber lo que hacen otros y construir lo tuyo. Este es el resumen para tener a mano cuando integres un widget.</p>
+  <h2>Checklist al sumar un widget</h2>
+  <ul>
+    <li>¿Propio o de terceros? Terceros para lo difícil y ajeno, propio para lo simple y tuyo.</li>
+    <li>Si es de terceros: ¿iframe (aislado, más seguro) o script (potente, con acceso)?</li>
+    <li>Scripts de terceros con <code>async</code> o <code>defer</code>, y solo los confiables y necesarios.</li>
+    <li>Contenido pesado abajo del pliegue con <code>loading="lazy"</code>.</li>
+    <li>Si es propio: accesible (teclado, aria) desde el arranque.</li>
+    <li>Si consume una API: maneja los tres estados (cargando, éxito, error).</li>
+    <li>Para reutilizar de verdad: un web component.</li>
+    <li>Privacidad: los widgets que rastrean, recién después del consentimiento.</li>
+    <li>¿Vale el peso que suma? El widget más rápido es el que no pusiste.</li>
+  </ul>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Widget</th><td>Pieza autónoma de interfaz que hace una tarea.</td></tr>
+      <tr><th>iframe</th><td>Una página web embebida dentro de otra, aislada.</td></tr>
+      <tr><th>Script embed</th><td>Código de un tercero que se inserta y corre en tu página.</td></tr>
+      <tr><th>CDN</th><td>Servidor que sirve librerías listas para usar por URL.</td></tr>
+      <tr><th>Web Component</th><td>Etiqueta HTML propia, encapsulada y reutilizable.</td></tr>
+      <tr><th>Shadow DOM</th><td>El interior aislado de un web component (sus estilos no se escapan).</td></tr>
+      <tr><th>async / defer</th><td>Cargar un script sin frenar la página.</td></tr>
+      <tr><th>Lazy load</th><td>Cargar algo recién cuando se necesita (al aparecer en pantalla).</td></tr>
+      <tr><th>sandbox</th><td>Atributo que le quita permisos a un iframe.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Lo que te llevás</h2>
+  <p>Sabés embeber mapas, videos, chats y pagos; construir acordeones, carruseles y widgets con datos vivos; hacer web components reutilizables; y todo sin frenar tu página ni comprometer la seguridad. Con esto, una página deja de ser estática y se llena de vida. Es el toque que separa un sitio que informa de uno con el que se interactúa.</p>
+  <div class="box nota"><span class="tag">El mapa completo</span><p>Con este librito, el track de frontend, el de conexión front-back y los de bases de datos, tenés todo el camino: la interfaz, los artilugios que la hacen viva, el backend, y los datos. Ya podés construir una aplicación web completa de punta a punta. Ahora, a construir.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="11"><span class="dir">Anterior</span><span class="t">← Widgets con IA</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('wid-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('wid-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('wid-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('wid-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

@@ -1,0 +1,19 @@
+=== WIDGETS · salida real de pruebas (navegador headless, Playwright) ===
+
+== Widget 1: acordeón propio (JS vanilla) ==
+acordeon antes:    aria-expanded="false"
+acordeon despues del click: aria-expanded="true"
+panel abierto (maxHeight): 50px   <- el panel se expandió
+
+== Widget 3: web component <mi-insignia> ==
+render dentro del shadow DOM: "Probado"
+web components en la página: 2   <- el mismo tag reutilizado
+
+== Widget 2: clima desde open-meteo (API sin key) ==
+La API responde de verdad (verificado con curl, salida abajo).
+El fetch en el navegador consume exactamente esa respuesta.
+
+curl "https://api.open-meteo.com/v1/forecast?latitude=-31.42&longitude=-64.18&current=temperature_2m"
+{"latitude":-31.4587,"longitude":-64.19354,"timezone":"GMT",
+ "current_units":{"temperature_2m":"°C"},
+ "current":{"time":"2026-09-05T02:15","temperature_2m":12.3}}

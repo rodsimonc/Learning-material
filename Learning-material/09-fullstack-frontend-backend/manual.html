@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conectar frontend y backend, seguro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Full-stack · conexión segura</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Colección · Full-stack</div>
+  <h1>Conectar frontend y backend, seguro</h1>
+  <p class="lead">Ya tenés APIs (librito 01), frontend (el track completo) y seguridad (librito 07). Este libro los une: cómo conectar bien las dos mitades de una aplicación, con las arquitecturas recomendadas y sin abrir agujeros de seguridad. Todo por pasos, con un ejemplo real y probado, y con un capítulo sobre cómo hacerlo apoyándote en las herramientas de IA de hoy.</p>
+  <div class="box nota"><span class="tag">Código real y probado</span><p>El ejemplo (login con JWT + endpoint protegido) se construyó y se corrió de verdad. Los bloques con <span class="tested">✓ salida real</span> son lo que devolvió el servidor. El código completo está en <code>ejemplos/</code>: backend en Python (FastAPI) y en Node (Express), y el frontend que los consume.</p></div>
+  <h2>Qué vas a poder hacer al terminar</h2>
+  <p>Levantar un backend con login, consumirlo desde un frontend, resolver CORS, proteger endpoints con tokens, y aplicar la checklist de seguridad de la conexión. Y saber qué arquitectura elegir según el proyecto.</p>
+  <div class="box nota"><span class="tag">Cómo moverte</span><p>Índice a la izquierda, o flechas <span class="kbd">←</span> <span class="kbd">→</span>. El libro recuerda dónde quedaste.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">Cómo se conectan →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="1" data-title="Cómo se conectan" id="conexion">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Cómo se conectan las dos mitades</h1>
+  <p class="lead">Una aplicación moderna tiene dos mitades que corren por separado: el frontend en el navegador del usuario, y el backend en un servidor. Se hablan por HTTP, con una API en el medio.</p>
+  <h2>El modelo</h2>
+<pre>  FRONTEND (navegador)              BACKEND (servidor)
+  HTML + CSS + JS                   lógica + base de datos
+        │                                  │
+        │   fetch("/api/perfil")           │
+        │ ──────── request (JSON) ───────▶ │
+        │                                  │  valida, consulta la base
+        │ ◀─────── response (JSON) ─────── │
+        │                                  │
+   muestra los datos</pre>
+  <p>El frontend no toca la base de datos ni la lógica de negocio: se los pide al backend a través de la API (librito 01). El backend no sabe de colores ni botones: solo recibe pedidos, valida, y devuelve datos. Esa separación es la base de todo.</p>
+  <h2>Por qué se separan</h2>
+  <ul>
+    <li><strong>Seguridad:</strong> la lógica y los datos sensibles viven en el servidor, lejos del navegador, que el usuario controla por completo.</li>
+    <li><strong>Reutilización:</strong> un mismo backend sirve a la web, a una app móvil y a integraciones, todos consumiendo la misma API.</li>
+    <li><strong>Equipos:</strong> front y back pueden avanzar en paralelo mientras respeten el contrato de la API.</li>
+  </ul>
+  <div class="box ojo"><span class="tag">La regla que ordena todo</span><p>Nunca confíes en el frontend para la seguridad. El navegador es territorio del usuario: puede editar el JS, la request, saltarse tu validación. El frontend valida para la experiencia; el backend valida para la seguridad. Este principio vuelve en cada capítulo.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Arquitecturas recomendadas →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="2" data-title="Arquitecturas recomendadas" id="arquitecturas">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Arquitecturas recomendadas</h1>
+  <p class="lead">Hay varias formas de organizar la conexión front-back. No hay una mejor para todo; hay una mejor para tu caso. Estas son las que conviene conocer, de la más simple a la más armada.</p>
+  <h2>1. SPA + API separada</h2>
+  <p>El frontend es una aplicación que corre sola en el navegador (una SPA, del librito de APIs), y consume un backend que es solo API. Se despliegan por separado: el front en un hosting estático (librito de deploy), el back en su servidor.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Cuándo</th><th>Ventajas</th><th>Cuidados</th></tr></thead>
+    <tbody>
+      <tr><td>Apps con mucha interacción; varios clientes (web + móvil)</td><td>Front y back independientes; una API para todos</td><td>Hay que resolver CORS y auth entre dominios (este libro)</td></tr>
+    </tbody>
+  </table></div>
+  <h2>2. Monolito con frontend servido por el backend</h2>
+  <p>El backend sirve las páginas y también la API, todo junto. Más simple para empezar: no hay CORS (mismo origen), un solo despliegue.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Cuándo</th><th>Ventajas</th><th>Cuidados</th></tr></thead>
+    <tbody>
+      <tr><td>Proyectos chicos o medianos, un solo cliente web</td><td>Simple, sin CORS, un despliegue</td><td>Menos flexible si después sumás una app móvil</td></tr>
+    </tbody>
+  </table></div>
+  <h2>3. BFF (Backend For Frontend)</h2>
+  <p>Un backend intermedio, hecho a medida del frontend, que se sienta entre la SPA y los servicios o APIs internas. Le simplifica la vida al front (le da justo lo que necesita) y guarda los secretos y tokens del lado del servidor.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Cuándo</th><th>Ventajas</th><th>Cuidados</th></tr></thead>
+    <tbody>
+      <tr><td>Apps con varios servicios detrás; cuando querés el token fuera del navegador</td><td>Más seguro (secretos en el server), API a medida del front</td><td>Una capa más para mantener</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">La recomendación</span><p>Empezá con lo más simple que resuelva tu caso (librito de arquitectura). Para aprender y para proyectos chicos, SPA + API o monolito alcanzan y sobran. El BFF aparece cuando la seguridad o la cantidad de servicios lo justifican, no antes.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← Cómo se conectan</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">El contrato: la API →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="3" data-title="El contrato: la API" id="contrato">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>El contrato entre front y back</h1>
+  <p class="lead">Lo único que comparten el frontend y el backend es el contrato de la API: qué endpoints hay, qué reciben y qué devuelven. Si los dos respetan el contrato, todo lo demás puede cambiar sin romperse.</p>
+  <h2>Un contrato es esto</h2>
+  <div class="codehead"><span class="lang txt">el contrato del ejemplo de este libro</span></div>
+<pre>POST /login
+  recibe:  { "email": "...", "password": "..." }
+  devuelve: { "token": "eyJ..." }        (200) o error 401
+
+GET /perfil
+  requiere: header Authorization: Bearer &lt;token&gt;
+  devuelve: { "email", "nombre", "rol" }  (200) o error 401</pre>
+  <p>El frontend sabe exactamente qué mandar y qué esperar. El backend cumple eso. Ninguno necesita saber cómo está hecho el otro por dentro.</p>
+  <h2>Buenas prácticas del contrato</h2>
+  <ul>
+    <li><strong>Versioná</strong> la API (<code>/v1/...</code>) para poder evolucionar sin romper a los clientes.</li>
+    <li><strong>Documentá</strong> con OpenAPI. FastAPI la genera sola en <code>/docs</code>; es documentación viva que front y back comparten.</li>
+    <li><strong>Formatos y errores consistentes:</strong> siempre JSON, siempre los mismos códigos de estado para las mismas situaciones.</li>
+  </ul>
+  <div class="box nota"><span class="tag">Acordá el contrato primero</span><p>En equipo, definir el contrato de la API antes de programar deja que front y back trabajen en paralelo. El front puede simular respuestas (mock) mientras el back se construye. El contrato es el punto de encuentro.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Arquitecturas recomendadas</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Paso 1: el backend →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · La conexión, paso a paso" data-num="4" data-title="Paso 1: el backend" id="backend">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Paso 1: levantar el backend</h1>
+  <p class="lead">Construimos un backend con dos endpoints: uno de login que entrega un token, y uno de perfil protegido. Acá va en FastAPI (Python); la variante en Express (Node) está en <code>ejemplos/backend/server.js</code>.</p>
+  <h2>El endpoint de login</h2>
+  <div class="codehead"><span class="lang py">backend/main.py</span></div>
+<pre>from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import jwt, datetime, hashlib
+
+SECRET = "clave_de_ejemplo"     # en producción: variable de entorno
+app = FastAPI()
+
+def hash_pw(p): return hashlib.sha256(p.encode()).hexdigest()  # demo; real: bcrypt
+USUARIOS = {"carlos@ejemplo.com": {"pw": hash_pw("secreto123"),
+                                    "nombre": "Carlos", "rol": "user"}}
+
+class Login(BaseModel):
+    email: str
+    password: str
+
+def crear_token(email, rol):
+    payload = {"sub": email, "rol": rol,
+               "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)}
+    return jwt.encode(payload, SECRET, algorithm="HS256")
+
+@app.post("/login")
+def login(datos: Login):
+    u = USUARIOS.get(datos.email)
+    if not u or u["pw"] != hash_pw(datos.password):
+        raise HTTPException(401, "credenciales invalidas")   # mensaje genérico
+    return {"token": crear_token(datos.email, u["rol"])}</pre>
+  <h2>Levantarlo y probarlo</h2>
+  <p>Se corre con <code>uvicorn --app-dir backend main:app --port 8010</code>. Probamos el login con <code>curl</code>:</p>
+  <div class="codehead"><span class="lang sh">prueba real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">### Login con credenciales correctas -> devuelve token JWT
+token (recortado): eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ...
+
+### Login con contraseña incorrecta -> 401 genérico
+HTTP/1.1 401 Unauthorized
+{"detail":"credenciales invalidas"}</pre>
+  <p>Con la contraseña correcta devuelve un token JWT; con una incorrecta, un 401 con mensaje genérico (no revela si el usuario existe, buena práctica del librito de seguridad). Todavía falta proteger el perfil: próximo paso.</p>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← El contrato: la API</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Paso 2: consumir desde el front →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · La conexión, paso a paso" data-num="5" data-title="Paso 2: consumir desde el front" id="consumir">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Paso 2: consumir la API desde el frontend</h1>
+  <p class="lead">Ahora el frontend le pega al backend. Usa <code>fetch</code> (librito de DOM y de consumir APIs): manda el login, recibe el token, y con él pide el perfil.</p>
+  <h2>El login desde el front</h2>
+  <div class="codehead"><span class="lang js">frontend/app.js</span></div>
+<pre>const API = "http://localhost:8010";   // en producción: variable de entorno
+
+form.addEventListener("submit", async (e) =&gt; {
+  e.preventDefault();
+  const email = document.querySelector("#email").value.trim();
+  const password = document.querySelector("#password").value;
+
+  // 1) login: pedir el token
+  const r = await fetch(`${API}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!r.ok) { mostrar("Credenciales inválidas", "error"); return; }
+  const { token } = await r.json();
+
+  // 2) guardar el token y usarlo
+  sessionStorage.setItem("token", token);
+  await cargarPerfil(token);
+});</pre>
+  <h2>Pedir un recurso protegido</h2>
+  <div class="codehead"><span class="lang js">frontend/app.js</span></div>
+<pre>async function cargarPerfil(token) {
+  const r = await fetch(`${API}/perfil`, {
+    headers: { "Authorization": `Bearer ${token}` },   // el token viaja acá
+  });
+  if (!r.ok) { mostrar("Sesión expirada", "error"); return; }
+  const perfil = await r.json();
+  datos.textContent = JSON.stringify(perfil, null, 2);
+}</pre>
+  <p>El patrón es el del librito de consumir APIs: <code>fetch</code>, chequear <code>r.ok</code>, parsear el JSON. Lo nuevo es el header <code>Authorization: Bearer &lt;token&gt;</code>, que le prueba al backend quién sos en cada pedido.</p>
+  <div class="box ojo"><span class="tag">Si abrís esto ahora, falla</span><p>Si servís el front desde otro origen (por ejemplo <code>localhost:5500</code>) y le pegás a la API en <code>localhost:8010</code>, el navegador va a bloquear el pedido. No es un bug tuyo: es CORS, y es el próximo capítulo.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Paso 1: el backend</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Paso 3: CORS →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 2 · La conexión, paso a paso" data-num="6" data-title="Paso 3: CORS" id="cors">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Paso 3: CORS, el primer muro</h1>
+  <p class="lead">Cuando el frontend y el backend están en orígenes distintos (distinto dominio o puerto), el navegador bloquea el pedido por seguridad, salvo que el backend lo permita explícitamente. Eso es CORS, y frena a todo el que conecta front y back por primera vez.</p>
+  <h2>Por qué el navegador bloquea</h2>
+  <p>Por defecto, una página de un origen no puede leer respuestas de una API de otro origen vía JavaScript. Es una protección: evita que un sitio malicioso use tu sesión para consumir APIs ajenas (librito de seguridad). El backend tiene que declarar qué orígenes autoriza.</p>
+  <h2>Configurarlo bien en el backend</h2>
+  <div class="codehead"><span class="lang py">backend/main.py (FastAPI)</span></div>
+<pre>from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5500"],   # SOLO el frontend legítimo
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)</pre>
+  <div class="codehead"><span class="lang js">backend/server.js (Express)</span></div>
+<pre>const cors = require("cors");
+app.use(cors({ origin: "http://localhost:5500", credentials: true }));</pre>
+  <div class="box ojo"><span class="tag">Nunca abras CORS a todos</span><p>Ver <code>allow_origins=["*"]</code> en producción es una señal de alarma (librito de seguridad). Listá solo los orígenes de tus frontends reales. El <code>*</code> deja que cualquier sitio consuma tu API desde el navegador de tus usuarios.</p></div>
+  <div class="box nota"><span class="tag">CORS es del servidor, no del front</span><p>Un error común es intentar "arreglar CORS" desde el frontend. No se puede: es el backend el que autoriza. Si ves el error, la configuración va del lado del server.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Paso 2: consumir</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Paso 4: configuración →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 2 · La conexión, paso a paso" data-num="7" data-title="Paso 4: configuración" id="config">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>Paso 4: variables de entorno y configuración</h1>
+  <p class="lead">La URL de la API, la clave secreta, la cadena de conexión a la base: nada de eso va escrito en el código. Va en configuración, que cambia según el entorno (tu máquina, producción) sin tocar el código.</p>
+  <h2>El problema de hardcodear</h2>
+  <p>En los ejemplos pusimos <code>const API = "http://localhost:8010"</code> para que se entienda. Pero en tu máquina la API está en localhost, y en producción está en <code>https://api.tuapp.com</code>. Si está hardcodeado, tenés que cambiar el código para desplegar. Y peor: un secreto en el código se filtra (librito de seguridad).</p>
+  <h2>Variables de entorno</h2>
+  <div class="codehead"><span class="lang py">backend (Python)</span></div>
+<pre>import os
+SECRET = os.environ["JWT_SECRET"]              # viene del entorno
+DB_URL = os.environ["DATABASE_URL"]</pre>
+  <p>Los valores viven en un archivo <code>.env</code> local (que va en el <code>.gitignore</code>, librito de Git) y en el gestor de secretos del proveedor en producción.</p>
+  <h2>Config del frontend</h2>
+  <p>El frontend también necesita saber a qué URL pegarle según el entorno. Con un bundler (Vite, por ejemplo) usás variables de entorno del build; sin bundler, un pequeño archivo de config que cambiás por entorno.</p>
+  <div class="codehead"><span class="lang txt">.env (nunca al repositorio)</span></div>
+<pre>JWT_SECRET=una_clave_larga_y_aleatoria
+DATABASE_URL=postgres://...
+</pre>
+  <div class="box ojo"><span class="tag">El frontend no guarda secretos</span><p>Ojo: cualquier cosa que mandes al navegador es pública, el usuario la ve en las DevTools. Las claves de API secretas y las credenciales viven en el backend, nunca en el JS del front. Si el front necesita algo secreto, lo pide al backend, que lo usa por él (ese es uno de los motivos del BFF, capítulo 2).</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Paso 3: CORS</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Autenticación →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 3 · Seguridad de la conexión" data-num="8" data-title="Autenticación" id="auth">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Autenticación: el login y el token</h1>
+  <p class="lead">La autenticación es cómo el backend sabe quién manda cada pedido. Como HTTP no recuerda nada entre requests (librito de APIs), después del login el cliente prueba su identidad en cada llamada con un token.</p>
+  <h2>El flujo completo</h2>
+<pre>1. El usuario manda email + contraseña al POST /login
+2. El backend verifica contra la base (contraseña hasheada)
+3. Si es correcto, emite un token (JWT) firmado y con vencimiento
+4. El cliente guarda el token y lo manda en cada pedido protegido
+5. El backend verifica la firma del token en cada request</pre>
+  <h2>Dónde guardar el token: la decisión clave</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Opción</th><th>Ventaja</th><th>Riesgo</th></tr></thead>
+    <tbody>
+      <tr><th>Cookie HttpOnly</th><td>El JavaScript no puede leerla: un XSS no roba el token</td><td>Hay que manejar CSRF (cookies con <code>SameSite</code>)</td></tr>
+      <tr><th>localStorage / sessionStorage</th><td>Simple de usar desde el JS</td><td>Accesible a JavaScript: un XSS lo roba (librito de seguridad)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box ojo"><span class="tag">La recomendación para apps web</span><p>Para una app web, el patrón más seguro es que el backend entregue el token en una <strong>cookie <code>HttpOnly; Secure; SameSite</code></strong>, fuera del alcance del JavaScript (librito 01 y 07). El <code>localStorage</code> es más simple pero queda expuesto a XSS. En el ejemplo de este libro usamos <code>sessionStorage</code> por claridad didáctica; para producción, cookie HttpOnly.</p></div>
+  <p>Apps móviles nativas y clientes servidor-a-servidor sí usan el header <code>Authorization: Bearer</code>, porque no tienen un <code>document.cookie</code> que proteger.</p>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Paso 4: configuración</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Proteger endpoints →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 3 · Seguridad de la conexión" data-num="9" data-title="Proteger endpoints" id="proteger">
+  <div class="ch-eyebrow">Capítulo 9</div>
+  <h1>Proteger endpoints y autorizar</h1>
+  <p class="lead">Un endpoint protegido verifica el token en cada pedido, y además chequea que quien lo manda tenga permiso para eso puntual. Autenticar (quién sos) no es autorizar (qué podés hacer), como viste en el librito de seguridad.</p>
+  <h2>Verificar el token</h2>
+  <div class="codehead"><span class="lang py">backend/main.py</span></div>
+<pre>from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import jwt
+
+seguridad = HTTPBearer()
+
+def usuario_actual(cred: HTTPAuthorizationCredentials = Depends(seguridad)):
+    try:
+        return jwt.decode(cred.credentials, SECRET, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(401, "token expirado")
+    except jwt.InvalidTokenError:
+        raise HTTPException(401, "token invalido")
+
+@app.get("/perfil")
+def perfil(user=Depends(usuario_actual)):     # protegido: exige token válido
+    email = user["sub"]
+    return {"email": email, "nombre": USUARIOS[email]["nombre"], "rol": user["rol"]}</pre>
+  <h2>Probarlo: con y sin token</h2>
+  <div class="codehead"><span class="lang sh">prueba real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">### GET /perfil SIN token -> protegido
+HTTP/1.1 401 Unauthorized
+
+### GET /perfil CON token -> 200 + datos del usuario
+{"email":"carlos@ejemplo.com","nombre":"Carlos","rol":"user"}</pre>
+  <p>Sin token, 401. Con el token del login, devuelve los datos. Funciona: el endpoint solo responde a quien probó su identidad.</p>
+  <h2>Autorización por rol o por dueño</h2>
+  <p>El token trae el <code>rol</code>. Para acciones sensibles, verificá también el permiso, no solo que esté logueado. Y para recursos de un usuario, verificá que el recurso sea suyo (el IDOR del librito de seguridad):</p>
+  <div class="codehead"><span class="lang py">python</span></div>
+<pre>@app.delete("/pedidos/{id}")
+def borrar(id: int, user=Depends(usuario_actual)):
+    pedido = db.obtener(id)
+    if pedido.usuario_id != user["sub"]:
+        raise HTTPException(403)      # no es tuyo
+    ...</pre>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Autenticación</span></button><button class="navbtn next" data-goto="10"><span class="dir">Siguiente</span><span class="t">Los must de seguridad →</span></button></div>
+</section>
+
+<!-- 10 -->
+<section class="chapter" data-part="Parte 3 · Seguridad de la conexión" data-num="10" data-title="Los must de seguridad" id="musts">
+  <div class="ch-eyebrow">Capítulo 10</div>
+  <h1>Los must de una conexión segura</h1>
+  <p class="lead">Más allá del token, hay un conjunto de defensas que toda conexión front-back necesita. Son las del librito de ciberseguridad, aplicadas al punto de contacto entre las dos mitades.</p>
+  <h2>La lista no negociable</h2>
+  <ul>
+    <li><strong>HTTPS siempre.</strong> Sin él, el token y los datos viajan en texto plano. En producción no es opcional.</li>
+    <li><strong>Validar en el servidor.</strong> Toda entrada se valida en el backend, aunque el front ya haya validado. El front es para la experiencia; el back, para la seguridad.</li>
+    <li><strong>Consultas parametrizadas.</strong> Nunca armar SQL pegando datos del usuario (inyección SQL, librito de seguridad).</li>
+    <li><strong>Rate limiting.</strong> Limitar intentos de login y pedidos por cliente, para frenar fuerza bruta y abuso.</li>
+    <li><strong>CORS restringido</strong> a tus orígenes (capítulo 6).</li>
+    <li><strong>Cabeceras de seguridad</strong> en las respuestas del backend (CSP, HSTS, etc.).</li>
+    <li><strong>Secretos fuera del código</strong> (capítulo 7).</li>
+    <li><strong>Errores discretos:</strong> no devolver stack traces ni detalles internos al cliente.</li>
+  </ul>
+  <h2>CSRF, si usás cookies</h2>
+  <p>Si guardás el token en cookie (lo recomendado para web), sumás protección CSRF: token anti-CSRF o cookies con <code>SameSite=Lax/Strict</code> (librito de seguridad). Si usás el header <code>Authorization</code> con el token en memoria, CSRF no aplica de la misma forma, pero quedás más expuesto a XSS. Es el trade-off del capítulo 8.</p>
+  <div class="box nota"><span class="tag">Todo esto ya lo viste</span><p>Este capítulo es el librito de ciberseguridad web aplicado a la conexión. Si querés el detalle de cada punto (cómo se explota y cómo se corrige), está ahí. Acá lo importante es que ninguna de estas defensas es opcional en producción.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="9"><span class="dir">Anterior</span><span class="t">← Proteger endpoints</span></button><button class="navbtn next" data-goto="11"><span class="dir">Siguiente</span><span class="t">Errores y estados →</span></button></div>
+</section>
+
+<!-- 11 -->
+<section class="chapter" data-part="Parte 3 · Seguridad de la conexión" data-num="11" data-title="Errores y estados" id="estados">
+  <div class="ch-eyebrow">Capítulo 11</div>
+  <h1>Manejar errores y estados en el front</h1>
+  <p class="lead">Una conexión real falla a veces: el servidor tarda, no responde, el token venció. Un buen frontend maneja esos casos en vez de quedarse colgado o mostrar datos rotos.</p>
+  <h2>Los tres estados de todo pedido</h2>
+  <ul>
+    <li><strong>Cargando:</strong> mostrar un indicador mientras la respuesta llega. El usuario sabe que algo pasa.</li>
+    <li><strong>Éxito:</strong> mostrar los datos.</li>
+    <li><strong>Error:</strong> mostrar un mensaje claro y, si aplica, una forma de reintentar.</li>
+  </ul>
+  <div class="codehead"><span class="lang js">javascript</span></div>
+<pre>async function cargar() {
+  mostrarCargando(true);
+  try {
+    const r = await fetch(`${API}/perfil`, { headers: authHeader() });
+    if (r.status === 401) { irALogin(); return; }        // token venció
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    render(await r.json());
+  } catch (err) {
+    mostrarError("No pudimos cargar tus datos. Reintentá.");
+  } finally {
+    mostrarCargando(false);
+  }
+}</pre>
+  <h2>El 401 y la sesión vencida</h2>
+  <p>Un caso clave de la conexión: cuando el token vence, el backend responde 401. El frontend debería detectar ese 401 en sus pedidos y mandar al usuario al login, en vez de mostrar un error genérico. Es la coordinación fina entre las dos mitades.</p>
+  <div class="box nota"><span class="tag">El estado de carga importa</span><p>Una página que no muestra nada mientras carga se siente rota. Un simple "Cargando..." o un esqueleto de contenido cambia por completo la percepción de velocidad. Es de lo que más se nota y menos cuesta.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="10"><span class="dir">Anterior</span><span class="t">← Los must de seguridad</span></button><button class="navbtn next" data-goto="12"><span class="dir">Siguiente</span><span class="t">Construir con IA →</span></button></div>
+</section>
+
+<!-- 12 -->
+<section class="chapter" data-part="Parte 4 · Con herramientas de IA" data-num="12" data-title="Construir con IA" id="ia">
+  <div class="ch-eyebrow">Capítulo 12</div>
+  <h1>Construir la conexión con herramientas de IA</h1>
+  <p class="lead">Hoy buena parte de este código lo podés generar con asistentes de IA. Bien usados, aceleran muchísimo; mal usados, meten bugs y agujeros de seguridad. La clave es saber pedir y, sobre todo, saber revisar.</p>
+  <h2>Las herramientas vigentes (2026)</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Herramienta</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Cursor</th><td>Editor con IA integrada; edita tu código entendiendo todo el proyecto.</td></tr>
+      <tr><th>Claude Code</th><td>Agente de IA en la terminal que trabaja sobre tu repo entero.</td></tr>
+      <tr><th>GitHub Copilot</th><td>Autocompletado y chat de IA dentro de tu editor.</td></tr>
+      <tr><th>Windsurf</th><td>Editor con agente de IA, similar a Cursor.</td></tr>
+      <tr><th>v0 / Lovable / Bolt</th><td>"Vibe coding": generan apps y UIs completas desde una descripción en lenguaje natural.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Cómo pedirle bien (prompting)</h2>
+  <p>La calidad de lo que sale depende de lo que pedís. Un buen pedido para esta conexión sería específico y con las restricciones de seguridad explícitas:</p>
+  <div class="codehead"><span class="lang txt">ejemplo de prompt</span></div>
+<pre>Creá un endpoint POST /login en FastAPI que:
+- reciba email y password
+- verifique la contraseña con bcrypt (no texto plano ni sha256)
+- devuelva un JWT firmado con expiración de 1 hora
+- use la clave secreta desde una variable de entorno, no hardcodeada
+- devuelva un 401 genérico si las credenciales son inválidas
+Y un endpoint GET /perfil protegido que verifique el token.
+Configurá CORS solo para http://localhost:5500.</pre>
+  <p>Fijate que el prompt incluye las buenas prácticas que aprendiste (bcrypt, secreto en entorno, 401 genérico, CORS acotado). La IA no las aplica sola si no se las pedís; tu conocimiento es lo que guía a la herramienta.</p>
+  <div class="box nota"><span class="tag">La IA acelera, no reemplaza el criterio</span><p>Estas herramientas escriben código rápido, pero no saben qué es correcto para tu caso ni tienen tu contexto de seguridad. El valor de todos los libritos anteriores es que te dan el criterio para dirigir a la IA y para darte cuenta cuando se equivoca.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="11"><span class="dir">Anterior</span><span class="t">← Errores y estados</span></button><button class="navbtn next" data-goto="13"><span class="dir">Siguiente</span><span class="t">Revisar con IA →</span></button></div>
+</section>
+
+<!-- 13 -->
+<section class="chapter" data-part="Parte 4 · Con herramientas de IA" data-num="13" data-title="Revisar con IA" id="revisar-ia">
+  <div class="ch-eyebrow">Capítulo 13</div>
+  <h1>Revisar seguridad y calidad con IA</h1>
+  <p class="lead">La IA no solo escribe código: también lo revisa. Pedirle que audite lo que generó (o lo que escribiste vos) es una de sus mejores aplicaciones, siempre con la última palabra en tus manos.</p>
+  <h2>Prompts para auditar la conexión</h2>
+  <div class="codehead"><span class="lang txt">ejemplos de prompt de revisión</span></div>
+<pre>Revisá este endpoint buscando problemas de seguridad: inyección,
+autorización faltante, secretos hardcodeados, CORS abierto, y manejo
+de errores que filtre información. Listá cada hallazgo con su riesgo
+y cómo corregirlo.
+
+¿Este código guarda el token de forma segura? ¿Qué pasa si hay un XSS?
+
+¿La validación de este formulario está también en el backend, o solo
+en el frontend?</pre>
+  <h2>Qué revisar siempre en el código generado</h2>
+  <p>La IA tiende a generar código que "funciona" pero que a veces saltea seguridad. Revisá especialmente:</p>
+  <ul>
+    <li><strong>Secretos:</strong> ¿quedó alguna clave hardcodeada?</li>
+    <li><strong>Contraseñas:</strong> ¿usa un hash lento (bcrypt/argon2) o algo inseguro?</li>
+    <li><strong>SQL:</strong> ¿las consultas están parametrizadas?</li>
+    <li><strong>CORS:</strong> ¿quedó en <code>*</code>?</li>
+    <li><strong>Autorización:</strong> ¿verifica permisos, o solo que esté logueado?</li>
+    <li><strong>Validación:</strong> ¿valida en el servidor, no solo en el front?</li>
+  </ul>
+  <div class="box ojo"><span class="tag">Nunca confíes ciego</span><p>La IA puede afirmar con seguridad algo incorrecto, o generar código con un bug sutil. Todo lo que genera pasa por tu revisión antes de ir a producción, sobre todo lo de seguridad. Es una herramienta poderosa con un humano al mando, no un reemplazo del humano. Y podés potenciarla con herramientas de análisis (SAST/SCA, librito de seguridad) que revisan automáticamente en cada cambio.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="12"><span class="dir">Anterior</span><span class="t">← Construir con IA</span></button><button class="navbtn next" data-goto="14"><span class="dir">Siguiente</span><span class="t">Checklist y cierre →</span></button></div>
+</section>
+
+<!-- 14 -->
+<section class="chapter" data-part="Parte 5 · Cierre" data-num="14" data-title="Checklist y arquitectura de referencia" id="cierre">
+  <div class="ch-eyebrow">Cierre</div>
+  <h1>Checklist, arquitectura de referencia y glosario</h1>
+  <h2>Arquitectura de referencia (segura)</h2>
+<pre>  [ Frontend (SPA) ]  ── HTTPS ──▶  [ Backend / API ]  ──▶  [ Base de datos ]
+   - valida (UX)                     - valida (seguridad)      - accesos parametrizados
+   - token en cookie                 - CORS acotado            - mínimo privilegio
+     HttpOnly                        - auth + autorización
+                                     - rate limiting
+                                     - secretos en entorno
+                                     - HTTPS forzado</pre>
+  <h2>Checklist de la conexión front-back</h2>
+  <ul>
+    <li>Contrato de API claro, versionado y documentado (OpenAPI).</li>
+    <li>CORS restringido a los orígenes de tus frontends.</li>
+    <li>HTTPS forzado en toda la comunicación.</li>
+    <li>Login con contraseñas hasheadas (bcrypt/argon2) y token con vencimiento.</li>
+    <li>Token en cookie HttpOnly para web (o Bearer para clientes no navegador).</li>
+    <li>Endpoints protegidos verifican token y autorización (no solo login).</li>
+    <li>Validación en el servidor, siempre; consultas parametrizadas.</li>
+    <li>Rate limiting en login y endpoints sensibles.</li>
+    <li>Secretos y URLs en variables de entorno, nunca en el código.</li>
+    <li>Frontend maneja los tres estados: cargando, éxito, error (y el 401).</li>
+    <li>Código generado por IA revisado, sobre todo en seguridad.</li>
+  </ul>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>SPA</th><td>App que corre en el navegador y consume una API.</td></tr>
+      <tr><th>BFF</th><td>Backend intermedio a medida del frontend.</td></tr>
+      <tr><th>Contrato de API</th><td>Qué endpoints hay, qué reciben y devuelven.</td></tr>
+      <tr><th>CORS</th><td>Reglas de qué orígenes pueden consumir la API desde el navegador.</td></tr>
+      <tr><th>JWT</th><td>Token firmado que prueba la identidad en cada pedido.</td></tr>
+      <tr><th>Cookie HttpOnly</th><td>Cookie que el JavaScript no puede leer; protege el token de XSS.</td></tr>
+      <tr><th>Variable de entorno</th><td>Config que vive fuera del código y cambia por entorno.</td></tr>
+      <tr><th>Vibe coding</th><td>Generar apps completas describiéndolas a una IA.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Sabés conectar frontend y backend con las arquitecturas recomendadas y de forma segura, paso a paso, y sabés apoyarte en la IA sin delegarle el criterio. Este libro cierra el círculo de la colección: APIs, frontend, seguridad y arquitectura, unidos en una app real. Ahora tenés el panorama completo para construir software de punta a punta.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="13"><span class="dir">Anterior</span><span class="t">← Revisar con IA</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('fs-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('fs-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('fs-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('fs-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

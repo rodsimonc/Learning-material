@@ -1,0 +1,12 @@
+### 1) Login con credenciales correctas -> devuelve token JWT
+token (recortado): eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ...
+
+### 2) GET /perfil SIN token -> 403/401 (protegido)
+HTTP/1.1 401 Unauthorized
+
+### 3) GET /perfil CON token -> 200 + datos del usuario
+{"email":"carlos@ejemplo.com","nombre":"Carlos","rol":"user"}
+
+### 4) Login con contraseña incorrecta -> 401 genérico
+HTTP/1.1 401 Unauthorized
+{"detail":"credenciales invalidas"}

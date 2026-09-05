@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Enfoca · Menos ruido, más hecho</title>
+  <meta name="description" content="Enfoca es la app de tareas que te muestra solo lo que importa hoy. Organizá tu día en minutos.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a href="#" class="logo">Enfoca</a>
+      <button class="menu-btn" id="menuBtn" aria-label="Abrir menú">☰</button>
+      <nav class="menu" id="menu">
+        <a href="#beneficios">Beneficios</a>
+        <a href="#opiniones">Opiniones</a>
+        <a href="#contacto" class="btn btn-sm">Empezar gratis</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-texto">
+          <span class="eyebrow">Tu día, ordenado</span>
+          <h1>Menos ruido, más hecho</h1>
+          <p class="lead">Enfoca te muestra solo las tareas de hoy, sin listas infinitas ni distracciones. Organizá tu día en dos minutos y volvé a lo importante.</p>
+          <div class="hero-cta">
+            <a href="#contacto" class="btn">Empezar gratis</a>
+            <a href="#beneficios" class="btn btn-ghost">Ver cómo funciona</a>
+          </div>
+          <p class="hero-nota">Gratis para siempre. Sin tarjeta.</p>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="mock">
+            <div class="mock-top"><span></span><span></span><span></span></div>
+            <div class="mock-task done">Revisar el informe</div>
+            <div class="mock-task">Llamar al proveedor</div>
+            <div class="mock-task">Preparar la reunión</div>
+            <div class="mock-task hoy">+ Hoy solo 3 tareas</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="beneficios" id="beneficios">
+      <div class="container">
+        <h2 class="seccion-titulo">Todo lo que necesitás, nada de lo que sobra</h2>
+        <div class="cards">
+          <article class="card">
+            <div class="card-ico">◎</div>
+            <h3>Solo hoy</h3>
+            <p>Nada de listas eternas. Enfoca te muestra lo del día, y el resto espera su turno.</p>
+          </article>
+          <article class="card">
+            <div class="card-ico">⚡</div>
+            <h3>Rápido de verdad</h3>
+            <p>Agregás una tarea en un segundo. Sin campos que llenar ni menús que abrir.</p>
+          </article>
+          <article class="card">
+            <div class="card-ico">◪</div>
+            <h3>En todos lados</h3>
+            <p>Tus tareas te siguen del celular a la compu, siempre sincronizadas.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="opiniones" id="opiniones">
+      <div class="container">
+        <h2 class="seccion-titulo">Gente que ya se enfocó</h2>
+        <div class="cards">
+          <blockquote class="quote">
+            <p>"Dejé de sentirme abrumada por mi lista de pendientes. Ahora sé qué hacer hoy y listo."</p>
+            <footer>— Personaje de ejemplo, diseñadora</footer>
+          </blockquote>
+          <blockquote class="quote">
+            <p>"Lo más simple que probé, y por eso lo uso todos los días desde hace meses."</p>
+            <footer>— Personaje de ejemplo, desarrollador</footer>
+          </blockquote>
+        </div>
+        <p class="social-num">+12.000 personas usan Enfoca cada día <em>(cifra de ejemplo)</em></p>
+      </div>
+    </section>
+
+    <section class="cta-final" id="contacto">
+      <div class="container">
+        <h2>Empezá hoy, gratis</h2>
+        <p>Dejanos tu email y te mandamos el acceso.</p>
+        <form id="form" class="form" novalidate>
+          <input type="email" id="email" name="email" placeholder="tu@email.com" required aria-label="Email">
+          <button type="submit" class="btn">Quiero empezar</button>
+        </form>
+        <p id="aviso" class="aviso" role="status"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <span class="logo">Enfoca</span>
+      <nav class="footer-links">
+        <a href="#beneficios">Beneficios</a>
+        <a href="#opiniones">Opiniones</a>
+        <a href="#contacto">Empezar</a>
+      </nav>
+      <span class="footer-legal">Proyecto de ejemplo · Bootcamp Frontend</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

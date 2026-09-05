@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proyecto: la landing page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Frontend · 13 · Proyecto: landing page</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Frontend · Librito 13 de 14</div>
+  <h1>Proyecto: la landing page</h1>
+  <p class="lead">Llegó el momento de juntar todo. En este librito construimos una landing page completa y funcional, de cero, aplicando cada cosa que aprendiste: HTML semántico, CSS con design tokens, Flexbox y Grid, responsive, un formulario con validación y un menú móvil. Al terminar vas a tener una landing real, y lo más importante, vas a saber cómo se arma una.</p>
+  <div class="box nota"><span class="tag">Código real y probado</span><p>La landing de este librito está construida y testeada de verdad: el formulario valida y confirma, el menú móvil abre y cierra, y se adapta al celular. Todo el código está en la carpeta <code>ejemplos/landing/</code> (index.html, estilos.css, script.js), listo para abrir y modificar.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">El plan →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Preparar" data-num="1" data-title="El plan" id="plan">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Qué vamos a construir</h1>
+  <p class="lead">Construimos la landing de <strong>Enfoca</strong>, una app de tareas ficticia. Un producto inventado nos deja concentrarnos en el frontend sin distraernos con contenido real.</p>
+  <h2>Las secciones (del librito 11)</h2>
+  <p>Seguimos la anatomía que ya conocés, de arriba hacia abajo:</p>
+  <ul>
+    <li><strong>Header</strong> con logo, navegación y un CTA.</li>
+    <li><strong>Hero</strong> con título, promesa, botones y una maqueta visual del producto.</li>
+    <li><strong>Beneficios</strong>: tres tarjetas con lo que gana el usuario.</li>
+    <li><strong>Opiniones</strong>: prueba social con testimonios.</li>
+    <li><strong>CTA final</strong> con un formulario de email.</li>
+    <li><strong>Footer</strong> con enlaces y lo legal.</li>
+  </ul>
+  <h2>Los tres archivos</h2>
+  <div class="codehead"><span class="lang txt">estructura del proyecto</span></div>
+<pre>landing/
+  index.html      ← la estructura (HTML semántico)
+  estilos.css     ← el diseño (tokens + layout + responsive)
+  script.js       ← el comportamiento (formulario + menú)</pre>
+  <p>Vamos parte por parte. Te recomiendo tener la carpeta <code>ejemplos/landing/</code> abierta al lado para ver el código completo mientras leés la explicación.</p>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">La estructura HTML →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 2 · Construir" data-num="2" data-title="La estructura HTML" id="html">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>La estructura en HTML semántico</h1>
+  <p class="lead">Empezamos por el esqueleto, sin estilos. Cada sección con su etiqueta semántica correcta (librito 2), y una clase para estilarla después.</p>
+  <h2>El esqueleto de la página</h2>
+  <div class="codehead"><span class="lang txt">index.html (estructura)</span></div>
+<pre>&lt;body&gt;
+  &lt;header class="site-header"&gt;
+    &lt;nav&gt;...&lt;/nav&gt;
+  &lt;/header&gt;
+
+  &lt;main&gt;
+    &lt;section class="hero"&gt;...&lt;/section&gt;
+    &lt;section class="beneficios" id="beneficios"&gt;...&lt;/section&gt;
+    &lt;section class="opiniones" id="opiniones"&gt;...&lt;/section&gt;
+    &lt;section class="cta-final" id="contacto"&gt;...&lt;/section&gt;
+  &lt;/main&gt;
+
+  &lt;footer class="site-footer"&gt;...&lt;/footer&gt;
+
+  &lt;script src="script.js"&gt;&lt;/script&gt;
+&lt;/body&gt;</pre>
+  <p>Fijate: <code>header</code>, <code>main</code>, <code>section</code>, <code>footer</code>, todo semántico. Los <code>id</code> en las secciones (<code>#beneficios</code>, <code>#contacto</code>) sirven para que los enlaces del menú lleven ahí con scroll (librito 4). Y el <code>&lt;script&gt;</code> al final, como corresponde.</p>
+  <h2>El header con navegación</h2>
+  <div class="codehead"><span class="lang txt">index.html</span></div>
+<pre>&lt;header class="site-header"&gt;
+  &lt;div class="container nav"&gt;
+    &lt;a href="#" class="logo"&gt;Enfoca&lt;/a&gt;
+    &lt;button class="menu-btn" id="menuBtn" aria-label="Abrir menú"&gt;☰&lt;/button&gt;
+    &lt;nav class="menu" id="menu"&gt;
+      &lt;a href="#beneficios"&gt;Beneficios&lt;/a&gt;
+      &lt;a href="#opiniones"&gt;Opiniones&lt;/a&gt;
+      &lt;a href="#contacto" class="btn btn-sm"&gt;Empezar gratis&lt;/a&gt;
+    &lt;/nav&gt;
+  &lt;/div&gt;
+&lt;/header&gt;</pre>
+  <p>El botón <code>☰</code> es para el menú móvil (lo activamos con JS después). El <code>aria-label</code> lo hace accesible, ya que el ícono solo no dice nada a un lector de pantalla.</p>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← El plan</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Los tokens y base →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · Construir" data-num="3" data-title="Tokens y estilos base" id="tokens">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Los design tokens y la base</h1>
+  <p class="lead">Antes de estilar nada, definimos los tokens (librito 12): colores, espaciados, radios. Así todo el diseño sale de un solo lugar y queda consistente.</p>
+  <div class="codehead"><span class="lang txt">estilos.css</span></div>
+<pre>:root {
+  --color-fondo: #ffffff;
+  --color-texto: #16202a;
+  --color-suave: #5a6672;
+  --color-borde: #e2e7ea;
+  --color-acento: #0e7c86;
+  --color-acento-osc: #0a5c63;
+  --sp-3: 1rem; --sp-4: 1.5rem; --sp-5: 2rem; --sp-6: 3rem; --sp-7: 5rem;
+  --radio: 14px;
+  --sombra: 0 6px 24px rgba(16,32,42,.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--color-texto);
+  line-height: 1.6;
+}
+img { max-width: 100%; height: auto; }   /* nunca se desbordan (librito 5) */
+.container { max-width: 1080px; margin: 0 auto; padding: 0 var(--sp-4); }</pre>
+  <p>El <code>* { box-sizing: border-box; margin: 0; padding: 0; }</code> es el reset mínimo (librito 3). La clase <code>.container</code> es el truco de ancho máximo centrado (librito 5): la reusamos en cada sección para que el contenido no se estire infinito en pantallas grandes.</p>
+  <h2>El componente botón</h2>
+  <div class="codehead"><span class="lang txt">estilos.css</span></div>
+<pre>.btn {
+  display: inline-block;
+  background: var(--color-acento); color: #fff;
+  padding: 0.85rem 1.6rem; border: none; border-radius: var(--radio);
+  font: inherit; font-weight: 600; cursor: pointer;
+  transition: background .2s, transform .2s;
+}
+.btn:hover { background: var(--color-acento-osc); transform: translateY(-1px); }</pre>
+  <p>Definido una vez con tokens, se usa en toda la página (librito 12). Todos los botones se ven iguales porque comparten esta clase.</p>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← La estructura HTML</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">El hero →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · Construir" data-num="4" data-title="El hero" id="hero">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>El hero: dos columnas que se adaptan</h1>
+  <p class="lead">El hero tiene texto a un lado y una maqueta visual al otro. En el celular se apilan; en pantalla ancha van lado a lado. Es Grid + una media query (libritos 4 y 5).</p>
+  <div class="codehead"><span class="lang txt">estilos.css</span></div>
+<pre>.hero { padding: var(--sp-7) 0; }
+.hero-grid {
+  display: grid;
+  gap: var(--sp-6);
+  align-items: center;
+}
+.hero h1 {
+  font-size: clamp(2.2rem, 6vw, 3.6rem);   /* escala sola (librito 5) */
+  font-weight: 800;
+}
+.hero .lead {
+  font-size: 1.2rem;
+  color: var(--color-suave);
+  max-width: 46ch;   /* ancho de lectura cómodo */
+}
+
+/* desde 768px: dos columnas */
+@media (min-width: 768px) {
+  .hero-grid { grid-template-columns: 1.1fr 0.9fr; }
+}</pre>
+  <p>Sin la media query, el grid es de una columna (todo apilado, perfecto para el celular). Desde 768px pasa a dos columnas. El título usa <code>clamp()</code> para escalar solo. Es exactamente el patrón del librito de responsive.</p>
+  <h2>La maqueta del producto, con puro CSS</h2>
+  <p>En vez de una imagen, la maqueta del hero está hecha con divs y CSS (tarjetas de tareas). Es un buen ejercicio de box model, bordes y sombras (librito 3), y pesa menos que una imagen (librito 10). Mirá <code>.mock</code> y <code>.mock-task</code> en el CSS del ejemplo.</p>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Tokens y base</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Beneficios y opiniones →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · Construir" data-num="5" data-title="Beneficios y opiniones" id="cards">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Beneficios y opiniones: grillas de tarjetas</h1>
+  <p class="lead">Las dos secciones son grillas de tarjetas que se adaptan solas. Acá brilla la receta estrella de Grid (librito 4): columnas que se acomodan sin una sola media query.</p>
+  <div class="codehead"><span class="lang txt">estilos.css</span></div>
+<pre>.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--sp-4);
+}
+.card {
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  padding: var(--sp-5);
+  box-shadow: var(--sombra);
+}</pre>
+  <p>Ese <code>repeat(auto-fit, minmax(260px, 1fr))</code> hace toda la magia: en pantalla ancha entran 3 tarjetas en fila; en el celular, 1. Sin media queries. La misma clase <code>.cards</code> sirve para los beneficios y para los testimonios.</p>
+  <h2>La prueba social</h2>
+  <p>Los testimonios usan <code>&lt;blockquote&gt;</code> (semántica correcta para una cita) y están marcados como ejemplo en el texto, para no inventar personas reales. La sección tiene fondo distinto (<code>var(--color-superficie)</code>) para separarla visualmente, un recurso de jerarquía (librito 12).</p>
+  <div class="box nota"><span class="tag">Reutilizar es la clave</span><p>Fijate cómo la misma clase <code>.cards</code> y el mismo patrón de grilla resuelven dos secciones distintas. Definir patrones y reusarlos es lo que mantiene el CSS corto y consistente.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← El hero</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">El formulario →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 3 · Interactividad" data-num="6" data-title="El formulario" id="form">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>El CTA final con formulario funcional</h1>
+  <p class="lead">Acá entra el JavaScript (libritos 6, 7 y 8): un formulario de email que valida y le da feedback al usuario. Esto es lo que hace la página interactiva de verdad.</p>
+  <h2>El HTML del formulario</h2>
+  <div class="codehead"><span class="lang txt">index.html</span></div>
+<pre>&lt;form id="form" class="form" novalidate&gt;
+  &lt;input type="email" id="email" placeholder="tu@email.com" required&gt;
+  &lt;button type="submit" class="btn"&gt;Quiero empezar&lt;/button&gt;
+&lt;/form&gt;
+&lt;p id="aviso" class="aviso" role="status"&gt;&lt;/p&gt;</pre>
+  <h2>El JavaScript que lo maneja</h2>
+  <div class="codehead"><span class="lang txt">script.js</span><span class="tested">✓ probado</span></div>
+<pre>const form = document.querySelector("#form");
+const email = document.querySelector("#email");
+const aviso = document.querySelector("#aviso");
+
+form.addEventListener("submit", (event) =&gt; {
+  event.preventDefault();               // no recargar
+  const valor = email.value.trim();
+
+  if (valor === "") {
+    mostrar("Escribí tu email para empezar.", "error");
+    email.classList.add("invalido");
+    return;
+  }
+  if (!valor.includes("@") || !valor.includes(".")) {
+    mostrar("Ese email no parece válido.", "error");
+    email.classList.add("invalido");
+    return;
+  }
+
+  email.classList.remove("invalido");
+  mostrar("¡Listo! Te mandamos el acceso a " + valor, "ok");
+  form.reset();
+});
+
+function mostrar(mensaje, tipo) {
+  aviso.textContent = mensaje;
+  aviso.style.color = tipo === "ok" ? "#2f8f56" : "#c0392b";
+}</pre>
+  <p>Es exactamente el patrón del librito 8: interceptar el <code>submit</code> con <code>preventDefault</code>, validar, y dar feedback cambiando el texto y color del aviso. Al probarlo de verdad, con un email válido responde "¡Listo! Te mandamos el acceso a..." y con uno inválido, "Ese email no parece válido". Funciona.</p>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Beneficios y opiniones</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">El menú móvil →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 3 · Interactividad" data-num="7" data-title="El menú móvil" id="menu">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>El menú móvil y el responsive final</h1>
+  <p class="lead">En el celular no entra el menú horizontal, así que lo escondemos detrás del botón <code>☰</code> y lo mostramos al tocarlo. Es el patrón evento + toggle de clase (librito 7) combinado con una media query (librito 5).</p>
+  <h2>El JavaScript del menú</h2>
+  <div class="codehead"><span class="lang txt">script.js</span><span class="tested">✓ probado</span></div>
+<pre>const menuBtn = document.querySelector("#menuBtn");
+const menu = document.querySelector("#menu");
+
+menuBtn.addEventListener("click", () =&gt; {
+  menu.classList.toggle("abierto");   // prende/apaga la clase
+});
+
+// cerrar el menú al tocar un enlace
+menu.querySelectorAll("a").forEach((enlace) =&gt; {
+  enlace.addEventListener("click", () =&gt; menu.classList.remove("abierto"));
+});</pre>
+  <h2>El CSS que lo acompaña</h2>
+  <div class="codehead"><span class="lang txt">estilos.css</span></div>
+<pre>/* en pantalla grande el menú se ve, el botón no */
+.menu-btn { display: none; }
+
+@media (max-width: 767px) {
+  .menu-btn { display: block; }        /* aparece el botón */
+  .menu { display: none; }             /* se esconde el menú */
+  .menu.abierto { display: flex; }     /* ...salvo cuando el JS lo abre */
+}</pre>
+  <p>El JS solo pone y saca la clase <code>abierto</code>; el CSS decide qué significa eso en cada tamaño. En pantalla grande el menú siempre se ve; en el celular, solo cuando está <code>abierto</code>. Esa división (JS maneja el estado, CSS maneja la apariencia) es una buena práctica clave.</p>
+  <div class="box nota"><span class="tag">Probado en móvil</span><p>Al abrir la landing en 390px de ancho, el menú horizontal desaparece, aparece el <code>☰</code>, y al tocarlo se despliega la navegación. Funciona como debe.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← El formulario</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Repaso y cierre →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 4 · Cierre" data-num="8" data-title="Repaso y cierre" id="cierre">
+  <div class="ch-eyebrow">Cierre</div>
+  <h1>Lo que usaste, y cómo seguir</h1>
+  <p class="lead">Construiste una landing completa. Vale la pena ver cuánto del track entró en ella: casi todo.</p>
+  <h2>Todo el track en un proyecto</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Librito</th><th>Dónde se usó</th></tr></thead>
+    <tbody>
+      <tr><th>02 HTML</th><td>Estructura semántica de toda la página.</td></tr>
+      <tr><th>03 CSS</th><td>Colores, tipografía, box model, botones, tarjetas.</td></tr>
+      <tr><th>04 Flexbox y Grid</th><td>Header, hero de dos columnas, grillas de tarjetas.</td></tr>
+      <tr><th>05 Responsive</th><td>Media queries, clamp(), imágenes fluidas, menú móvil.</td></tr>
+      <tr><th>06-07 JS y DOM</th><td>Seleccionar elementos, eventos, toggle de clases.</td></tr>
+      <tr><th>08 Formularios</th><td>Validación y feedback del formulario de email.</td></tr>
+      <tr><th>09 Accesibilidad</th><td>Semántica, aria-label, foco, contraste.</td></tr>
+      <tr><th>10 Rendimiento</th><td>Maqueta en CSS en vez de imagen, fuentes con swap.</td></tr>
+      <tr><th>11 Anatomía</th><td>Las secciones de la landing en orden.</td></tr>
+      <tr><th>12 Diseño</th><td>Design tokens, escala de espaciado, componentes.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Hacela tuya</h2>
+  <p>Ahora que entendés cómo está armada, modificala: cambiá los colores en los tokens y mirá cómo cambia toda la página, agregá una sección de precios, cambiá los textos por los de un producto tuyo. Modificar un proyecto que funciona es la mejor forma de afianzar lo aprendido.</p>
+  <h2>Lo que falta</h2>
+  <p>Te queda un solo paso para que esto exista en internet y cualquiera lo vea: publicarlo. Eso es el último librito, Deploy.</p>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Construiste una landing page real, responsive, accesible e interactiva, aplicando todo el track. Ya no seguís tutoriales: entendés cómo se arma una página de principio a fin. Eso es ser frontend.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← El menú móvil</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('fe13-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('fe13-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('fe13-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('fe13-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

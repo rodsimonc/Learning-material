@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTML: estructura y semántica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Frontend · 02 · HTML</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Frontend · Librito 2 de 14</div>
+  <h1>HTML: estructura y semántica</h1>
+  <p class="lead">HTML es el esqueleto de toda página: define qué contenido hay y cómo se organiza. Este librito te enseña todas las etiquetas que vas a usar de verdad, con ejemplos que podés copiar y abrir en tu navegador. Al terminar vas a poder maquetar el contenido de cualquier página, listo para estilarlo en el próximo librito.</p>
+  <h2>Cómo estudiarlo</h2>
+  <p>Tené VS Code abierto y replicá cada ejemplo en tu <code>index.html</code>. HTML se aprende escribiéndolo y viéndolo en el navegador. Cada capítulo agrega etiquetas nuevas a tu repertorio.</p>
+  <div class="box nota"><span class="tag">Cómo moverte</span><p>Índice a la izquierda, o flechas <span class="kbd">←</span> <span class="kbd">→</span>. El libro recuerda dónde quedaste.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">Anatomía de una etiqueta →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="1" data-title="Anatomía de una etiqueta" id="etiqueta">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Anatomía de una etiqueta</h1>
+  <p class="lead">Todo en HTML se construye con etiquetas (o elementos). Entender su forma es entender el 90% del lenguaje: el resto es aprender qué etiquetas existen y para qué sirven.</p>
+  <h2>La forma básica</h2>
+  <p>Una etiqueta envuelve contenido con una apertura y un cierre. El cierre lleva una barra:</p>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;p&gt;Esto es un párrafo.&lt;/p&gt;
+ ▲                    ▲
+ apertura            cierre (con /)</pre>
+  <p>El navegador ve <code>&lt;p&gt;</code> y entiende "acá empieza un párrafo"; ve <code>&lt;/p&gt;</code> y entiende "acá termina". Lo del medio es el contenido.</p>
+  <h2>Atributos: información extra</h2>
+  <p>Las etiquetas pueden llevar <strong>atributos</strong> en la apertura, que dan información adicional. Un atributo es un par nombre-valor:</p>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;a href="https://ejemplo.com"&gt;Ir al sitio&lt;/a&gt;
+    ▲    ▲
+  nombre  valor (entre comillas)</pre>
+  <p>Acá <code>href</code> es el atributo que dice a dónde lleva el enlace. Cada tipo de etiqueta acepta ciertos atributos; los vas a ir conociendo.</p>
+  <h2>Etiquetas que no llevan cierre</h2>
+  <p>Algunas etiquetas no envuelven contenido, así que no tienen cierre. Se llaman vacías. La imagen es la más común:</p>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;img src="foto.jpg" alt="Una foto"&gt;
+&lt;br&gt;    &lt;!-- un salto de línea --&gt;
+&lt;hr&gt;    &lt;!-- una línea divisoria --&gt;</pre>
+  <h2>Anidar: etiquetas dentro de etiquetas</h2>
+  <p>Las etiquetas se meten unas dentro de otras, formando una jerarquía. Lo importante: se cierran en el orden inverso al que se abrieron, como paréntesis.</p>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;p&gt;Un párrafo con una &lt;strong&gt;palabra importante&lt;/strong&gt; adentro.&lt;/p&gt;</pre>
+  <div class="box ojo"><span class="tag">Error clásico</span><p>Cerrar en el orden equivocado: <code>&lt;p&gt;&lt;strong&gt;texto&lt;/p&gt;&lt;/strong&gt;</code> está mal. La etiqueta que se abre última se cierra primera. Anidá bien y te ahorrás bugs raros de estilo.</p></div>
+  <h2>Comentarios</h2>
+  <p>Podés dejar notas en el código que el navegador ignora, con <code>&lt;!-- ... --&gt;</code>. Útiles para explicar o para desactivar algo temporalmente.</p>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">La estructura del documento →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="2" data-title="La estructura del documento" id="documento">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>La estructura de un documento HTML</h1>
+  <p class="lead">Toda página arranca con el mismo esqueleto. No lo escribís de cero cada vez, pero conviene entender qué hace cada parte, porque ahí se configuran cosas importantes.</p>
+  <h2>El esqueleto completo</h2>
+  <div class="codehead"><span class="lang txt">index.html</span></div>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+    &lt;title&gt;Título de la pestaña&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;!-- todo el contenido visible va acá --&gt;
+    &lt;h1&gt;Hola&lt;/h1&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+  <h2>Qué hace cada parte</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Parte</th><th>Para qué</th></tr></thead>
+    <tbody>
+      <tr><th>&lt;!DOCTYPE html&gt;</th><td>Le dice al navegador que use HTML moderno.</td></tr>
+      <tr><th>&lt;html lang="es"&gt;</th><td>La raíz de la página. <code>lang</code> declara el idioma (ayuda a buscadores y lectores de pantalla).</td></tr>
+      <tr><th>&lt;head&gt;</th><td>Información sobre la página que no se ve en el cuerpo.</td></tr>
+      <tr><th>&lt;body&gt;</th><td>Todo el contenido visible.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Las metaetiquetas clave del head</h2>
+  <ul>
+    <li><code>&lt;meta charset="UTF-8"&gt;</code>: la codificación de caracteres. Sin esto, los acentos y la ñ pueden verse mal.</li>
+    <li><code>&lt;meta name="viewport" ...&gt;</code>: esencial para que la página se vea bien en el celular. La vas a entender a fondo en el librito de responsive, pero va siempre.</li>
+    <li><code>&lt;title&gt;</code>: el texto de la pestaña del navegador y lo que muestran los buscadores.</li>
+  </ul>
+  <div class="box nota"><span class="tag">Atajo útil</span><p>En VS Code, en un archivo <code>.html</code> vacío, escribí <code>!</code> y apretá Tab: te genera todo este esqueleto solo. Igual conviene entender qué genera.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← Anatomía de una etiqueta</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Texto y listas →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · El contenido" data-num="3" data-title="Texto y listas" id="texto">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Texto: encabezados, párrafos y listas</h1>
+  <p class="lead">El contenido de casi cualquier página es, ante todo, texto. Estas son las etiquetas para estructurarlo.</p>
+  <h2>Encabezados: del h1 al h6</h2>
+  <p>Los encabezados organizan la página en una jerarquía, como los títulos de un documento. Hay seis niveles:</p>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;h1&gt;Título principal de la página&lt;/h1&gt;
+&lt;h2&gt;Una sección&lt;/h2&gt;
+&lt;h3&gt;Una subsección&lt;/h3&gt;</pre>
+  <div class="box ojo"><span class="tag">Regla importante</span><p>Un solo <code>&lt;h1&gt;</code> por página (el título principal), y no te saltés niveles (no pases de <code>h2</code> a <code>h4</code>). Esta jerarquía la usan los buscadores y los lectores de pantalla para entender la página. No elijas el nivel por el tamaño; para eso está el CSS.</p></div>
+  <h2>Párrafos y saltos</h2>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;p&gt;Un párrafo de texto. El navegador ignora los saltos de línea
+que escribas acá adentro; para separar párrafos usás etiquetas &lt;p&gt;.&lt;/p&gt;
+&lt;p&gt;Otro párrafo.&lt;/p&gt;</pre>
+  <h2>Énfasis</h2>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;strong&gt;importante&lt;/strong&gt;   &lt;!-- negrita con peso semántico --&gt;
+&lt;em&gt;énfasis&lt;/em&gt;             &lt;!-- cursiva con peso semántico --&gt;</pre>
+  <p>Existen <code>&lt;b&gt;</code> e <code>&lt;i&gt;</code> que solo cambian la apariencia, pero <code>&lt;strong&gt;</code> y <code>&lt;em&gt;</code> además comunican importancia, que es lo que suele querer decirse.</p>
+  <h2>Listas</h2>
+  <p>Dos tipos: sin orden (con viñetas) y ordenadas (con números). Ambas usan <code>&lt;li&gt;</code> (list item) para cada elemento.</p>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;ul&gt;                    &lt;!-- unordered list --&gt;
+  &lt;li&gt;Manzanas&lt;/li&gt;
+  &lt;li&gt;Peras&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ol&gt;                    &lt;!-- ordered list --&gt;
+  &lt;li&gt;Primero esto&lt;/li&gt;
+  &lt;li&gt;Después esto&lt;/li&gt;
+&lt;/ol&gt;</pre>
+  <p>Las listas se usan más de lo que parece: un menú de navegación es, por debajo, una lista de enlaces.</p>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← La estructura del documento</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Enlaces →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · El contenido" data-num="4" data-title="Enlaces" id="enlaces">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Enlaces: lo que hace a la web una web</h1>
+  <p class="lead">El enlace es la etiqueta que conecta páginas entre sí. Sin él no habría web. Se hace con <code>&lt;a&gt;</code> (de <em>anchor</em>) y su atributo <code>href</code>.</p>
+  <h2>La forma básica</h2>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;a href="https://ejemplo.com"&gt;Visitá el sitio&lt;/a&gt;</pre>
+  <p>El <code>href</code> dice a dónde va; el texto entre las etiquetas es lo que ve y clickea el usuario.</p>
+  <h2>Tipos de destino</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Destino</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><th>Otro sitio (absoluto)</th><td><code>href="https://otrositio.com"</code></td></tr>
+      <tr><th>Otra página tuya (relativo)</th><td><code>href="contacto.html"</code></td></tr>
+      <tr><th>Una sección de la misma página</th><td><code>href="#precios"</code> (va al elemento con <code>id="precios"</code>)</td></tr>
+      <tr><th>Un email</th><td><code>href="mailto:hola@ejemplo.com"</code></td></tr>
+      <tr><th>Un teléfono</th><td><code>href="tel:+5491100000000"</code></td></tr>
+    </tbody>
+  </table></div>
+  <h2>Abrir en otra pestaña</h2>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;a href="https://otro.com" target="_blank" rel="noopener"&gt;Abrir aparte&lt;/a&gt;</pre>
+  <p><code>target="_blank"</code> abre el enlace en una pestaña nueva. El <code>rel="noopener"</code> es una buena práctica de seguridad que conviene agregar siempre que uses <code>_blank</code>.</p>
+  <div class="box nota"><span class="tag">Enlaces internos y anclas</span><p>El truco de <code>href="#seccion"</code> es clave en las landing pages: un menú arriba que lleva a cada sección de la misma página con un scroll suave. Lo vas a usar en el proyecto.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Texto y listas</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Imágenes y multimedia →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · El contenido" data-num="5" data-title="Imágenes y multimedia" id="imagenes">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Imágenes y multimedia</h1>
+  <p class="lead">Las imágenes dan vida a una página. La etiqueta es <code>&lt;img&gt;</code>, y tiene dos atributos que siempre van juntos.</p>
+  <h2>La imagen</h2>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;img src="productos/teclado.jpg" alt="Teclado mecánico negro"&gt;</pre>
+  <ul>
+    <li><code>src</code>: la ruta a la imagen (dónde está el archivo).</li>
+    <li><code>alt</code>: un texto que describe la imagen. No es opcional.</li>
+  </ul>
+  <div class="box ojo"><span class="tag">El alt no se saltea</span><p>El <code>alt</code> cumple tres funciones: lo lee el lector de pantalla para una persona ciega, se muestra si la imagen no carga, y lo usan los buscadores. Describí lo que muestra la imagen. Si es puramente decorativa, poné <code>alt=""</code> vacío, pero el atributo va igual.</p></div>
+  <h2>Imagen con epígrafe</h2>
+  <p>Cuando una imagen necesita un pie de foto, se usa <code>&lt;figure&gt;</code> con <code>&lt;figcaption&gt;</code>:</p>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;figure&gt;
+  &lt;img src="grafico.png" alt="Ventas por mes en 2026"&gt;
+  &lt;figcaption&gt;Ventas mensuales del último año.&lt;/figcaption&gt;
+&lt;/figure&gt;</pre>
+  <h2>Formatos de imagen</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Formato</th><th>Cuándo</th></tr></thead>
+    <tbody>
+      <tr><th>JPG</th><td>Fotos. Buen equilibrio peso/calidad.</td></tr>
+      <tr><th>PNG</th><td>Cuando necesitás fondo transparente o bordes nítidos.</td></tr>
+      <tr><th>SVG</th><td>Logos e íconos. Es vectorial: no pierde calidad al escalar.</td></tr>
+      <tr><th>WebP</th><td>Formato moderno, más liviano. Ideal para la web hoy.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Video</h2>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;video src="demo.mp4" controls width="600"&gt;&lt;/video&gt;</pre>
+  <p><code>controls</code> muestra los botones de reproducción. El peso de las imágenes y videos es clave para la velocidad de la página, tema del librito de rendimiento.</p>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Enlaces</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Formularios →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 3 · Formularios y semántica" data-num="6" data-title="Formularios" id="formularios">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Formularios: capturar datos</h1>
+  <p class="lead">Los formularios son cómo el usuario te manda información: un login, un registro, un campo de contacto. Acá va la estructura HTML; la validación con JavaScript tiene su propio librito.</p>
+  <h2>La estructura</h2>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;form&gt;
+  &lt;label for="email"&gt;Tu email&lt;/label&gt;
+  &lt;input type="email" id="email" name="email" placeholder="hola@ejemplo.com"&gt;
+
+  &lt;label for="msg"&gt;Mensaje&lt;/label&gt;
+  &lt;textarea id="msg" name="mensaje"&gt;&lt;/textarea&gt;
+
+  &lt;button type="submit"&gt;Enviar&lt;/button&gt;
+&lt;/form&gt;</pre>
+  <h2>El label y el for</h2>
+  <p>Cada campo debería tener su <code>&lt;label&gt;</code>. El atributo <code>for</code> del label debe coincidir con el <code>id</code> del input. Así, al tocar la etiqueta se activa el campo, y el lector de pantalla sabe qué pide cada casilla. Es accesibilidad básica que no cuesta nada.</p>
+  <h2>Los tipos de input</h2>
+  <p>El atributo <code>type</code> cambia el comportamiento del campo:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>type</th><th>Para</th></tr></thead>
+    <tbody>
+      <tr><th>text</th><td>Texto común.</td></tr>
+      <tr><th>email</th><td>Emails (valida el formato, en móvil muestra el teclado con @).</td></tr>
+      <tr><th>password</th><td>Contraseñas (oculta lo que se escribe).</td></tr>
+      <tr><th>number</th><td>Números.</td></tr>
+      <tr><th>checkbox / radio</th><td>Casillas y opciones.</td></tr>
+      <tr><th>date</th><td>Selector de fecha.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Elegir el type correcto rinde</span><p>Usar <code>type="email"</code> en vez de <code>text</code> te da validación básica gratis y, en el celular, el teclado adecuado. Elegir bien el tipo es la forma más barata de mejorar un formulario.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Imágenes y multimedia</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">HTML semántico →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 3 · Formularios y semántica" data-num="7" data-title="HTML semántico" id="semantica">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>HTML semántico: etiquetas con significado</h1>
+  <p class="lead">Podrías construir toda una página con <code>&lt;div&gt;</code> (una caja genérica sin significado). Pero HTML tiene etiquetas que dicen qué es cada parte, y usarlas es lo que separa un HTML profesional de uno amateur.</p>
+  <h2>Las etiquetas de estructura</h2>
+  <p>En vez de cajas anónimas, nombrás cada región de la página por lo que es:</p>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;body&gt;
+  &lt;header&gt;      &lt;!-- encabezado: logo, navegación --&gt;
+    &lt;nav&gt;&lt;/nav&gt;   &lt;!-- el menú de navegación --&gt;
+  &lt;/header&gt;
+
+  &lt;main&gt;        &lt;!-- el contenido principal, único por página --&gt;
+    &lt;section&gt;&lt;/section&gt;   &lt;!-- una sección temática --&gt;
+    &lt;article&gt;&lt;/article&gt;   &lt;!-- contenido autónomo (un post, una tarjeta) --&gt;
+  &lt;/main&gt;
+
+  &lt;aside&gt;&lt;/aside&gt;   &lt;!-- contenido lateral, secundario --&gt;
+
+  &lt;footer&gt;&lt;/footer&gt;  &lt;!-- pie: contacto, enlaces, copyright --&gt;
+&lt;/body&gt;</pre>
+  <h2>Semántica vs div</h2>
+  <p>Comparalos. El de la izquierda no dice nada; el de la derecha se lee solo:</p>
+  <div class="codehead"><span class="lang txt">antes (todo div) vs después (semántico)</span></div>
+<pre>&lt;div class="header"&gt;        &lt;header&gt;
+  &lt;div class="nav"&gt;           &lt;nav&gt;
+&lt;div class="main"&gt;          &lt;main&gt;
+&lt;div class="footer"&gt;        &lt;footer&gt;</pre>
+  <p>El <code>&lt;div&gt;</code> sigue siendo útil para agrupar cosas cuando no hay una etiqueta semántica que aplique. Pero primero buscá la semántica; el <code>div</code> es el último recurso.</p>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Formularios</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Por qué importa →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 3 · Formularios y semántica" data-num="8" data-title="Por qué importa la semántica" id="por-que">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Por qué la semántica importa</h1>
+  <p class="lead">Usar la etiqueta correcta no es un capricho de purista. Tiene tres beneficios concretos que se cobran solos, sin trabajo extra.</p>
+  <h2>Accesibilidad</h2>
+  <p>Las personas que usan lectores de pantalla navegan por la estructura semántica: "saltar al contenido principal" funciona porque existe un <code>&lt;main&gt;</code>; "listar los encabezados" funciona porque usaste <code>&lt;h1&gt;</code> a <code>&lt;h3&gt;</code> bien. Con puros <code>&lt;div&gt;</code>, esa navegación se rompe. Tiene su propio librito (Accesibilidad y SEO), pero empieza acá, en el HTML.</p>
+  <h2>SEO</h2>
+  <p>Los buscadores leen tu HTML para entender de qué trata la página. Una estructura semántica clara, con encabezados bien jerarquizados, les facilita indexarte bien. HTML prolijo es SEO gratis.</p>
+  <h2>Mantenibilidad</h2>
+  <p>Un HTML semántico se lee como un documento: cualquiera que lo abra entiende la estructura de un vistazo. Cuando vuelvas a tu propio código en tres meses, te vas a agradecer no haber puesto veinte <code>&lt;div&gt;</code> anónimos.</p>
+  <div class="box nota"><span class="tag">La regla práctica</span><p>Antes de escribir un <code>&lt;div&gt;</code>, preguntate si existe una etiqueta que describa qué es ese contenido. Si es el encabezado, <code>header</code>; si es navegación, <code>nav</code>; si es el pie, <code>footer</code>. El <code>div</code> queda para cuando de verdad no hay nada mejor.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← HTML semántico</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Buenas prácticas →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 4 · Cierre" data-num="9" data-title="Buenas prácticas y cheatsheet" id="cierre">
+  <div class="ch-eyebrow">Cierre</div>
+  <h1>Buenas prácticas, cheatsheet y glosario</h1>
+  <h2>Buenas prácticas</h2>
+  <ul>
+    <li>Un <code>&lt;h1&gt;</code> por página; encabezados sin saltar niveles.</li>
+    <li><code>alt</code> en toda imagen; <code>label</code> en todo campo de formulario.</li>
+    <li>Semántica antes que <code>&lt;div&gt;</code>.</li>
+    <li>Indentá el código (sangría) para que la anidación se lea. VS Code te ayuda.</li>
+    <li>El HTML define <em>qué</em> es el contenido, no cómo se ve. El "cómo se ve" es del CSS, próximo librito.</li>
+  </ul>
+  <h2>Cheatsheet de etiquetas</h2>
+  <div class="codehead"><span class="lang txt">las que más vas a usar</span></div>
+<pre>Estructura:  header  nav  main  section  article  aside  footer  div
+Texto:       h1..h6  p  strong  em  ul  ol  li  a
+Media:       img  figure  figcaption  video
+Formulario:  form  label  input  textarea  select  button
+Genéricas:   div (bloque)  span (en línea)</pre>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Etiqueta / elemento</th><td>La unidad de HTML: <code>&lt;p&gt;...&lt;/p&gt;</code>.</td></tr>
+      <tr><th>Atributo</th><td>Información extra en la apertura: <code>href</code>, <code>src</code>, <code>alt</code>.</td></tr>
+      <tr><th>Anidar</th><td>Meter etiquetas dentro de otras, respetando el orden de cierre.</td></tr>
+      <tr><th>Semántica</th><td>Usar la etiqueta que describe qué es el contenido.</td></tr>
+      <tr><th>Atributo alt</th><td>Descripción de una imagen, para accesibilidad y SEO.</td></tr>
+      <tr><th>Formulario</th><td>Conjunto de campos para que el usuario envíe datos.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Sabés armar la estructura de cualquier página: texto, enlaces, imágenes, formularios, y todo con HTML semántico. Tenés el esqueleto. En el próximo librito le ponés la piel: CSS.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Por qué importa la semántica</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('fe02-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('fe02-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('fe02-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('fe02-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

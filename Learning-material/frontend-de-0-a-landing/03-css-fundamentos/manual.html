@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS: fundamentos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Frontend · 03 · CSS fundamentos</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Frontend · Librito 3 de 14</div>
+  <h1>CSS: fundamentos</h1>
+  <p class="lead">Si el HTML es el esqueleto, el CSS es la piel: colores, tipografías, espaciados, tamaños. Este librito te enseña a estilar cualquier elemento con control real. Es de los más importantes del track, porque el CSS es donde vive el diseño de una página. Cada ejemplo es para copiar y probar.</p>
+  <h2>Cómo estudiarlo</h2>
+  <p>Creá un <code>index.html</code> con algo de contenido y un <code>estilos.css</code> enlazado, y aplicá cada regla que veas. El CSS se entiende viendo el efecto en pantalla, no leyéndolo.</p>
+  <div class="box nota"><span class="tag">Cómo moverte</span><p>Índice a la izquierda, o flechas <span class="kbd">←</span> <span class="kbd">→</span>. Recuerda dónde quedaste.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">Cómo se aplica el CSS →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="1" data-title="Cómo se aplica el CSS" id="aplicar">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Cómo se escribe y se aplica el CSS</h1>
+  <p class="lead">El CSS son reglas que dicen "a este elemento, aplicale estos estilos". Primero la forma de una regla, después las tres maneras de conectarlo al HTML.</p>
+  <h2>La anatomía de una regla</h2>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>h1 {
+  color: teal;
+  font-size: 32px;
+}
+▲    ▲       ▲
+selector propiedad valor</pre>
+  <ul>
+    <li>El <strong>selector</strong> (<code>h1</code>) dice a qué elementos aplicar.</li>
+    <li>Entre llaves van las <strong>declaraciones</strong>: pares de <strong>propiedad</strong> y <strong>valor</strong>, separados por dos puntos y terminados en punto y coma.</li>
+  </ul>
+  <h2>Las tres formas de aplicarlo</h2>
+  <p>De peor a mejor práctica:</p>
+  <div class="codehead"><span class="lang txt">1. inline (evitar)</span></div>
+<pre>&lt;h1 style="color: teal;"&gt;Hola&lt;/h1&gt;</pre>
+  <div class="codehead"><span class="lang txt">2. interno (ocasional)</span></div>
+<pre>&lt;head&gt;
+  &lt;style&gt;
+    h1 { color: teal; }
+  &lt;/style&gt;
+&lt;/head&gt;</pre>
+  <div class="codehead"><span class="lang txt">3. externo (lo correcto)</span></div>
+<pre>&lt;!-- en el HTML --&gt;
+&lt;link rel="stylesheet" href="estilos.css"&gt;
+
+/* en estilos.css */
+h1 { color: teal; }</pre>
+  <div class="box nota"><span class="tag">Usá el archivo externo</span><p>Separar el CSS en su propio archivo mantiene el HTML limpio, permite reusar los estilos en varias páginas, y el navegador lo cachea. El inline se reserva para casos muy puntuales.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Selectores →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="2" data-title="Selectores" id="selectores">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Selectores: elegir qué estilar</h1>
+  <p class="lead">El selector es la mitad de una regla CSS: decide a qué apunta. Dominar los selectores es dominar el CSS. Estos son los que vas a usar todo el tiempo.</p>
+  <h2>Los tres básicos</h2>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>p        { }   /* por etiqueta: todos los &lt;p&gt; */
+.destacado { } /* por clase: elementos con class="destacado" */
+#menu    { }   /* por id: el elemento con id="menu" (único) */</pre>
+  <p>La <strong>clase</strong> es la reina: la ponés en cuantos elementos quieras y es la forma normal de estilar. El <strong>id</strong> es único por página y se usa menos para estilo.</p>
+  <div class="codehead"><span class="lang txt">en el HTML</span></div>
+<pre>&lt;p class="destacado"&gt;Este párrafo va distinto.&lt;/p&gt;
+&lt;div id="menu"&gt;...&lt;/div&gt;</pre>
+  <h2>Combinar y agrupar</h2>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>.tarjeta p     { }  /* los &lt;p&gt; DENTRO de un .tarjeta (descendiente) */
+h1, h2, h3     { }  /* aplica a los tres (agrupación) */
+.btn.primario  { }  /* elementos con AMBAS clases */</pre>
+  <h2>Pseudoclases: estados</h2>
+  <p>Apuntan a un estado del elemento, como cuando el mouse está encima:</p>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>a:hover   { color: red; }      /* al pasar el mouse */
+button:focus { outline: 2px solid blue; }  /* al enfocar (teclado) */
+li:first-child { font-weight: bold; }       /* el primer &lt;li&gt; */</pre>
+  <p>El <code>:hover</code> es el que más vas a usar: cambiar el estilo de botones y enlaces al pasar el mouse. El <code>:focus</code> es clave para accesibilidad con teclado.</p>
+  <div class="box nota"><span class="tag">La clase es tu herramienta principal</span><p>El 90% del tiempo vas a estilar con clases. Ponés una clase con nombre descriptivo (<code>.boton-primario</code>, <code>.tarjeta</code>) y la estilás. Es flexible y reutilizable.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← Cómo se aplica el CSS</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Cascada y especificidad →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="3" data-title="Cascada y especificidad" id="cascada">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Cascada, especificidad y herencia</h1>
+  <p class="lead">Es lo que más confunde al principio: por qué un estilo "no se aplica" aunque lo escribiste. Casi siempre la respuesta está en estas tres reglas de cómo el navegador decide qué gana.</p>
+  <h2>La cascada: el orden importa</h2>
+  <p>Si dos reglas con la misma fuerza tocan lo mismo, gana la última escrita. La "C" de CSS es de <em>Cascading</em>: los estilos caen en cascada y el de más abajo pisa al de más arriba.</p>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>p { color: blue; }
+p { color: red; }   /* gana este: el texto queda rojo */</pre>
+  <h2>La especificidad: quién es más específico</h2>
+  <p>Cuando los selectores tienen distinta fuerza, gana el más específico, sin importar el orden. La jerarquía, de menor a mayor:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Selector</th><th>Fuerza</th></tr></thead>
+    <tbody>
+      <tr><th>Por etiqueta (<code>p</code>)</th><td>Baja</td></tr>
+      <tr><th>Por clase (<code>.destacado</code>)</th><td>Media</td></tr>
+      <tr><th>Por id (<code>#menu</code>)</th><td>Alta</td></tr>
+      <tr><th>Inline (<code>style="..."</code>)</th><td>La más alta</td></tr>
+    </tbody>
+  </table></div>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>p { color: blue; }
+.destacado { color: red; }   /* gana este aunque esté escrito antes:
+                                la clase es más específica que la etiqueta */</pre>
+  <div class="box ojo"><span class="tag">El bug más común de principiante</span><p>"Mi estilo no se aplica." Casi siempre es porque otra regla más específica lo pisa. Abrí las DevTools, inspeccioná el elemento, y en el panel de estilos vas a ver qué regla gana y cuáles están tachadas. Es la forma de depurar CSS.</p></div>
+  <h2>La herencia</h2>
+  <p>Algunas propiedades se heredan de padre a hijo. Si ponés <code>color</code> y <code>font-family</code> en el <code>&lt;body&gt;</code>, todo lo de adentro las hereda, salvo que se sobreescriban. Por eso conviene poner los estilos generales de texto en el body.</p>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>body {
+  font-family: system-ui, sans-serif;
+  color: #222;
+}
+/* todos los textos heredan esto por defecto */</pre>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Selectores</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">El box model →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · El box model" data-num="4" data-title="El box model" id="box-model">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>El box model: todo es una caja</h1>
+  <p class="lead">El concepto más importante del CSS. Cada elemento de una página es una caja rectangular, y esa caja tiene cuatro capas. Entender esto es entender cómo se distribuye el espacio.</p>
+  <h2>Las cuatro capas</h2>
+<pre>  ┌─────────────────────────────────┐  ← margin (espacio EXTERIOR)
+  │  ┌───────────────────────────┐  │
+  │  │        border (borde)     │  │
+  │  │  ┌─────────────────────┐  │  │
+  │  │  │   padding (interior)│  │  │
+  │  │  │   ┌───────────────┐ │  │  │
+  │  │  │   │   content     │ │  │  │
+  │  │  │   │  (contenido)  │ │  │  │
+  │  │  │   └───────────────┘ │  │  │
+  │  │  └─────────────────────┘  │  │
+  │  └───────────────────────────┘  │
+  └─────────────────────────────────┘</pre>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Capa</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>content</th><td>El contenido en sí (texto, imagen).</td></tr>
+      <tr><th>padding</th><td>Espacio interior, entre el contenido y el borde.</td></tr>
+      <tr><th>border</th><td>El borde de la caja.</td></tr>
+      <tr><th>margin</th><td>Espacio exterior, separa esta caja de las demás.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>En código</h2>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>.tarjeta {
+  padding: 20px;              /* espacio interior en los 4 lados */
+  border: 1px solid #ccc;    /* grosor, estilo, color */
+  margin: 16px;              /* espacio exterior en los 4 lados */
+}</pre>
+  <h2>La confusión clásica: box-sizing</h2>
+  <p>Por defecto, si a una caja de <code>width: 300px</code> le sumás padding y borde, la caja termina midiendo más de 300 (el padding se suma por fuera). Eso rompe la cabeza a todo principiante. La solución, que se pone una vez y para siempre:</p>
+  <div class="codehead"><span class="lang txt">css · ponelo siempre al inicio</span></div>
+<pre>* {
+  box-sizing: border-box;
+}</pre>
+  <p>Con <code>border-box</code>, el <code>width</code> incluye el padding y el borde: si decís 300px, la caja mide 300px, y el padding se acomoda adentro. Es la forma intuitiva, y prácticamente todos los proyectos la activan.</p>
+  <div class="box nota"><span class="tag">Regla de oro</span><p><code>* { box-sizing: border-box; }</code> es de las primeras líneas de casi cualquier CSS. Te ahorra horas de cálculos de tamaños.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Cascada y especificidad</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Display →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · El box model" data-num="5" data-title="Display" id="display">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Display: cómo se comporta cada caja</h1>
+  <p class="lead">La propiedad <code>display</code> define cómo se ubica una caja respecto de las demás. Los dos comportamientos base son block e inline, y entenderlos evita mucha frustración.</p>
+  <h2>Block: ocupa toda la línea</h2>
+  <p>Un elemento <strong>block</strong> arranca en una línea nueva y ocupa todo el ancho disponible. Se apilan uno debajo del otro. Son block por defecto: <code>div</code>, <code>p</code>, <code>h1</code>–<code>h6</code>, <code>section</code>, <code>header</code>, etc.</p>
+  <h2>Inline: fluye con el texto</h2>
+  <p>Un elemento <strong>inline</strong> ocupa solo lo que necesita y va en la misma línea que el texto que lo rodea. No podés darle ancho ni alto. Son inline: <code>a</code>, <code>strong</code>, <code>em</code>, <code>span</code>.</p>
+  <div class="codehead"><span class="lang txt">visualmente</span></div>
+<pre>block:              inline:
+[████████████]      texto [██] más texto [██] fin
+[████████████]
+[████████████]</pre>
+  <h2>Inline-block y none</h2>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>.boton { display: inline-block; }  /* fluye en línea PERO acepta ancho/alto */
+.oculto { display: none; }         /* desaparece por completo de la página */</pre>
+  <p><code>display: none</code> es muy útil: esconde un elemento del todo (no ocupa espacio). Se usa mucho con JavaScript para mostrar y ocultar cosas, como un menú móvil.</p>
+  <div class="box nota"><span class="tag">Lo que viene</span><p>Hay dos valores de <code>display</code> que merecen su propio librito por lo potentes: <code>flex</code> y <code>grid</code>. Son la base del maquetado moderno y los ves en el librito 4.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← El box model</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Colores y fondos →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 3 · Estilo visual" data-num="6" data-title="Colores y fondos" id="colores">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Colores y fondos</h1>
+  <p class="lead">El color es lo primero que se nota de un diseño. CSS te da varias formas de definirlo; conviene conocerlas todas porque cada una aparece en algún lado.</p>
+  <h2>Formas de escribir un color</h2>
+  <div class="codehead"><span class="lang txt">css · todas dan el mismo rojo-ish</span></div>
+<pre>color: red;                  /* nombre (hay ~140) */
+color: #e63946;              /* hexadecimal (el más común) */
+color: rgb(230, 57, 70);     /* rojo, verde, azul (0-255) */
+color: rgba(230, 57, 70, 0.5); /* igual + transparencia (0-1) */
+color: hsl(355, 78%, 56%);   /* tono, saturación, luminosidad */</pre>
+  <p>El <strong>hexadecimal</strong> es el que más vas a ver y copiar (de una paleta, de Figma). El <strong>hsl</strong> es el más intuitivo para ajustar a mano: cambiás el tercer número y aclarás u oscurecés el mismo color.</p>
+  <h2>Color de texto y de fondo</h2>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>.hero {
+  color: white;             /* color del texto */
+  background-color: #0e7c86;/* color de fondo */
+}</pre>
+  <h2>Fondos: más que un color</h2>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>.seccion {
+  background-image: url("fondo.jpg");
+  background-size: cover;      /* que cubra todo el elemento */
+  background-position: center; /* centrada */
+}
+
+/* un degradado, sin imagen */
+.hero {
+  background: linear-gradient(135deg, #0e7c86, #114b5f);
+}</pre>
+  <div class="box ojo"><span class="tag">Contraste = accesibilidad</span><p>Texto claro sobre fondo claro (o oscuro sobre oscuro) no se lee, y deja afuera a personas con baja visión. Hay un contraste mínimo recomendado; lo vemos en el librito de accesibilidad. Por ahora: asegurate de que el texto se lea cómodo sobre su fondo.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Display</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Tipografía →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 3 · Estilo visual" data-num="7" data-title="Tipografía" id="tipografia">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>Tipografía</h1>
+  <p class="lead">La tipografía carga gran parte del peso de un diseño, incluso cuando el diseño "no es sobre tipografía". Estas son las propiedades para controlarla.</p>
+  <h2>Las propiedades principales</h2>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>body {
+  font-family: "Inter", system-ui, sans-serif;  /* la fuente + respaldos */
+  font-size: 16px;        /* tamaño base */
+  font-weight: 400;       /* grosor: 400 normal, 700 negrita */
+  line-height: 1.6;       /* alto de línea: clave para la lectura */
+  letter-spacing: 0.01em; /* espacio entre letras */
+}</pre>
+  <h2>La pila de fuentes (fallback)</h2>
+  <p>En <code>font-family</code> ponés varias separadas por coma: el navegador usa la primera que tenga disponible. Siempre terminá con una genérica (<code>sans-serif</code> o <code>serif</code>) como último respaldo.</p>
+  <h2>Line-height: el detalle que más rinde</h2>
+  <p>El alto de línea es cuánto espacio hay entre renglones. Un valor de <code>1.5</code> a <code>1.7</code> hace que un bloque de texto sea mucho más legible. Es el ajuste tipográfico que más mejora una página con menos esfuerzo.</p>
+  <h2>Fuentes web (Google Fonts)</h2>
+  <p>Para usar una fuente que el usuario no tiene instalada, la traés de un servicio como Google Fonts con un <code>&lt;link&gt;</code> en el HTML, y después la usás normal en el CSS:</p>
+  <div class="codehead"><span class="lang txt">html + css</span></div>
+<pre>&lt;!-- en el head del HTML --&gt;
+&lt;link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"&gt;
+
+/* en el CSS */
+body { font-family: "Inter", sans-serif; }</pre>
+  <div class="box nota"><span class="tag">Menos es más</span><p>Con una o dos tipografías alcanza y sobra para casi todo: una para títulos y otra para texto, o incluso una sola en distintos pesos. Demasiadas fuentes se ven amateur y hacen la página más lenta.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Colores y fondos</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Unidades →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 3 · Estilo visual" data-num="8" data-title="Unidades" id="unidades">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Unidades: px, em, rem, %, vw</h1>
+  <p class="lead">Cada tamaño en CSS lleva una unidad, y elegir bien entre ellas es lo que hace que un diseño se adapte o se rompa. Hay dos familias: absolutas y relativas.</p>
+  <h2>La absoluta: px</h2>
+  <p>El <strong>píxel</strong> (<code>px</code>) es un tamaño fijo. Preciso y predecible, pero no se adapta. Perfecto para bordes finos (<code>1px</code>) y detalles que no deben cambiar.</p>
+  <h2>Las relativas: rem, em, %</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Unidad</th><th>Relativa a</th><th>Uso típico</th></tr></thead>
+    <tbody>
+      <tr><th>rem</th><td>El tamaño de fuente raíz (del <code>html</code>, normalmente 16px)</td><td>Tamaños de fuente y espaciados. La más recomendada.</td></tr>
+      <tr><th>em</th><td>El tamaño de fuente del propio elemento</td><td>Espaciados relativos al texto del elemento.</td></tr>
+      <tr><th>%</th><td>El tamaño del elemento padre</td><td>Anchos fluidos.</td></tr>
+      <tr><th>vw / vh</th><td>El ancho / alto de la ventana</td><td>Elementos que ocupan proporción de la pantalla.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>html { font-size: 16px; }   /* 1rem = 16px */
+
+h1 { font-size: 2rem; }     /* 32px, pero escala si cambia la base */
+.caja { padding: 1.5rem; }  /* 24px */
+.columna { width: 50%; }    /* la mitad del padre */
+.hero { min-height: 60vh; } /* 60% del alto de la ventana */</pre>
+  <div class="box nota"><span class="tag">La recomendación práctica</span><p>Usá <code>rem</code> para fuentes y espaciados, <code>%</code> o fracciones para anchos, <code>px</code> para bordes finos, y <code>vw/vh</code> con cuidado para cosas que deben escalar con la pantalla. Preferir <code>rem</code> sobre <code>px</code> en las fuentes ayuda a la accesibilidad: respeta el tamaño de letra que el usuario configuró.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Tipografía</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Espaciado y bordes →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 3 · Estilo visual" data-num="9" data-title="Espaciado y bordes" id="espaciado">
+  <div class="ch-eyebrow">Capítulo 9</div>
+  <h1>Espaciado, bordes y sombras</h1>
+  <p class="lead">Los detalles que hacen que algo se vea prolijo: el aire entre elementos, los bordes redondeados, las sombras sutiles. Todo esto es lo que separa una página "de tutorial" de una que se ve terminada.</p>
+  <h2>Margin y padding, con atajos</h2>
+  <p>Ya conocés margin (exterior) y padding (interior). Se pueden dar por lado o con atajos:</p>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>padding: 20px;                /* los 4 lados */
+padding: 10px 20px;           /* vertical | horizontal */
+padding: 10px 20px 30px 40px; /* arriba | derecha | abajo | izquierda */
+margin-top: 16px;             /* un solo lado */
+margin: 0 auto;               /* centrar horizontalmente un bloque con ancho */</pre>
+  <p>El <code>margin: 0 auto</code> es un clásico: centra un elemento de ancho fijo en su contenedor.</p>
+  <h2>Bordes y esquinas redondeadas</h2>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>.tarjeta {
+  border: 1px solid #ddd;
+  border-radius: 12px;   /* esquinas redondeadas */
+}
+.avatar {
+  border-radius: 50%;    /* círculo perfecto (en un cuadrado) */
+}</pre>
+  <h2>Sombras: profundidad sutil</h2>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>.tarjeta {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  /*          x  y  desenfoque  color con transparencia */
+}</pre>
+  <p>Una sombra suave da la sensación de que el elemento "flota" sobre la página. La clave es la sutileza: sombras muy marcadas se ven pesadas.</p>
+  <h2>Transiciones: suavizar los cambios</h2>
+  <div class="codehead"><span class="lang txt">css</span></div>
+<pre>.boton {
+  background: #0e7c86;
+  transition: background 0.2s;   /* suaviza el cambio */
+}
+.boton:hover {
+  background: #0a5c63;           /* al pasar el mouse, cambia gradual */
+}</pre>
+  <p>La <code>transition</code> hace que los cambios de estilo (como el <code>:hover</code>) sean graduales en vez de bruscos. Es un toque chico que se nota mucho.</p>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Unidades</span></button><button class="navbtn next" data-goto="10"><span class="dir">Siguiente</span><span class="t">Buenas prácticas →</span></button></div>
+</section>
+
+<!-- 10 -->
+<section class="chapter" data-part="Parte 4 · Cierre" data-num="10" data-title="Buenas prácticas y cheatsheet" id="cierre">
+  <div class="ch-eyebrow">Cierre</div>
+  <h1>Buenas prácticas, cheatsheet y glosario</h1>
+  <h2>Buenas prácticas</h2>
+  <ul>
+    <li>Empezá tu CSS con <code>* { box-sizing: border-box; margin: 0; padding: 0; }</code> como base (un "reset" mínimo).</li>
+    <li>Estilá con clases; reservá el id y evitá el inline.</li>
+    <li>Poné los estilos generales de texto en el <code>body</code> y dejá que se hereden.</li>
+    <li>Cuando un estilo "no aplique", inspeccioná con DevTools: es especificidad casi siempre.</li>
+    <li>Nombres de clase descriptivos por función (<code>.tarjeta-producto</code>), no por apariencia (<code>.rojo</code>).</li>
+  </ul>
+  <h2>Cheatsheet</h2>
+  <div class="codehead"><span class="lang txt">lo esencial</span></div>
+<pre>Selectores:  elemento  .clase  #id  .a .b (descendiente)  a:hover
+Caja:        width  height  padding  border  margin  box-sizing
+Display:     block  inline  inline-block  none  (flex/grid → librito 4)
+Texto:       color  font-family  font-size  font-weight  line-height
+Fondo:       background-color  background-image  linear-gradient()
+Detalles:    border-radius  box-shadow  transition
+Unidades:    px (fijo)  rem (fuentes)  % (anchos)  vw/vh (pantalla)</pre>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Regla</th><td>Un selector con sus declaraciones entre llaves.</td></tr>
+      <tr><th>Selector</th><td>La parte que elige a qué elementos aplicar.</td></tr>
+      <tr><th>Cascada</th><td>Con igual fuerza, gana la última regla.</td></tr>
+      <tr><th>Especificidad</th><td>Qué selector gana según su fuerza (id > clase > etiqueta).</td></tr>
+      <tr><th>Herencia</th><td>Propiedades que pasan de padre a hijo.</td></tr>
+      <tr><th>Box model</th><td>Content, padding, border, margin.</td></tr>
+      <tr><th>box-sizing</th><td><code>border-box</code> hace que el width incluya padding y borde.</td></tr>
+      <tr><th>rem</th><td>Unidad relativa al tamaño de fuente raíz.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Sabés aplicar CSS, elegir elementos con selectores, entender por qué gana un estilo, controlar la caja de cada elemento, y darle color, tipografía y detalle. Con esto ya estilás cualquier cosa. Falta lo grande: acomodar los elementos en la página con Flexbox y Grid, el próximo librito.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="9"><span class="dir">Anterior</span><span class="t">← Espaciado y bordes</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('fe03-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('fe03-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('fe03-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('fe03-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

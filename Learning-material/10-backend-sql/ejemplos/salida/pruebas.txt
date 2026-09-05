@@ -1,0 +1,25 @@
+=== BACKEND SQL · salida real de pruebas ===
+(FastAPI + SQLAlchemy + SQLite, CRUD de /tareas)
+
+== crear dos tareas ==
+{'titulo': 'Aprender SQL', 'hecha': False, 'id': 1}
+{'titulo': 'Deploy a Postgres', 'hecha': False, 'id': 2}
+== listar ==
+[{'titulo': 'Aprender SQL', 'hecha': False, 'id': 1}, {'titulo': 'Deploy a Postgres', 'hecha': False, 'id': 2}]
+== marcar la 1 como hecha (PUT) ==
+{'titulo': 'Aprender SQL', 'hecha': True, 'id': 1}
+== ver la 1 ==
+{'titulo': 'Aprender SQL', 'hecha': True, 'id': 1}
+== borrar la 2 ==
+{'borrada': 2}
+== listar final ==
+[{'titulo': 'Aprender SQL', 'hecha': True, 'id': 1}]
+== ver una que no existe ==
+404 {'detail': 'no existe'}
+
+=== SQL crudo + inyeccion (SQLite) ===
+== MAL: concatenando ==
+query armada: SELECT email FROM usuarios WHERE email = 'no@existe.com' OR '1'='1'
+resultado: [('carlos@x.com',), ('ana@x.com',)]   <- devolvio TODOS los usuarios
+== BIEN: parametrizado (?) ==
+resultado: []   <- vacio, la entrada se trato como dato, no como codigo

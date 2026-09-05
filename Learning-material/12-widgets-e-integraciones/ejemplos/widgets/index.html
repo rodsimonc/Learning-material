@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo de widgets</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #1a2b3c; }
+  h1 { font-size: 1.4rem; }
+  section { border: 1px solid #dde; border-radius: 12px; padding: 16px; margin: 18px 0; }
+  h2 { font-size: 1rem; margin-top: 0; color: #0d6b6b; }
+
+  /* Widget 1: acordeón propio */
+  .acc-item { border-bottom: 1px solid #eef; }
+  .acc-head { width: 100%; text-align: left; background: none; border: 0; padding: 12px 0; font-size: 1rem; cursor: pointer; display: flex; justify-content: space-between; }
+  .acc-head[aria-expanded="true"] .chev { transform: rotate(180deg); }
+  .chev { transition: transform .2s; }
+  .acc-panel { max-height: 0; overflow: hidden; transition: max-height .25s; }
+  .acc-panel p { margin: 0 0 12px; color: #445; }
+
+  /* Widget 2: clima (API) */
+  #clima .dato { font-size: 2rem; font-weight: 700; color: #0d6b6b; }
+  #clima .estado { color: #789; }
+</style>
+</head>
+<body>
+  <h1>Tres widgets en una página</h1>
+
+  <!-- Widget propio: acordeón (JS vanilla) -->
+  <section>
+    <h2>1 · Acordeón (widget propio)</h2>
+    <div id="acordeon">
+      <div class="acc-item">
+        <button class="acc-head" aria-expanded="false">¿Qué es un widget? <span class="chev">▾</span></button>
+        <div class="acc-panel"><p>Un componente independiente que hace una cosa y se puede reusar o embeber.</p></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-head" aria-expanded="false">¿Propio o de terceros? <span class="chev">▾</span></button>
+        <div class="acc-panel"><p>Propio: lo construís con tu código. De terceros: lo embebés con un script o un iframe.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Widget con datos de una API real -->
+  <section id="clima">
+    <h2>2 · Clima de Córdoba (widget con API)</h2>
+    <div class="dato" id="temp">cargando…</div>
+    <div class="estado" id="estado">consultando open-meteo</div>
+  </section>
+
+  <!-- Web Component: widget reutilizable de verdad -->
+  <section>
+    <h2>3 · Insignia (Web Component)</h2>
+    <mi-insignia texto="Probado" color="#0d6b6b"></mi-insignia>
+    <mi-insignia texto="Reutilizable" color="#b4551d"></mi-insignia>
+  </section>
+
+<script>
+// --- Widget 1: acordeón ---
+document.querySelectorAll('.acc-head').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var abierto = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!abierto));
+    var panel = btn.nextElementSibling;
+    panel.style.maxHeight = abierto ? '0' : panel.scrollHeight + 'px';
+  });
+});
+
+// --- Widget 2: clima desde una API pública (sin API key) ---
+var URL = 'https://api.open-meteo.com/v1/forecast' +
+          '?latitude=-31.42&longitude=-64.18&current=temperature_2m';
+fetch(URL)
+  .then(function (r) { return r.json(); })
+  .then(function (d) {
+    document.getElementById('temp').textContent = d.current.temperature_2m + ' °C';
+    document.getElementById('estado').textContent = 'actualizado ' + d.current.time;
+  })
+  .catch(function () {
+    document.getElementById('temp').textContent = 'sin conexión';
+    document.getElementById('estado').textContent = 'no se pudo consultar';
+  });
+
+// --- Widget 3: Web Component reutilizable ---
+class MiInsignia extends HTMLElement {
+  connectedCallback() {
+    var texto = this.getAttribute('texto') || 'badge';
+    var color = this.getAttribute('color') || '#333';
+    var raiz = this.attachShadow({ mode: 'open' });
+    raiz.innerHTML =
+      '<style>span{background:' + color + ';color:#fff;padding:4px 10px;' +
+      'border-radius:999px;font:600 .85rem system-ui;margin-right:6px}</style>' +
+      '<span>' + texto + '</span>';
+  }
+}
+customElements.define('mi-insignia', MiInsignia);
+</script>
+</body>
+</html>

@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El DOM y los eventos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Frontend · 07 · DOM y eventos</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Frontend · Librito 7 de 14</div>
+  <h1>El DOM y los eventos</h1>
+  <p class="lead">Acá se junta todo. En el librito anterior aprendiste JavaScript; ahora lo usás para tocar la página: cambiar textos, mostrar y ocultar cosas, y reaccionar cuando el usuario hace clic. Esto es lo que hace que una página sea interactiva de verdad.</p>
+  <div class="box nota"><span class="tag">Cómo estudiarlo</span><p>Necesitás un <code>index.html</code> con contenido y un <code>script.js</code> enlazado. Cada ejemplo modifica esa página. Abrí la consola para ver errores. Flechas <span class="kbd">←</span> <span class="kbd">→</span> para navegar.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">Qué es el DOM →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Tocar la página" data-num="1" data-title="Qué es el DOM" id="que-es">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Qué es el DOM</h1>
+  <p class="lead">Cuando el navegador lee tu HTML, arma una representación viva de la página en memoria: el DOM (Document Object Model). Es tu HTML convertido en objetos que JavaScript puede leer y modificar.</p>
+  <h2>El HTML como árbol</h2>
+  <p>El DOM es una estructura de árbol que refleja el anidamiento de tu HTML:</p>
+<pre>document
+  └─ html
+      └─ body
+          ├─ h1
+          └─ button</pre>
+  <p>JavaScript accede a ese árbol a través de <code>document</code>, el punto de entrada a toda la página. Desde ahí podés buscar cualquier elemento, cambiarlo, o agregar nuevos.</p>
+  <h2>La idea clave</h2>
+  <p>El HTML es el estado inicial de la página. El DOM es la página viva, y JavaScript la modifica en tiempo real. Cuando hacés clic en un botón y aparece un mensaje, lo que pasó es que JS modificó el DOM. Toda interactividad es, en el fondo, modificar el DOM.</p>
+  <div class="box nota"><span class="tag">HTML vs DOM</span><p>El HTML es lo que escribiste en el archivo. El DOM es lo que hay en memoria ahora mismo, que pudo cambiar por JavaScript. Si inspeccionás con DevTools, ves el DOM actual, que puede diferir del HTML original.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Seleccionar elementos →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Tocar la página" data-num="2" data-title="Seleccionar elementos" id="seleccionar">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Seleccionar elementos</h1>
+  <p class="lead">Antes de modificar algo, tenés que agarrarlo. JavaScript busca elementos en el DOM usando los mismos selectores del CSS que ya conocés.</p>
+  <h2>querySelector: el que vas a usar siempre</h2>
+  <div class="codehead"><span class="lang txt">javascript</span></div>
+<pre>const titulo = document.querySelector("h1");        // por etiqueta
+const caja   = document.querySelector(".tarjeta");  // por clase
+const menu   = document.querySelector("#menu");     // por id</pre>
+  <p><code>querySelector</code> devuelve el <strong>primer</strong> elemento que coincide, usando sintaxis de CSS (con el punto para clases, el numeral para ids). Es el más versátil.</p>
+  <h2>Seleccionar varios</h2>
+  <div class="codehead"><span class="lang txt">javascript</span></div>
+<pre>const botones = document.querySelectorAll(".boton");   // todos los .boton
+
+botones.forEach((boton) =&gt; {
+  console.log(boton);   // recorrer con forEach, como un array
+});</pre>
+  <div class="box ojo"><span class="tag">Si sale null...</span><p>Si <code>querySelector</code> devuelve <code>null</code>, no encontró el elemento. Causas típicas: el selector está mal escrito, o el <code>&lt;script&gt;</code> corre antes de que el HTML exista. Por eso el script va al final del <code>&lt;body&gt;</code> (librito 1): así el HTML ya está cargado cuando el JS busca.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← Qué es el DOM</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Modificar elementos →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 1 · Tocar la página" data-num="3" data-title="Modificar elementos" id="modificar">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Modificar elementos</h1>
+  <p class="lead">Con el elemento agarrado, ya podés cambiarlo: su texto, sus clases, sus estilos, sus atributos. Esto es la mitad de la interactividad.</p>
+  <h2>Cambiar el texto</h2>
+  <div class="codehead"><span class="lang txt">javascript</span></div>
+<pre>const titulo = document.querySelector("h1");
+titulo.textContent = "Nuevo título";   // cambia el texto</pre>
+  <div class="box ojo"><span class="tag">textContent vs innerHTML</span><p><code>textContent</code> pone texto puro (seguro). <code>innerHTML</code> interpreta HTML, y es peligroso con datos del usuario (abre la puerta al XSS que viste en seguridad). Usá <code>textContent</code> salvo que de verdad necesites insertar HTML propio y confiable.</p></div>
+  <h2>Cambiar clases (lo más útil)</h2>
+  <p>En vez de escribir estilos desde JS, la mejor práctica es tener las clases en el CSS y agregarlas o quitarlas desde JavaScript:</p>
+  <div class="codehead"><span class="lang txt">javascript</span></div>
+<pre>const caja = document.querySelector(".tarjeta");
+caja.classList.add("activa");      // agregar clase
+caja.classList.remove("activa");   // quitar
+caja.classList.toggle("activa");   // si está la saca, si no la pone</pre>
+  <p><code>toggle</code> es oro: con una línea prendés y apagás un estado (un menú abierto, un modo oscuro, una tarjeta seleccionada). El estilo vive en el CSS; JS solo pone o saca la clase.</p>
+  <h2>Cambiar estilos y atributos directamente</h2>
+  <div class="codehead"><span class="lang txt">javascript</span></div>
+<pre>caja.style.display = "none";              // ocultar
+imagen.setAttribute("src", "otra.jpg");   // cambiar un atributo
+input.value = "";                         // vaciar un campo</pre>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Seleccionar elementos</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Eventos →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · Reaccionar" data-num="4" data-title="Eventos" id="eventos">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Eventos: reaccionar al usuario</h1>
+  <p class="lead">Un evento es algo que pasa: un clic, una tecla, mover el mouse, enviar un formulario. Con eventos, tu página reacciona a lo que hace la persona. Es la otra mitad de la interactividad.</p>
+  <h2>addEventListener</h2>
+  <p>Le decís a un elemento "cuando pase esto, ejecutá esta función":</p>
+  <div class="codehead"><span class="lang txt">javascript</span></div>
+<pre>const boton = document.querySelector("#comprar");
+
+boton.addEventListener("click", () =&gt; {
+  console.log("¡Hicieron clic!");
+});</pre>
+  <p>Se lee: "en el botón, escuchá el evento <code>click</code>, y cuando ocurra, ejecutá esta función". La función que se pasa se llama <em>callback</em>: corre cuando el evento sucede, no antes.</p>
+  <h2>Los eventos más comunes</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Evento</th><th>Cuándo ocurre</th></tr></thead>
+    <tbody>
+      <tr><th>click</th><td>Al hacer clic en el elemento.</td></tr>
+      <tr><th>input</th><td>Al escribir en un campo (en cada tecla).</td></tr>
+      <tr><th>submit</th><td>Al enviar un formulario.</td></tr>
+      <tr><th>keydown</th><td>Al presionar una tecla.</td></tr>
+      <tr><th>mouseover</th><td>Al pasar el mouse por encima.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Ejemplo: un botón que muestra y oculta</h2>
+  <div class="codehead"><span class="lang txt">javascript</span></div>
+<pre>const boton = document.querySelector("#toggle");
+const menu = document.querySelector("#menu");
+
+boton.addEventListener("click", () =&gt; {
+  menu.classList.toggle("oculto");   // prende/apaga la clase que lo esconde
+});</pre>
+  <p>Combinás lo del capítulo anterior (<code>toggle</code>) con un evento (<code>click</code>): con seis líneas hiciste un menú que se abre y cierra. Ese patrón, evento + cambiar clase, es la base de casi toda la interactividad.</p>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Modificar elementos</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">El objeto event →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · Reaccionar" data-num="5" data-title="El objeto event" id="event">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>El objeto event</h1>
+  <p class="lead">Cuando un evento ocurre, JavaScript le pasa a tu función un objeto con información sobre lo que pasó. Sirve para saber qué elemento se tocó y para controlar el comportamiento por defecto.</p>
+  <h2>Recibir el evento</h2>
+  <div class="codehead"><span class="lang txt">javascript</span></div>
+<pre>boton.addEventListener("click", (event) =&gt; {
+  console.log(event.target);   // el elemento que disparó el evento
+});</pre>
+  <p><code>event.target</code> es el elemento concreto sobre el que ocurrió. Útil cuando el mismo manejador cubre varios elementos.</p>
+  <h2>preventDefault: frenar lo automático</h2>
+  <p>Algunos elementos tienen comportamiento por defecto: un formulario, al enviarse, recarga la página. Casi siempre querés evitar eso para manejarlo con JavaScript:</p>
+  <div class="codehead"><span class="lang txt">javascript</span></div>
+<pre>const formulario = document.querySelector("form");
+
+formulario.addEventListener("submit", (event) =&gt; {
+  event.preventDefault();   // NO recargar la página
+  console.log("Formulario enviado, lo manejo yo");
+});</pre>
+  <h2>Leer el valor de un campo</h2>
+  <div class="codehead"><span class="lang txt">javascript</span></div>
+<pre>const input = document.querySelector("#email");
+
+input.addEventListener("input", (event) =&gt; {
+  console.log(event.target.value);   // lo que hay escrito, en vivo
+});</pre>
+  <p>El <code>.value</code> de un input es lo que el usuario escribió. Con el evento <code>input</code> lo leés en cada tecla; esto es la base de la validación en vivo, tema del próximo librito.</p>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Eventos</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Crear elementos →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 2 · Reaccionar" data-num="6" data-title="Crear elementos" id="crear">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Crear elementos desde JavaScript</h1>
+  <p class="lead">Hasta ahora modificaste elementos que ya existían. También podés crear nuevos y agregarlos a la página. Es como se muestran listas de datos: una tarjeta por cada producto, un ítem por cada tarea.</p>
+  <h2>Crear y agregar</h2>
+  <div class="codehead"><span class="lang txt">javascript</span></div>
+<pre>const lista = document.querySelector("#lista");
+
+const item = document.createElement("li");   // crear un &lt;li&gt;
+item.textContent = "Nueva tarea";            // ponerle texto
+lista.append(item);                          // agregarlo a la lista</pre>
+  <h2>El patrón estrella: renderizar un array</h2>
+  <p>Acá se junta todo el track: tenés datos (un array de objetos, del librito de JS) y generás un elemento HTML por cada uno.</p>
+  <div class="codehead"><span class="lang txt">javascript</span></div>
+<pre>const productos = [
+  { nombre: "Teclado", precio: 25000 },
+  { nombre: "Mouse", precio: 12000 }
+];
+
+const contenedor = document.querySelector("#productos");
+
+productos.forEach((producto) =&gt; {
+  const tarjeta = document.createElement("div");
+  tarjeta.classList.add("tarjeta");
+  tarjeta.textContent = `${producto.nombre}: $${producto.precio}`;
+  contenedor.append(tarjeta);
+});</pre>
+  <p>Recorrés el array con <code>forEach</code>, creás una tarjeta por producto, y la agregás. Así funciona toda tienda, todo listado, todo feed que ves en la web: datos que se convierten en elementos.</p>
+  <div class="box nota"><span class="tag">Todo el track en un ejemplo</span><p>Ese bloque usa arrays y objetos (librito 6), <code>forEach</code>, template strings, y manipulación del DOM. Cuando lo entendés, entendés cómo se construye la mayoría del frontend.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← El objeto event</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Ejemplo completo →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 3 · Juntar todo" data-num="7" data-title="Ejemplo completo" id="ejemplo">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>Ejemplo completo: un contador de tareas</h1>
+  <p class="lead">Juntemos selección, eventos, creación de elementos y datos en algo que funciona: agregar tareas a una lista escribiendo en un campo.</p>
+  <div class="codehead"><span class="lang txt">html</span></div>
+<pre>&lt;input id="campo" placeholder="Nueva tarea"&gt;
+&lt;button id="agregar"&gt;Agregar&lt;/button&gt;
+&lt;ul id="lista"&gt;&lt;/ul&gt;</pre>
+  <div class="codehead"><span class="lang txt">script.js</span></div>
+<pre>const campo = document.querySelector("#campo");
+const boton = document.querySelector("#agregar");
+const lista = document.querySelector("#lista");
+
+boton.addEventListener("click", () =&gt; {
+  const texto = campo.value.trim();     // lo escrito, sin espacios sobrantes
+  if (texto === "") return;             // si está vacío, no hacer nada
+
+  const item = document.createElement("li");
+  item.textContent = texto;
+  lista.append(item);                   // agregar a la lista
+
+  campo.value = "";                     // limpiar el campo
+  campo.focus();                        // volver a enfocarlo
+});</pre>
+  <h2>Qué hace, paso a paso</h2>
+  <ol>
+    <li>Agarra los tres elementos con <code>querySelector</code>.</li>
+    <li>Escucha el clic en el botón.</li>
+    <li>Lee lo escrito; si está vacío, corta con <code>return</code>.</li>
+    <li>Crea un <code>&lt;li&gt;</code>, le pone el texto, lo agrega a la lista.</li>
+    <li>Limpia el campo y lo vuelve a enfocar para seguir escribiendo.</li>
+  </ol>
+  <p>Con menos de 15 líneas hiciste una función real. Todo lo del track está acá: selección, eventos, condicionales, creación de elementos.</p>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Crear elementos</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Cheatsheet →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 3 · Juntar todo" data-num="8" data-title="Cheatsheet y glosario" id="cierre">
+  <div class="ch-eyebrow">Cierre</div>
+  <h1>Cheatsheet y glosario</h1>
+  <h2>Cheatsheet</h2>
+  <div class="codehead"><span class="lang txt">DOM y eventos</span></div>
+<pre>// seleccionar
+document.querySelector(".clase")        // el primero
+document.querySelectorAll(".clase")     // todos (forEach)
+
+// modificar
+el.textContent = "texto"                // texto (seguro)
+el.classList.add / remove / toggle("x") // clases
+el.style.display = "none"               // estilo directo
+el.setAttribute("src", "...")           // atributo
+input.value                             // valor de un campo
+
+// eventos
+el.addEventListener("click", (event) =&gt; { ... })
+event.target                            // el elemento tocado
+event.preventDefault()                  // frenar lo automático
+
+// crear
+const nuevo = document.createElement("div")
+contenedor.append(nuevo)</pre>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>DOM</th><td>La página viva en memoria, como árbol de objetos, que JS modifica.</td></tr>
+      <tr><th>querySelector</th><td>Buscar un elemento con sintaxis de CSS.</td></tr>
+      <tr><th>textContent</th><td>Leer o cambiar el texto de un elemento (seguro).</td></tr>
+      <tr><th>classList</th><td>Agregar, quitar o alternar clases.</td></tr>
+      <tr><th>Evento</th><td>Algo que pasa (clic, tecla, submit) a lo que podés reaccionar.</td></tr>
+      <tr><th>addEventListener</th><td>Registrar una función que corre cuando ocurre un evento.</td></tr>
+      <tr><th>callback</th><td>La función que se ejecuta cuando el evento sucede.</td></tr>
+      <tr><th>preventDefault</th><td>Cancelar el comportamiento por defecto (recargar, seguir un link).</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Sabés seleccionar elementos, modificarlos, reaccionar a eventos y crear contenido nuevo. Ya podés hacer páginas interactivas de verdad. En el próximo librito aplicás esto a los formularios: capturar datos y validarlos con feedback al usuario.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Ejemplo completo</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('fe07-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('fe07-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('fe07-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('fe07-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

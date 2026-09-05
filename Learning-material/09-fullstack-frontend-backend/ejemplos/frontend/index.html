@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login · demo full-stack</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <main class="caja">
+    <h1>Iniciar sesión</h1>
+    <form id="form">
+      <input id="email" type="email" placeholder="Email" value="carlos@ejemplo.com" required>
+      <input id="password" type="password" placeholder="Contraseña" value="secreto123" required>
+      <button type="submit">Entrar</button>
+    </form>
+    <p id="aviso" class="aviso" role="status"></p>
+    <section id="perfil" hidden>
+      <h2>Tu perfil</h2>
+      <pre id="datos"></pre>
+      <button id="salir">Cerrar sesión</button>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

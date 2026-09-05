@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backend SQL, de 0 al deploy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Backend · bases de datos SQL</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Backend · Bases de datos SQL</div>
+  <h1>Backend SQL, de 0 hasta el deploy</h1>
+  <p class="lead">Una aplicación de verdad guarda datos: usuarios, productos, pedidos. Ese trabajo lo hace una base de datos. En este librito armás un backend con base de datos relacional desde cero, hasta dejar una base funcionando en internet. Todo por pasos, con código real y probado, en Python y en Node.</p>
+  <div class="box nota"><span class="tag">Código real y probado</span><p>El CRUD de este libro se construyó y se corrió de verdad. Los bloques con <span class="tested">✓ salida real</span> son lo que devolvió el programa. El código completo está en <code>ejemplos/</code>: backend en Python (FastAPI + SQLAlchemy) y en Node (Express + SQLite).</p></div>
+  <h2>Qué vas a poder hacer al terminar</h2>
+  <p>Diseñar un esquema de tablas, escribir SQL, conectar un backend a la base, exponer un CRUD por API, protegerlo de inyección SQL, y publicar una base Postgres real y gratuita para que tu app la use en producción.</p>
+  <div class="box nota"><span class="tag">Cómo moverte</span><p>Índice a la izquierda, o flechas <span class="kbd">←</span> <span class="kbd">→</span>. El libro recuerda dónde quedaste.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">Qué es una base relacional →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="1" data-title="Qué es una base relacional" id="que-es">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Qué es una base de datos relacional</h1>
+  <p class="lead">Una base de datos relacional guarda la información en tablas, como planillas conectadas entre sí. Es el modelo más usado del mundo para datos con estructura clara, y el "SQL" del título es el lenguaje para hablarle.</p>
+  <h2>Tablas, filas y columnas</h2>
+  <p>Una tabla es como una hoja de cálculo con un tema: una tabla <code>usuarios</code>, una tabla <code>productos</code>. Cada <strong>columna</strong> es un dato (email, precio) con un tipo fijo (texto, número). Cada <strong>fila</strong> es un registro completo (un usuario, un producto). El conjunto de tablas y columnas se llama <strong>esquema</strong>.</p>
+  <div class="codehead"><span class="lang txt">tabla usuarios</span></div>
+<pre>id │ email          │ nombre
+───┼────────────────┼────────
+ 1 │ carlos@x.com   │ Carlos
+ 2 │ ana@x.com      │ Ana</pre>
+  <h2>La clave primaria</h2>
+  <p>Cada fila necesita un identificador único: la <strong>clave primaria</strong> (primary key), casi siempre una columna <code>id</code>. Es cómo la base distingue una fila de otra y cómo otras tablas la referencian.</p>
+  <h2>Las relaciones</h2>
+  <p>Acá está la magia del modelo. Si una tabla <code>pedidos</code> tiene una columna <code>usuario_id</code> que apunta al <code>id</code> de <code>usuarios</code>, quedan relacionadas: cada pedido sabe de quién es, sin repetir los datos del usuario. Esa columna que apunta a otra tabla se llama <strong>clave foránea</strong> (foreign key).</p>
+  <div class="box nota"><span class="tag">La idea central</span><p>En vez de repetir la info del usuario en cada pedido, la guardás una vez y la referenciás con un id. Menos repetición, menos errores, datos consistentes. Ese principio (no duplicar) se llama normalización, y es el corazón del modelo relacional.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">El lenguaje SQL →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="2" data-title="El lenguaje SQL" id="sql">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>SQL: el lenguaje para hablarle a la base</h1>
+  <p class="lead">SQL (Structured Query Language) es cómo pedís y modificás datos. Son cuatro verbos que cubren casi todo, y se leen casi como inglés.</p>
+  <h2>Los cuatro verbos (CRUD)</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Verbo SQL</th><th>Qué hace</th><th>CRUD</th></tr></thead>
+    <tbody>
+      <tr><th>INSERT</th><td>Agrega una fila</td><td>Create</td></tr>
+      <tr><th>SELECT</th><td>Lee filas</td><td>Read</td></tr>
+      <tr><th>UPDATE</th><td>Modifica filas</td><td>Update</td></tr>
+      <tr><th>DELETE</th><td>Borra filas</td><td>Delete</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Ejemplos</h2>
+  <div class="codehead"><span class="lang sql">SQL</span></div>
+<pre>CREATE TABLE usuarios (id INTEGER PRIMARY KEY, email TEXT, nombre TEXT);
+
+INSERT INTO usuarios (email, nombre) VALUES ('carlos@x.com', 'Carlos');
+
+SELECT id, email FROM usuarios WHERE nombre = 'Carlos';
+
+UPDATE usuarios SET nombre = 'Carlitos' WHERE id = 1;
+
+DELETE FROM usuarios WHERE id = 1;</pre>
+  <p>El <code>WHERE</code> es el filtro: qué filas afecta la operación. Sin <code>WHERE</code> en un <code>UPDATE</code> o <code>DELETE</code>, tocás todas las filas. Es el error más caro del SQL, así que cuidado con eso.</p>
+  <div class="box nota"><span class="tag">SQL es casi universal</span><p>Este lenguaje lo entienden SQLite, PostgreSQL, MySQL, SQL Server y más. Hay pequeñas diferencias entre motores, pero el 90% de lo que escribas anda igual en todos. Aprendés SQL una vez y te sirve en cualquiera.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← Qué es una base relacional</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Diseñar el esquema →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="3" data-title="Diseñar el esquema" id="esquema">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Diseñar el esquema</h1>
+  <p class="lead">Antes de escribir código, pensás qué tablas necesitás y cómo se conectan. Un buen esquema te ahorra problemas para siempre; uno malo te persigue todo el proyecto.</p>
+  <h2>Los tipos de dato</h2>
+  <p>Cada columna tiene un tipo. Los que más vas a usar:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>Para</th></tr></thead>
+    <tbody>
+      <tr><th>INTEGER</th><td>Números enteros (ids, cantidades)</td></tr>
+      <tr><th>TEXT / VARCHAR</th><td>Texto (nombres, emails)</td></tr>
+      <tr><th>BOOLEAN</th><td>Verdadero o falso (activo, pagado)</td></tr>
+      <tr><th>TIMESTAMP</th><td>Fecha y hora (creado_en)</td></tr>
+      <tr><th>DECIMAL</th><td>Números con decimales exactos (dinero)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box ojo"><span class="tag">El dinero nunca es float</span><p>Para plata usá DECIMAL, no float. Los float tienen errores de redondeo (0.1 + 0.2 no da exactamente 0.3) y con dinero eso es inaceptable. Otra opción común es guardar centavos como enteros.</p></div>
+  <h2>Un esquema de ejemplo</h2>
+  <p>Un mini ecommerce: usuarios que hacen pedidos.</p>
+  <div class="codehead"><span class="lang sql">esquema</span></div>
+<pre>CREATE TABLE usuarios (
+  id       INTEGER PRIMARY KEY,
+  email    TEXT NOT NULL UNIQUE,
+  nombre   TEXT NOT NULL
+);
+
+CREATE TABLE pedidos (
+  id          INTEGER PRIMARY KEY,
+  usuario_id  INTEGER NOT NULL REFERENCES usuarios(id),
+  total       DECIMAL NOT NULL,
+  creado_en   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);</pre>
+  <p><code>NOT NULL</code> obliga a que haya valor. <code>UNIQUE</code> impide emails repetidos. <code>REFERENCES</code> arma la relación (la clave foránea). <code>DEFAULT</code> pone un valor si no lo das. Estas reglas viven en la base: aunque tu código tenga un bug, la base defiende la integridad de los datos.</p>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← El lenguaje SQL</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Qué motor elegir →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · El backend" data-num="4" data-title="Qué motor elegir" id="motor">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Qué motor de base de datos elegir</h1>
+  <p class="lead">"Base de datos SQL" es una categoría; el motor concreto es el programa que la corre. Estos tres son los que vas a cruzar todo el tiempo.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Motor</th><th>Cuándo</th></tr></thead>
+    <tbody>
+      <tr><th>SQLite</th><td>La base es un solo archivo, sin servidor. Perfecta para aprender, para desarrollo y para apps chicas. La usamos en este libro para los ejemplos.</td></tr>
+      <tr><th>PostgreSQL</th><td>El motor serio por defecto para producción. Robusto, gratis, potente, con todo lo que un proyecto real necesita. A lo que vamos a hacer el deploy.</td></tr>
+      <tr><th>MySQL</th><td>Otro clásico de producción, muy usado también. Postgres y MySQL son intercambiables para la mayoría de los casos.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">La estrategia práctica</span><p>Desarrollás con SQLite (cero configuración, es solo un archivo) y desplegás a Postgres. Con un ORM (próximo capítulo), pasar de uno al otro es cambiar una línea: la URL de conexión. Tu código no se entera.</p></div>
+  <h2>La URL de conexión</h2>
+  <p>Cada base se identifica con una cadena de conexión. Vas a ver este formato mil veces:</p>
+  <div class="codehead"><span class="lang txt">connection strings</span></div>
+<pre>SQLite:    sqlite:///./tareas.db
+Postgres:  postgresql+psycopg://usuario:clave@host:5432/basededatos</pre>
+  <p>La de Postgres lleva usuario, clave, host, puerto y nombre de la base. Esa cadena es un secreto (tiene la contraseña), así que nunca va en el código: va en una variable de entorno, como viste en el librito de conexión front-back.</p>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Diseñar el esquema</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Conectar el backend →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · El backend" data-num="5" data-title="Conectar el backend" id="conectar">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Conectar el backend: ORM o SQL crudo</h1>
+  <p class="lead">Tu backend habla con la base de dos maneras: escribiendo SQL a mano, o usando un ORM que traduce objetos de tu lenguaje a filas de la base. Conviene entender las dos.</p>
+  <h2>SQL crudo</h2>
+  <p>Escribís las consultas vos mismo y las mandás con la librería del motor. Control total, pero más verboso y hay que tener cuidado con la seguridad (capítulo 9).</p>
+  <h2>ORM (Object-Relational Mapping)</h2>
+  <p>Un ORM te deja definir tus tablas como clases y trabajar con objetos; él genera el SQL. En Python el más usado es <strong>SQLAlchemy</strong>; en Node, Prisma o Sequelize. Ventajas: menos código repetido, cambio de motor casi gratis, y protección contra inyección SQL por defecto.</p>
+  <div class="codehead"><span class="lang py">definir una tabla con SQLAlchemy</span></div>
+<pre>class Tarea(Base):
+    __tablename__ = "tareas"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    titulo: Mapped[str] = mapped_column(String(200))
+    hecha: Mapped[bool] = mapped_column(Boolean, default=False)</pre>
+  <p>Esa clase <em>es</em> la tabla. <code>Base.metadata.create_all(engine)</code> la crea en la base si no existe. Después trabajás con objetos <code>Tarea</code> y SQLAlchemy escribe los INSERT y SELECT por vos.</p>
+  <div class="box nota"><span class="tag">Cuál usar</span><p>Para empezar y para la mayoría de los proyectos, un ORM. Es más productivo y más seguro. El SQL crudo lo sacás para consultas muy específicas o de mucho rendimiento. Saber leer SQL siempre sirve, aunque uses ORM: cuando algo va lento, mirás el SQL que genera.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Qué motor elegir</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">El CRUD en Python →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 2 · El backend" data-num="6" data-title="El CRUD en Python" id="crud-py">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Construir el CRUD paso a paso (Python)</h1>
+  <p class="lead">Ahora lo armamos de verdad: una API con FastAPI y SQLAlchemy que crea, lee, actualiza y borra tareas en la base. Este es el <code>ejemplos/backend/app.py</code>, corrido de verdad.</p>
+  <h2>Un endpoint por operación</h2>
+  <div class="codehead"><span class="lang py">backend/app.py (recorte)</span></div>
+<pre>@app.post("/tareas", response_model=TareaOut)
+def crear(t: TareaIn, s: Session = Depends(db)):
+    fila = Tarea(titulo=t.titulo, hecha=t.hecha)
+    s.add(fila); s.commit(); s.refresh(fila)
+    return TareaOut(id=fila.id, titulo=fila.titulo, hecha=fila.hecha)
+
+@app.get("/tareas", response_model=list[TareaOut])
+def listar(s: Session = Depends(db)):
+    return [TareaOut(id=f.id, titulo=f.titulo, hecha=f.hecha)
+            for f in s.query(Tarea).all()]
+
+@app.put("/tareas/{tid}", response_model=TareaOut)
+def actualizar(tid: int, t: TareaIn, s: Session = Depends(db)):
+    f = s.get(Tarea, tid)
+    if not f: raise HTTPException(404, "no existe")
+    f.titulo, f.hecha = t.titulo, t.hecha
+    s.commit(); s.refresh(f)
+    return TareaOut(id=f.id, titulo=f.titulo, hecha=f.hecha)</pre>
+  <p>Cada endpoint HTTP se traduce a una operación SQL: POST inserta, GET lee, PUT actualiza, DELETE borra. El <code>Session</code> es la conexión a la base; <code>commit</code> confirma el cambio en el disco.</p>
+  <h2>Probado de verdad</h2>
+  <div class="codehead"><span class="lang sh">prueba real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">== crear dos tareas ==
+{'titulo': 'Aprender SQL', 'hecha': False, 'id': 1}
+{'titulo': 'Deploy a Postgres', 'hecha': False, 'id': 2}
+== marcar la 1 como hecha (PUT) ==
+{'titulo': 'Aprender SQL', 'hecha': True, 'id': 1}
+== borrar la 2 ==
+{'borrada': 2}
+== listar final ==
+[{'titulo': 'Aprender SQL', 'hecha': True, 'id': 1}]
+== ver una que no existe ==
+404 {'detail': 'no existe'}</pre>
+  <p>Los datos quedan guardados en el archivo <code>tareas.db</code>: si apagás el servidor y lo prendés, siguen ahí. Eso es persistencia, la razón de ser de una base de datos.</p>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Conectar el backend</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">El mismo CRUD en Node →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 2 · El backend" data-num="7" data-title="El CRUD en Node" id="crud-node">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>El mismo CRUD en Node</h1>
+  <p class="lead">Misma idea, otro lenguaje: Express con better-sqlite3. Para que veas que el concepto es el mismo y solo cambia la sintaxis. Este es el <code>ejemplos/backend/server.js</code>, corrido de verdad.</p>
+  <div class="codehead"><span class="lang js">backend/server.js (recorte)</span></div>
+<pre>app.post("/tareas", (req, res) => {
+  const { titulo, hecha = false } = req.body;
+  const r = db.prepare("INSERT INTO tareas (titulo,hecha) VALUES (?,?)")
+              .run(titulo, hecha ? 1 : 0);
+  const f = db.prepare("SELECT * FROM tareas WHERE id=?").get(r.lastInsertRowid);
+  res.json(aSalida(f));
+});
+
+app.get("/tareas", (_req, res) => {
+  res.json(db.prepare("SELECT * FROM tareas").all().map(aSalida));
+});</pre>
+  <p>Acá vemos SQL crudo (los <code>SELECT</code> y <code>INSERT</code> escritos a mano) en vez de un ORM. Fijate en el <code>?</code>: es el marcador de parámetro que evita la inyección SQL. Los valores nunca se pegan a la cadena, se pasan aparte.</p>
+  <h2>Probado de verdad</h2>
+  <div class="codehead"><span class="lang sh">prueba real (curl)</span><span class="tested">✓ salida real</span></div>
+<pre class="output">== crear ==
+{"id":1,"titulo":"Aprender SQL","hecha":false}
+== listar ==
+[{"id":1,"titulo":"Aprender SQL","hecha":false},{"id":2,"titulo":"Deploy","hecha":false}]
+== put 1 ==
+{"id":1,"titulo":"Aprender SQL","hecha":true}
+== delete 2 ==
+{"borrada":2}
+== 404 ==
+404</pre>
+  <div class="box nota"><span class="tag">El mismo mapa mental</span><p>Python o Node, ORM o SQL crudo: siempre es lo mismo. Un endpoint recibe una petición, la traduce a una operación en la base, y devuelve el resultado como JSON. Si entendiste uno, entendiste todos.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← El CRUD en Python</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Migraciones →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 3 · Producción" data-num="8" data-title="Migraciones" id="migraciones">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Migraciones: cambiar el esquema sin romper</h1>
+  <p class="lead">Tu app va a cambiar: vas a querer agregar una columna, una tabla nueva. Pero la base ya tiene datos reales. Una migración es el cambio de esquema hecho de forma ordenada y reversible.</p>
+  <h2>El problema</h2>
+  <p>En desarrollo borrás la base y la recreás sin drama. En producción no podés: hay datos de usuarios que no se pueden perder. Necesitás una forma de decir "agregá esta columna a la tabla que ya existe, sin tocar lo que hay".</p>
+  <h2>La solución: herramientas de migración</h2>
+  <p>Cada cambio de esquema se guarda como un archivo de migración, numerado y versionado (junto a tu código, en Git). La herramienta las aplica en orden y sabe cuáles ya corrieron. En Python el estándar es <strong>Alembic</strong> (compañero de SQLAlchemy); en Node, las migraciones de Prisma.</p>
+  <div class="codehead"><span class="lang sh">flujo típico con Alembic</span></div>
+<pre># genera la migración comparando tus modelos con la base
+alembic revision --autogenerate -m "agrega columna prioridad"
+
+# aplica las migraciones pendientes a la base
+alembic upgrade head</pre>
+  <div class="box ojo"><span class="tag">Nunca cambies el esquema a mano en producción</span><p>Editar tablas directo en la base de producción es la receta para el desastre: no queda registro, no se puede revertir, y el próximo deploy puede pisarlo. Toda modificación de esquema pasa por una migración versionada. Es disciplina que se agradece.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← El CRUD en Node</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Seguridad →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 3 · Producción" data-num="9" data-title="Seguridad" id="seguridad">
+  <div class="ch-eyebrow">Capítulo 9</div>
+  <h1>Seguridad: inyección SQL y secretos</h1>
+  <p class="lead">La base guarda lo más valioso de tu app. El ataque clásico contra ella es la inyección SQL, y la defensa es simple una vez que la entendés. Lo vemos con una demo real.</p>
+  <h2>Qué es la inyección SQL</h2>
+  <p>Pasa cuando pegás la entrada del usuario dentro de una consulta como texto. Un atacante manda algo que no es un dato sino código SQL, y la base lo ejecuta. Mirá la diferencia, corrida de verdad:</p>
+  <div class="codehead"><span class="lang sh">demo real de inyección</span><span class="tested">✓ salida real</span></div>
+<pre class="output">entrada del atacante:  no@existe.com' OR '1'='1
+
+== MAL: concatenando la entrada ==
+query armada: SELECT email FROM usuarios WHERE email = 'no@existe.com' OR '1'='1'
+resultado: [('carlos@x.com',), ('ana@x.com',)]   &lt;- devolvió TODOS los usuarios
+
+== BIEN: parametrizado (?) ==
+resultado: []   &lt;- vacío, la entrada se trató como dato, no como código</pre>
+  <p>Con la consulta concatenada, el <code>OR '1'='1'</code> se volvió parte de la lógica y la condición siempre da verdadero: la base entregó todo. Con parámetros, la misma entrada se trató como un texto a buscar, y no encontró nada.</p>
+  <h2>La defensa: consultas parametrizadas</h2>
+  <p>Nunca armes SQL pegando strings. Usá los marcadores de parámetro (<code>?</code> o <code>:nombre</code>) y pasá los valores aparte. La librería se encarga de que la entrada jamás se interprete como código. Si usás un ORM, esto ya viene por defecto: es otra razón para usarlo.</p>
+  <div class="box ojo"><span class="tag">Los otros dos musts</span><p>Uno: la cadena de conexión (con la contraseña de la base) va en una variable de entorno, nunca en el código ni en Git. Dos: el usuario de base que usa tu app tiene solo los permisos que necesita, no es administrador. Si algo se filtra, el daño queda acotado.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Migraciones</span></button><button class="navbtn next" data-goto="10"><span class="dir">Siguiente</span><span class="t">Índices y rendimiento →</span></button></div>
+</section>
+
+<!-- 10 -->
+<section class="chapter" data-part="Parte 3 · Producción" data-num="10" data-title="Índices y rendimiento" id="indices">
+  <div class="ch-eyebrow">Capítulo 10</div>
+  <h1>Índices: que no sea lento</h1>
+  <p class="lead">Con pocos datos todo vuela. Con millones de filas, una consulta mal hecha puede tardar segundos. El índice es la herramienta número uno para que la base sea rápida.</p>
+  <h2>Qué es un índice</h2>
+  <p>Es como el índice de un libro. Sin él, buscar un email es leer la tabla entera fila por fila. Con un índice sobre la columna <code>email</code>, la base salta directo. El costo: ocupa espacio y hace las escrituras un poco más lentas, así que se ponen donde sirven.</p>
+  <div class="codehead"><span class="lang sql">crear un índice</span></div>
+<pre>CREATE INDEX idx_usuarios_email ON usuarios(email);</pre>
+  <h2>Dónde ponerlos</h2>
+  <p>En las columnas por las que filtrás o unís seguido: las que aparecen en tus <code>WHERE</code> y en las claves foráneas. La clave primaria ya tiene índice automático. No indexes todo por las dudas: cada índice tiene un costo.</p>
+  <div class="box nota"><span class="tag">Regla práctica</span><p>Empezá sin pensar en rendimiento. Cuando una consulta va lenta, mirala con <code>EXPLAIN</code> (te dice cómo la resuelve la base) y agregá el índice que falta. Optimizar antes de tener el problema suele ser tiempo perdido.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="9"><span class="dir">Anterior</span><span class="t">← Seguridad</span></button><button class="navbtn next" data-goto="11"><span class="dir">Siguiente</span><span class="t">Deploy de la base →</span></button></div>
+</section>
+
+<!-- 11 -->
+<section class="chapter" data-part="Parte 4 · Deploy" data-num="11" data-title="Deploy de la base" id="deploy">
+  <div class="ch-eyebrow">Capítulo 11</div>
+  <h1>Deploy de una base funcional</h1>
+  <p class="lead">Tu base vive en tu compu como un archivo. Para que tu app en producción la use, necesitás una base Postgres en internet, funcionando las 24 horas. Hoy eso es gratis y toma minutos.</p>
+  <h2>Bases gestionadas (managed)</h2>
+  <p>No vas a instalar y mantener un servidor Postgres a mano. Usás un servicio gestionado: ellos corren la base, hacen backups y la mantienen; vos solo la usás. Los más usados con plan gratis:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Servicio</th><th>Nota</th></tr></thead>
+    <tbody>
+      <tr><th>Neon</th><td>Postgres gestionado, plan gratis generoso, muy simple para empezar.</td></tr>
+      <tr><th>Supabase</th><td>Postgres más un montón de extras (auth, storage, API automática). Muy popular.</td></tr>
+      <tr><th>Railway</th><td>Levanta Postgres (y tu backend) con pocos clics.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Los pasos, con Neon o Supabase</h2>
+  <ol>
+    <li>Creás una cuenta gratis y un proyecto nuevo. Se levanta una base Postgres vacía.</li>
+    <li>El servicio te da una <strong>cadena de conexión</strong> (empieza con <code>postgresql://</code>). Ese es el dato clave.</li>
+    <li>En tu backend, ponés esa cadena en una variable de entorno <code>DATABASE_URL</code>. En local va en un archivo <code>.env</code> (que no subís a Git); en el hosting, en su panel de variables.</li>
+    <li>Tu código lee <code>DATABASE_URL</code> en vez de la ruta de SQLite. Como usás un ORM, no cambia nada más.</li>
+    <li>Corrés las migraciones apuntando a la base nueva (<code>alembic upgrade head</code>) para crear las tablas.</li>
+    <li>Listo: tu backend, esté donde esté, se conecta a esa base y guarda datos reales.</li>
+  </ol>
+  <div class="codehead"><span class="lang py">leer la URL del entorno</span></div>
+<pre>import os
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./tareas.db")
+engine = create_engine(DATABASE_URL)
+# en local usa SQLite; en producción, la Postgres de Neon. Mismo código.</pre>
+  <div class="box ojo"><span class="tag">La cadena de conexión es un secreto</span><p>Tiene la contraseña de tu base. Nunca en el código, nunca en Git, nunca en el frontend. Solo en variables de entorno del servidor. Si se filtra, cualquiera entra a tu base. Si alguna vez se te escapa a un repo, rotala (cambiá la clave) enseguida.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="10"><span class="dir">Anterior</span><span class="t">← Índices y rendimiento</span></button><button class="navbtn next" data-goto="12"><span class="dir">Siguiente</span><span class="t">Backups y cuidados →</span></button></div>
+</section>
+
+<!-- 12 -->
+<section class="chapter" data-part="Parte 4 · Deploy" data-num="12" data-title="Backups y cuidados" id="backups">
+  <div class="ch-eyebrow">Capítulo 12</div>
+  <h1>Backups y qué no hacer</h1>
+  <p class="lead">La base tiene los datos que no se pueden perder. Un par de cuidados que separan a un aficionado de alguien que sabe lo que hace.</p>
+  <h2>Backups</h2>
+  <p>Los servicios gestionados hacen backups automáticos, y podés restaurar a un punto en el tiempo. Igual, conviene saber exportar la base vos mismo (<code>pg_dump</code> para Postgres) y guardar una copia cada tanto. El día que la necesites, la vas a agradecer.</p>
+  <h2>Errores clásicos a evitar</h2>
+  <ul>
+    <li><strong>UPDATE o DELETE sin WHERE:</strong> afecta todas las filas. Antes de correr uno a mano, probalo como SELECT para ver qué toca.</li>
+    <li><strong>La contraseña de la base en el código:</strong> siempre en variables de entorno.</li>
+    <li><strong>Probar en producción:</strong> tené una base de desarrollo separada. No experimentes con los datos reales.</li>
+    <li><strong>Confiar en la entrada del usuario:</strong> validá en el backend y parametrizá siempre las consultas.</li>
+    <li><strong>No tener migraciones:</strong> el esquema de producción tiene que ser reproducible, no fruto de cambios manuales que nadie recuerda.</li>
+  </ul>
+  <div class="box nota"><span class="tag">La base es el activo</span><p>El código lo reescribís; los datos, no. Un frontend roto se arregla en una tarde. Una base corrupta o borrada sin backup puede terminar un proyecto. Tratala con el respeto que merece.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="11"><span class="dir">Anterior</span><span class="t">← Deploy de la base</span></button><button class="navbtn next" data-goto="13"><span class="dir">Siguiente</span><span class="t">Construir con IA →</span></button></div>
+</section>
+
+<!-- 13 -->
+<section class="chapter" data-part="Parte 5 · Con IA" data-num="13" data-title="Construir con IA" id="ia">
+  <div class="ch-eyebrow">Capítulo 13</div>
+  <h1>Bases de datos con ayuda de IA</h1>
+  <p class="lead">Las herramientas de IA de hoy son buenísimas para el trabajo con bases: diseñar esquemas, escribir consultas complejas y explicar SQL ajeno. Bien usadas, te ahorran horas. Mal usadas, te meten bugs sutiles.</p>
+  <h2>Para qué son excelentes</h2>
+  <ul>
+    <li><strong>Diseñar el esquema:</strong> "Necesito un esquema para un blog con usuarios, posts y comentarios. Dame las tablas con sus tipos y relaciones." Te da un punto de partida sólido en segundos.</li>
+    <li><strong>Escribir consultas difíciles:</strong> los JOIN de varias tablas y las agregaciones son justo donde la IA brilla. "Dame el SQL para el total vendido por usuario el último mes."</li>
+    <li><strong>Explicar y traducir:</strong> pegás un SQL que no entendés y pedís que lo explique, o pedís la versión con ORM de una consulta cruda.</li>
+    <li><strong>Optimizar:</strong> "Esta consulta va lenta, ¿qué índice le falta?"</li>
+  </ul>
+  <h2>Cómo pedirlo bien</h2>
+  <p>Dale contexto: qué motor usás (Postgres, SQLite), tu esquema actual, y qué querés lograr. Cuanto más concreto, mejor sale. Pegá tus <code>CREATE TABLE</code> para que trabaje con tus tablas reales.</p>
+  <div class="box ojo"><span class="tag">Revisá siempre, sobre todo lo destructivo</span><p>Nunca corras un <code>UPDATE</code> o <code>DELETE</code> que te dio la IA sin leerlo y sin un WHERE que entiendas. Un borrado mal hecho no se deshace. Y verificá que las consultas usen parámetros, no concatenación. La IA acelera; la responsabilidad sobre tus datos sigue siendo tuya.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="12"><span class="dir">Anterior</span><span class="t">← Backups y cuidados</span></button><button class="navbtn next" data-goto="14"><span class="dir">Siguiente</span><span class="t">Checklist y cierre →</span></button></div>
+</section>
+
+<!-- 14 -->
+<section class="chapter" data-part="Cierre" data-num="14" data-title="Checklist y cierre" id="cierre">
+  <div class="ch-eyebrow">Fin del librito</div>
+  <h1>Checklist y cierre</h1>
+  <p class="lead">Fuiste de no saber qué es una tabla a tener un backend con CRUD real y una base lista para producción. Este es el resumen para tener a mano.</p>
+  <h2>Checklist de un backend SQL</h2>
+  <ul>
+    <li>Esquema pensado: tablas, tipos correctos, claves primarias y foráneas.</li>
+    <li>Reglas en la base: NOT NULL, UNIQUE, DEFAULT donde corresponde.</li>
+    <li>Backend conectado con un ORM (o SQL crudo bien parametrizado).</li>
+    <li>CRUD completo por API: crear, leer, actualizar, borrar.</li>
+    <li>Consultas siempre parametrizadas (nunca concatenar entrada).</li>
+    <li>Cadena de conexión en variable de entorno, fuera de Git.</li>
+    <li>Migraciones versionadas para todo cambio de esquema.</li>
+    <li>Índices en las columnas que filtrás seguido.</li>
+    <li>Base de producción gestionada (Neon, Supabase) con backups.</li>
+  </ul>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Esquema</th><td>El conjunto de tablas y columnas de la base.</td></tr>
+      <tr><th>Clave primaria</th><td>El id único de cada fila.</td></tr>
+      <tr><th>Clave foránea</th><td>Columna que apunta al id de otra tabla (la relación).</td></tr>
+      <tr><th>ORM</th><td>Herramienta que mapea objetos de tu código a filas de la base.</td></tr>
+      <tr><th>Migración</th><td>Cambio de esquema versionado y reversible.</td></tr>
+      <tr><th>Inyección SQL</th><td>Ataque que mete código en una consulta mal armada.</td></tr>
+      <tr><th>Índice</th><td>Estructura que acelera las búsquedas por una columna.</td></tr>
+      <tr><th>Connection string</th><td>Cadena con los datos para conectarse a la base (es un secreto).</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Qué viene después</h2>
+  <p>El compañero de este librito es el de backend NoSQL: el otro gran modelo de bases, para datos más flexibles. Con los dos vas a poder elegir la herramienta correcta para cada proyecto. Y con el librito de conexión front-back, ya tenés todo para armar una app completa de punta a punta.</p>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Sabés diseñar datos, hablar SQL, conectar un backend, protegerlo y desplegar una base real. Es una de las habilidades más pedidas y más duraderas del desarrollo: los frameworks cambian, las bases relacionales llevan 50 años y siguen firmes.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="13"><span class="dir">Anterior</span><span class="t">← Construir con IA</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('sqlbe-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('sqlbe-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('sqlbe-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('sqlbe-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>
