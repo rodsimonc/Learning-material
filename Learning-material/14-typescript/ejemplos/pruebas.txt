@@ -1,0 +1,29 @@
+=== TYPESCRIPT · salida real ===
+
+== 1. El código correcto compila con tsc y corre ==
+$ tsc ejemplos.ts --strict && node ejemplos.js
+precio con IVA: 1210
+estado: Ya cobrado
+primer producto: Muzzarella
+con opcional stock: sin definir
+
+== 2. Errores que tsc atrapa ANTES de correr (en compilación) ==
+$ tsc errores.ts --strict --noUncheckedIndexedAccess --noEmit
+
+error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+  -> precioConIva("1000")   (pasaste un texto donde va un número)
+
+error TS2741: Property 'precio' is missing in type '{id,nombre}' but required in type 'Producto'.
+  -> const p: Producto = {id:1, nombre:"Pizza"}   (falta una propiedad obligatoria)
+
+error TS2322: Type '"cancelado"' is not assignable to type 'Estado'.
+  -> const e: Estado = "cancelado"   (valor fuera del union permitido)
+
+error TS2551: Property 'nombr' does not exist on type 'Producto'. Did you mean 'nombre'?
+  -> p.nombr   (typo, y hasta te sugiere la corrección)
+
+error TS2322: Type 'number | undefined' is not assignable to type 'number'.
+  -> const x: number = lista[0]   (acceso a array que puede venir vacío)
+
+Los 5 son bugs que en JavaScript recién explotarían corriendo, en producción.
+TypeScript te los muestra mientras escribís.

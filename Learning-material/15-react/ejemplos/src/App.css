@@ -1,0 +1,17 @@
+:root{font-family:system-ui,sans-serif}
+.app{max-width:900px;margin:0 auto;padding:16px}
+header h1{color:#c0392b}
+main{display:grid;grid-template-columns:1fr 280px;gap:20px}
+.catalogo{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.tarjeta{border:1px solid #e2e6ea;border-radius:12px;padding:14px;background:#fff}
+.tarjeta .cat{font-size:.72rem;text-transform:uppercase;color:#8a96a3;letter-spacing:.04em}
+.tarjeta h3{margin:.3rem 0;font-size:1rem}
+.tarjeta .precio{font-weight:700;color:#0d6b6b;margin:.2rem 0 .6rem}
+.tarjeta button{background:#c0392b;color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;width:100%}
+.carrito{background:#f6f7f9;border:1px solid #e2e6ea;border-radius:12px;padding:14px;align-self:start}
+.carrito h2{font-size:1rem;margin-top:0}
+.carrito ul{list-style:none;padding:0;margin:0}
+.carrito li{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #e7ebef;font-size:.9rem}
+.carrito .x{background:none;border:0;color:#c0392b;cursor:pointer;font-size:.8rem}
+.carrito .total{font-weight:800;font-size:1.1rem;margin-top:10px}
+@media(max-width:640px){main{grid-template-columns:1fr}.catalogo{grid-template-columns:1fr}}

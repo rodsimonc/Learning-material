@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Observabilidad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Backend · logs, errores y salud en producción</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Backend · Observabilidad</div>
+  <h1>Observabilidad, de 0</h1>
+  <p class="lead">"En mi compu andaba." La diferencia entre un programador y alguien que corre software en producción es saber qué pasa cuando se rompe, sin estar mirando. Eso es la observabilidad: logs, manejo de errores y salud de la app. En este librito la armás, con logs reales capturados.</p>
+  <div class="box nota"><span class="tag">Código real y probado</span><p>La API con logs estructurados, request id y captura de errores se construyó y se corrió. Los bloques con <span class="tested">✓ salida real</span> son los logs que generó, incluido un error atrapado. El código está en <code>ejemplos/</code>.</p></div>
+  <h2>Qué vas a poder hacer al terminar</h2>
+  <p>Escribir logs útiles (estructurados), seguir un pedido con un request id, capturar errores sin que se pierdan en silencio, exponer un healthcheck, y saber qué es Sentry y las métricas para cuando el proyecto crezca.</p>
+  <div class="box nota"><span class="tag">Cómo moverte</span><p>Índice a la izquierda, o flechas <span class="kbd">←</span> <span class="kbd">→</span>. El libro recuerda dónde quedaste.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">Qué es observabilidad →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Conceptos" data-num="1" data-title="Qué es" id="que-es">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Qué es la observabilidad</h1>
+  <p class="lead">Observabilidad es poder entender qué está haciendo tu app desde afuera, sin abrir el código ni ponerle pausa. Cuando algo falla a las 3 AM y vos estás durmiendo, lo que dejaste registrado es lo único que tenés para saber qué pasó.</p>
+  <h2>Los tres pilares</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Pilar</th><th>Responde</th></tr></thead>
+    <tbody>
+      <tr><th>Logs</th><td>¿Qué pasó, y cuándo? El diario de la app.</td></tr>
+      <tr><th>Métricas</th><td>¿Cuánto? Cantidad de pedidos, tiempo de respuesta, uso de CPU.</td></tr>
+      <tr><th>Trazas</th><td>¿Por dónde pasó un pedido? Su recorrido por el sistema.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Para una app normal, con logs bien hechos y captura de errores ya cubrís el 90% de lo que necesitás. Métricas y trazas suman cuando el sistema es grande. Este librito arranca por lo esencial: los logs.</p>
+  <div class="box nota"><span class="tag">El cambio de mentalidad</span><p>En desarrollo, si algo falla, lo ves y lo depurás. En producción no estás mirando, y no podés reproducir cada situación de cada usuario. Entonces preparás la app para que te cuente qué le pasa. Ese cambio (de "yo depuro" a "la app me avisa") es lo que separa un proyecto de hobby de uno serio.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Logs que sirven →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 2 · Logs" data-num="2" data-title="Logs que sirven" id="logs">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Logs que sirven: estructurados</h1>
+  <p class="lead">Un <code>print("algo pasó")</code> no sirve en producción: no se puede buscar ni filtrar. Los logs útiles son estructurados: cada uno es un dato con campos (JSON), no un texto suelto.</p>
+  <h2>print vs log estructurado</h2>
+  <div class="codehead"><span class="lang txt">comparación</span></div>
+<pre>print:  "pedido 201 de carlos falló"
+        -> ¿cómo buscás todos los errores? ¿los de un usuario? imposible
+
+JSON:   {"nivel":"ERROR","mensaje":"pago falló","pedido":201,"usuario":"carlos"}
+        -> filtrás por nivel=ERROR, por pedido, por usuario. Buscable.</pre>
+  <div class="codehead"><span class="lang py">app.py · logs en JSON</span></div>
+<pre>def logear(nivel, mensaje, **campos):
+    log.log(nivel, mensaje, extra={"extra": campos})
+
+logear(logging.INFO, "consulta de catálogo", cantidad=3)</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">{"ts":"2026-09-05T10:51:59","nivel":"INFO","mensaje":"consulta de catálogo","cantidad":3}</pre>
+  <div class="box nota"><span class="tag">Niveles de log</span><p>Usá los niveles: <code>DEBUG</code> (detalle para depurar), <code>INFO</code> (eventos normales), <code>WARNING</code> (algo raro pero no roto), <code>ERROR</code> (algo falló). En producción mostrás de INFO para arriba y filtrás por ERROR cuando buscás problemas. Un log sin nivel es ruido; con nivel, es una herramienta.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← Qué es observabilidad</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Request id →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · Logs" data-num="3" data-title="Request id" id="requestid">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Request id: seguir un pedido</h1>
+  <p class="lead">Un pedido genera varios logs (llegó, consultó la base, respondió). Con muchos usuarios a la vez, los logs se mezclan. El request id le pone a cada pedido una etiqueta única, así podés seguir todo su recorrido.</p>
+  <div class="codehead"><span class="lang py">app.py · middleware</span></div>
+<pre>@app.middleware("http")
+async def observar(request, call_next):
+    rid = str(uuid.uuid4())[:8]          # id único para este pedido
+    inicio = time.time()
+    respuesta = await call_next(request)
+    ms = round((time.time() - inicio) * 1000)
+    logear(logging.INFO, "request", request_id=rid,
+           metodo=request.method, ruta=request.url.path,
+           status=respuesta.status_code, ms=ms)
+    respuesta.headers["X-Request-ID"] = rid   # se lo devolvés al cliente
+    return respuesta</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">{"nivel":"INFO","mensaje":"request","request_id":"7e3d7336","metodo":"GET","ruta":"/productos","status":200,"ms":1}</pre>
+  <p>El middleware corre en cada pedido: genera el id, mide cuánto tardó, y lo loguea. Además mide el tiempo de respuesta (<code>ms</code>), que ya es una métrica gratis para detectar lo lento.</p>
+  <div class="box nota"><span class="tag">El id que le das al usuario</span><p>Fijate que el request id vuelve en un header (y en el cuerpo del error, próximo capítulo). Cuando un usuario reporta "no me anda", le pedís ese id, y con él encontrás en los logs exactamente su pedido, entre millones. Es la diferencia entre "buscá aguja en pajar" y "acá está".</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Logs que sirven</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Capturar errores →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 3 · Errores" data-num="4" data-title="Capturar errores" id="errores">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Capturar errores sin perder nada</h1>
+  <p class="lead">Cuando algo revienta, pasan dos cosas mal por defecto: el usuario ve un error feo (o los detalles internos), y vos no te enterás. Un manejo central de errores arregla las dos.</p>
+  <div class="codehead"><span class="lang py">app.py · atrapar todo en el middleware</span></div>
+<pre>try:
+    respuesta = await call_next(request)
+except Exception as e:
+    logear(logging.ERROR, "excepción no manejada",
+           request_id=rid, ruta=request.url.path, error=str(e))
+    return JSONResponse(status_code=500,
+        content={"detail": "error interno", "request_id": rid})</pre>
+  <div class="codehead"><span class="lang sh">salida real (un bug atrapado)</span><span class="tested">✓ salida real</span></div>
+<pre class="output"># en los logs (para vos):
+{"nivel":"ERROR","mensaje":"excepción no manejada","request_id":"e09ac39e","ruta":"/romper","error":"division by zero","ms":1}
+
+# lo que recibe el usuario:
+500 {"detail":"error interno","request_id":"e09ac39e"}</pre>
+  <div class="box ojo"><span class="tag">Nunca muestres el error interno al usuario</span><p>Fijate: al usuario le decís "error interno" y el id; el detalle real (<code>division by zero</code>) queda en tus logs. Mostrar el error técnico al usuario es feo y peligroso: puede revelar cómo está hecho tu sistema (nombres de tablas, rutas), información que un atacante aprovecha. El detalle para vos, un mensaje genérico con id para el usuario.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Request id</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Healthcheck →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 3 · Errores" data-num="5" data-title="Healthcheck" id="health">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Healthcheck: ¿está viva la app?</h1>
+  <p class="lead">Un endpoint chiquito que responde "estoy bien". Parece tonto y es clave: el hosting lo llama cada pocos segundos para saber si tu app está viva, y si no responde, la reinicia solo.</p>
+  <div class="codehead"><span class="lang py">app.py</span></div>
+<pre>@app.get("/health")
+def health():
+    return {"estado": "ok"}</pre>
+  <p>Eso solo ya sirve para que el hosting (librito 20) sepa que la app arrancó. Una versión más completa chequea también las dependencias: que la base de datos responda, por ejemplo. Si la base está caída, el health falla, y te enterás antes de que se quejen los usuarios.</p>
+  <div class="codehead"><span class="lang py">healthcheck que también chequea la base</span></div>
+<pre>@app.get("/health")
+def health():
+    try:
+        conectar().execute("SELECT 1")
+        return {"estado": "ok", "base": "ok"}
+    except Exception:
+        return JSONResponse(status_code=503,
+            content={"estado": "degradado", "base": "caída"})</pre>
+  <div class="box nota"><span class="tag">Liveness y readiness</span><p>Dos matices que vas a cruzar: <em>liveness</em> ("¿el proceso está vivo?") y <em>readiness</em> ("¿está listo para recibir tráfico?", ej. ya conectó a la base). En apps chicas alcanza con un health simple; en sistemas grandes (Kubernetes) se separan. Bueno saber que existen.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Capturar errores</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Sentry y métricas →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 4 · Herramientas" data-num="6" data-title="Sentry y métricas" id="herramientas">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Sentry, métricas y dashboards</h1>
+  <p class="lead">Los logs son la base. Cuando el proyecto crece, hay herramientas que te avisan de los errores al instante y te muestran la salud del sistema en gráficos. Un panorama para saber qué buscar.</p>
+  <h2>Sentry: que el error te llame a vos</h2>
+  <p>Con logs, tenés que ir a buscarlos. Sentry da vuelta la cosa: captura cada error automáticamente, lo agrupa (100 veces el mismo error es una sola alerta), te muestra la línea exacta y el contexto, y te avisa (email, Slack) apenas pasa. Se integra en dos líneas.</p>
+  <div class="codehead"><span class="lang py">integrar Sentry (requiere tu DSN)</span></div>
+<pre>import sentry_sdk
+sentry_sdk.init(dsn=os.getenv("SENTRY_DSN"))
+# listo: cada excepción no manejada se reporta sola, con todo el contexto</pre>
+  <h2>Métricas y dashboards</h2>
+  <p>Para el "¿cuánto?" (pedidos por minuto, tiempo de respuesta, errores por hora, uso de recursos), están herramientas como Prometheus + Grafana, o las que trae tu hosting. Te dan gráficos en tiempo real y alertas cuando algo se dispara. La mayoría de los servicios de deploy (librito 20) ya traen métricas y logs básicos sin configurar nada.</p>
+  <div class="box nota"><span class="tag">Empezá simple</span><p>No necesitás todo esto el día uno. Con logs estructurados, request id y captura de errores (lo que armamos acá) ya estás mejor que la mayoría. Sumá Sentry cuando tengas usuarios reales, y métricas cuando el volumen lo pida. La observabilidad crece con el proyecto; lo importante es arrancar con la base bien puesta.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Healthcheck</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Checklist y cierre →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Cierre" data-num="7" data-title="Checklist y cierre" id="cierre">
+  <div class="ch-eyebrow">Fin del librito</div>
+  <h1>Checklist y cierre</h1>
+  <p class="lead">Ya sabés preparar una app para saber qué le pasa en producción. Corto y al hueso.</p>
+  <h2>Con IA</h2>
+  <p>"Agregá logging estructurado en JSON y un middleware de request id + captura de errores a esta app FastAPI." Sale bien. Pedile que nunca exponga el detalle del error al cliente, solo el id.</p>
+  <h2>Checklist de observabilidad</h2>
+  <ul>
+    <li>Logs estructurados (JSON), no <code>print</code>.</li>
+    <li>Niveles bien usados (INFO, WARNING, ERROR).</li>
+    <li>Request id en cada pedido, devuelto al cliente.</li>
+    <li>Captura central de errores: log completo para vos, mensaje genérico + id para el usuario.</li>
+    <li>Nunca exponer detalles internos del error.</li>
+    <li>Healthcheck (mejor si chequea la base).</li>
+    <li>Sentry cuando haya usuarios; métricas cuando el volumen lo pida.</li>
+  </ul>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Log estructurado</th><td>Registro con campos (JSON), buscable.</td></tr>
+      <tr><th>Request id</th><td>Etiqueta única por pedido para seguir sus logs.</td></tr>
+      <tr><th>Healthcheck</th><td>Endpoint que dice si la app está viva.</td></tr>
+      <tr><th>Sentry</th><td>Servicio que captura y avisa errores solo.</td></tr>
+      <tr><th>Métricas</th><td>Números en el tiempo: pedidos, latencia, recursos.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Tu app dejó de ser una caja negra: ahora te cuenta qué hace y te avisa cuando se rompe, con el detalle para arreglarlo rápido. Es lo que te va a salvar el día que algo falle en producción, que va a pasar. Y es justo lo que necesitás antes de desplegar, que es el próximo librito.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Sentry y métricas</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('obs-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('obs-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('obs-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('obs-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

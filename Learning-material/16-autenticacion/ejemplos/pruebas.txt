@@ -1,0 +1,26 @@
+=== AUTENTICACIÓN · salida real ===
+
+== Registro (contraseña hasheada con bcrypt) ==
+{'email': 'carlos@x.com', 'rol': 'cliente', 'mensaje': 'registrado'}
+registro duplicado -> 409: el email ya está registrado
+
+== Login OK -> access + refresh token ==
+access (recortado):  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ...
+contenido del access: {'sub': 'carlos@x.com', 'rol': 'cliente', 'tipo': 'access'}
+login con clave incorrecta -> 401: credenciales invalidas (error genérico)
+
+== Endpoints protegidos ==
+GET /perfil sin token   -> 401
+GET /perfil con token   -> {'email': 'carlos@x.com', 'rol': 'cliente'}
+
+== Control por rol ==
+GET /admin con cliente  -> 403: requiere rol 'admin'
+GET /admin con admin    -> {'mensaje': 'bienvenido admin jefe@x.com', ...}
+
+== Refresh: renovar el access sin re-login ==
+POST /refresh -> nuevo access token
+
+== bcrypt: el hash no es la contraseña ==
+hash guardado:  $2b$12$3w84pFwQLMe0UqPcpNbGx...
+verifica 'secreto123': True
+verifica 'otra':       False

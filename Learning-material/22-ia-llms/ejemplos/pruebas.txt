@@ -1,0 +1,30 @@
+=== IA/LLMs · salida real ===
+
+=== RAG · recuperación (probado de verdad) ===
+
+Pregunta: ¿cómo puedo pagar?
+  [rel 0.29] -> Podés pagar con MercadoPago, con QR o con transferencia bancaria.
+
+Pregunta: ¿cuál es el horario?
+  [rel 0.382] -> El horario de atención es de 12 a 15 y de 20 a 24, todos los días.
+
+Pregunta: ¿tienen opciones sin gluten?
+  [rel 0.605] -> Los productos sin gluten (sin TACC) están marcados con etiqueta verde.
+
+=== El prompt final que recibe el LLM ===
+
+Respondé usando SOLO este contexto:
+- Podés pagar con MercadoPago, con QR o con transferencia bancaria.
+
+Pregunta: ¿cómo puedo pagar?
+
+=== Function calling · dispatch (probado de verdad) ===
+
+modelo pide buscar_pedido(201) -> {'pedido_id': 201, 'estado': 'pagado', 'total': 22600}
+modelo pide stock_producto('Milanesa') -> {'producto': 'Milanesa', 'stock': 12}
+modelo pide herramienta inexistente -> {'error': 'herramienta desconocida: borrar_todo'}
+
+Nota honesta: el retrieval usa TF-IDF (matching por palabras), que se puede
+correr sin API key. RAG en producción usa embeddings (vectores semánticos)
+que además captan sinónimos y parafraseo. El chat/streaming con Claude u OpenAI
+necesitan tu API key (variable de entorno); el código está en llm.py.

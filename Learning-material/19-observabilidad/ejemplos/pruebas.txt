@@ -1,0 +1,10 @@
+=== OBSERVABILIDAD · salida real (logs JSON por consola) ===
+
+{"ts":"2026-09-05T10:51:59","nivel":"INFO","mensaje":"request","request_id":"2296cab9","metodo":"GET","ruta":"/health","status":200,"ms":3}
+{"ts":"2026-09-05T10:51:59","nivel":"INFO","mensaje":"consulta de catálogo","cantidad":3}
+{"ts":"2026-09-05T10:51:59","nivel":"INFO","mensaje":"request","request_id":"7e3d7336","metodo":"GET","ruta":"/productos","status":200,"ms":1}
+{"ts":"2026-09-05T10:51:59","nivel":"ERROR","mensaje":"excepción no manejada","request_id":"e09ac39e","ruta":"/romper","error":"division by zero","ms":1}
+
+=== respuesta del endpoint que falló ===
+status: 500 | body: {"detail":"error interno","request_id":"e09ac39e"}
+   (el usuario recibe el request_id; con ese id encontrás su error exacto en los logs)

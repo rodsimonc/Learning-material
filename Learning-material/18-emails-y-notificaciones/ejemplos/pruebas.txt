@@ -1,0 +1,18 @@
+=== EMAILS Y NOTIFICACIONES · salida real ===
+(enviados por SMTP a un servidor local que los capturó)
+
+emails recibidos por el servidor SMTP: 2
+
+── Email 1: confirmación de pedido ──
+From: Sabores del Barrio <hola@sabores.com>
+To: carlos@x.com
+Subject: Pedido #201 confirmado
+Content-Type: multipart/alternative   (lleva versión texto y versión HTML)
+  cuerpo: Gracias por tu pedido! Pedido #201 confirmado. Total: $22,600
+
+── Email 2: reset de contraseña ──
+From: Sabores del Barrio <hola@sabores.com>
+To: carlos@x.com
+Subject: Restablecer contraseña
+Content-Type: multipart/alternative
+  cuerpo: link de reset con token, vence en 1 hora

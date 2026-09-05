@@ -1,0 +1,17 @@
+=== REACT + TS · salida real (build + navegador) ===
+
+== Build (tsc typecheck + vite build) ==
+> tsc -b && vite build
+✓ 21 modules transformed.
+dist/assets/index-*.js   192.37 kB │ gzip: 60.62 kB
+✓ built in 470ms
+
+== Interacción real en el navegador (Playwright) ==
+productos renderizados: 6
+carrito inicial: Vacío
+-- agrego 2× Milanesa ($9.500) + 1× Pizza napolitana ($9.800) --
+items en carrito: 2
+total: $28.800          (9500×2 + 9800 = 28.800 ✓)
+-- quito la milanesa --
+total tras quitar: $9.800   (✓)
+errores de consola: ninguno

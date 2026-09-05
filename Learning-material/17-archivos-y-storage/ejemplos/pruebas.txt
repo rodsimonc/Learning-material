@@ -1,0 +1,17 @@
+=== ARCHIVOS Y STORAGE · salida real ===
+
+== Subir una imagen PNG válida ==
+200: guardado como 1ebcc52199b847dda6b3ba0ab03a6c68.png (392 bytes)
+url: /archivos/1ebcc52199b847dda6b3ba0ab03a6c68.png  (nombre único, no 'logo.png')
+
+== Servir el archivo ==
+200, content-type: image/png
+
+== Rechazar tipo no permitido (.exe) ==
+415: tipo no permitido: application/octet-stream
+
+== Rechazar archivo muy grande (>2MB) ==
+413: archivo muy grande (2123435 bytes, máx 2097152)
+
+== Intento de path traversal (../../etc/passwd) ==
+404 (bloqueado)

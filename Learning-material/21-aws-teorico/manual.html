@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AWS, el mapa conceptual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">DevOps · la nube por debajo (teórico)</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">DevOps · AWS (teórico)</div>
+  <h1>AWS, el mapa conceptual</h1>
+  <p class="lead">Railway y Render (librito 20) te esconden la infraestructura para que despliegues rápido. AWS te la da toda, cruda y potente. Es lo que corre por debajo de medio internet y lo que más se pide laboralmente. Este librito es teórico: no vas a ejecutar código, vas a entender el mapa, para que cuando abras la consola de AWS no te ahogues.</p>
+  <div class="box nota"><span class="tag">Por qué teórico</span><p>AWS tiene más de 200 servicios y una curva empinada. Antes de tocar botones, lo que rinde es el modelo mental: qué es cada pieza grande, cómo se relacionan, y cuándo usar AWS en vez de algo más simple. Con ese mapa, los tutoriales concretos después se vuelven fáciles. Cada servicio lo vamos a atar a algo que ya sabés de la colección.</p></div>
+  <h2>Qué vas a poder hacer al terminar</h2>
+  <p>Entender el modelo de AWS, reconocer los servicios centrales (EC2, S3, RDS, Lambda, IAM, VPC y más), saber cómo se mapea una app como la tienda a AWS, entender el modelo de precios (y cómo no llevarte un susto), y decidir cuándo AWS y cuándo un PaaS.</p>
+  <div class="box nota"><span class="tag">Cómo moverte</span><p>Índice a la izquierda, o flechas <span class="kbd">←</span> <span class="kbd">→</span>. El libro recuerda dónde quedaste.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">Qué es AWS →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · El modelo" data-num="1" data-title="Qué es AWS" id="que-es">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Qué es AWS y el modelo de la nube</h1>
+  <p class="lead">AWS (Amazon Web Services) alquila infraestructura de computación por internet. En vez de comprar servidores y tenerlos en una sala, alquilás lo que necesitás de los centros de datos de Amazon, y pagás por lo que usás. Eso es "la nube".</p>
+  <h2>El cambio de fondo</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Antes (servidores propios)</th><th>Con la nube (AWS)</th></tr></thead>
+    <tbody>
+      <tr><th>Comprás máquinas por adelantado</th><td>Alquilás y pagás por uso</td></tr>
+      <tr><th>Meses para escalar</th><td>Minutos para escalar</td></tr>
+      <tr><th>Vos mantenés el hardware</th><td>Amazon mantiene el hardware</td></tr>
+      <tr><th>Pagás igual si no lo usás</th><td>Pagás casi nada si no lo usás</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Modelos de responsabilidad</h2>
+  <p>Hay un abanico según cuánto maneja AWS y cuánto vos: desde alquilar una máquina virtual pelada (vos instalás todo) hasta servicios donde solo subís código. Railway y Render (librito 20) son un PaaS: te esconden casi todo. AWS te deja elegir el nivel, y ahí está su poder y su complejidad.</p>
+  <div class="box nota"><span class="tag">Regiones y disponibilidad</span><p>AWS tiene centros de datos por todo el mundo, agrupados en "regiones" (São Paulo, Virginia, etc.), y cada región tiene varias "zonas de disponibilidad" (edificios separados). Elegís la región cercana a tus usuarios (menos latencia), y para apps críticas se reparten en varias zonas, así si una se cae, la app sigue. Es la base de la alta disponibilidad.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Cómputo: EC2 y Lambda →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 2 · Los servicios" data-num="2" data-title="Cómputo" id="computo">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Cómputo: dónde corre tu código</h1>
+  <p class="lead">Lo primero que necesitás es algo que ejecute tu backend. AWS tiene varias formas, de la más manual a la más automática.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Servicio</th><th>Qué es</th><th>Se parece a</th></tr></thead>
+    <tbody>
+      <tr><th>EC2</th><td>Una máquina virtual pelada: vos instalás y configurás todo</td><td>Tener tu propio servidor Linux</td></tr>
+      <tr><th>ECS / Fargate</th><td>Correr contenedores (librito 05, Docker)</td><td>Docker en la nube</td></tr>
+      <tr><th>Lambda</th><td>Subís una función; corre cuando la llaman, sin servidor fijo</td><td>Un endpoint sin servidor propio</td></tr>
+      <tr><th>Elastic Beanstalk</th><td>Subís tu app y AWS arma lo de abajo</td><td>Railway/Render, versión AWS</td></tr>
+    </tbody>
+  </table></div>
+  <h2>EC2: la pieza clásica</h2>
+  <p>Una instancia EC2 es una computadora virtual en la nube. Elegís su tamaño (CPU, RAM), le instalás lo que quieras, y corrés tu app ahí. Es lo más flexible y lo más trabajo: vos te encargás del sistema, las actualizaciones, la seguridad. Es "tener un servidor", sin el servidor físico.</p>
+  <h2>Lambda: sin servidor (serverless)</h2>
+  <p>Con Lambda no hay una máquina prendida esperando: subís una función, y AWS la ejecuta cuando llega un pedido, cobrándote solo por esos milisegundos. Ideal para tareas puntuales y tráfico irregular. Si no la llama nadie, no pagás nada. La contra: no sirve para todo (hay límites de tiempo y arranques "fríos").</p>
+  <div class="box nota"><span class="tag">Serverless no es "sin servidores"</span><p>El nombre confunde: servidores hay, pero no los ves ni los gestionás vos. Es "sin gestión de servidores". Lambda es el caso estrella, y encaja perfecto con cosas como procesar una imagen recién subida (librito 17) o responder un webhook (librito 13), donde el evento es puntual.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← Qué es AWS</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Almacenamiento y base →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · Los servicios" data-num="3" data-title="Datos: S3 y RDS" id="datos">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Guardar datos: S3 y RDS</h1>
+  <p class="lead">Tu app guarda dos tipos de cosas: archivos (imágenes, PDFs) y datos estructurados (usuarios, pedidos). AWS tiene un servicio estrella para cada uno.</p>
+  <h2>S3: archivos</h2>
+  <p>S3 (Simple Storage Service) es el almacén de archivos de AWS, y probablemente el servicio más usado de todos. Guardás archivos en "buckets", con una URL cada uno, capacidad prácticamente infinita, y muy barato. Es exactamente el storage en la nube del librito 17: las fotos de productos de la tienda irían acá.</p>
+  <h2>RDS: bases de datos relacionales</h2>
+  <p>RDS (Relational Database Service) es Postgres o MySQL gestionado por AWS (librito 10): ellos corren la base, hacen backups y la mantienen; vos la usás. Es el equivalente a la base Postgres que en el librito 10 levantábamos en Neon o Supabase, pero dentro de AWS.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Servicio AWS</th><th>Para</th><th>En la colección</th></tr></thead>
+    <tbody>
+      <tr><th>S3</th><td>Archivos</td><td>Storage en la nube (librito 17)</td></tr>
+      <tr><th>RDS</th><td>Base relacional (Postgres/MySQL)</td><td>Backend SQL (librito 10)</td></tr>
+      <tr><th>DynamoDB</th><td>Base NoSQL</td><td>Backend NoSQL (librito 11)</td></tr>
+      <tr><th>ElastiCache</th><td>Caché en memoria (Redis)</td><td>Redis (librito 11)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Todo lo que ya sabés, tiene su servicio</span><p>Fijate el patrón: cada cosa de la colección (base SQL, NoSQL, archivos, caché) tiene un servicio de AWS. AWS no inventa conceptos nuevos; te da su versión gestionada y a gran escala de lo que ya entendés. Por eso llegar a AWS con las bases puestas es tan distinto a llegar en frío.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Cómputo</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Red y entrega →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · Los servicios" data-num="4" data-title="Red y entrega" id="red">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Red y entrega: VPC, CloudFront y más</h1>
+  <p class="lead">Estos servicios conectan las piezas y llevan tu app a los usuarios rápido y seguro. Son menos glamorosos pero fundamentales.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Servicio</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><th>VPC</th><td>Tu red privada dentro de AWS: aísla y protege tus recursos.</td></tr>
+      <tr><th>Load Balancer (ELB)</th><td>Reparte el tráfico entre varias instancias (para escalar).</td></tr>
+      <tr><th>CloudFront</th><td>CDN: cachea tu contenido cerca del usuario, en todo el mundo.</td></tr>
+      <tr><th>Route 53</th><td>DNS: conecta tu dominio con tus servicios.</td></tr>
+      <tr><th>API Gateway</th><td>La puerta de entrada a tus APIs, sobre todo con Lambda.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>CloudFront: el CDN</h2>
+  <p>Es el CDN del que hablamos en widgets (librito 12): copia tu contenido en servidores por todo el mundo, así el usuario lo recibe del más cercano, rapidísimo. Se usa para servir el frontend y los archivos de S3. Un frontend React (librito 15) en S3 + CloudFront es una forma clásica de hostear una web estática en AWS.</p>
+  <div class="box nota"><span class="tag">VPC: la red que no ves pero importa</span><p>La VPC es tu red privada: definís qué recursos son públicos (tu API) y cuáles quedan escondidos (tu base de datos, que solo tu API puede tocar, nunca internet directo). Es la aplicación a nivel infraestructura de la regla de toda la colección: exponer lo mínimo. La base nunca abierta a internet (librito 11) se logra justo con esto.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Datos: S3 y RDS</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Seguridad: IAM →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · Los servicios" data-num="5" data-title="Seguridad: IAM" id="iam">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>IAM: quién puede hacer qué</h1>
+  <p class="lead">IAM (Identity and Access Management) es el sistema de permisos de AWS, y es de lo más importante que hay que entender. Define qué puede hacer cada persona y cada servicio. Es la autorización del librito 16, a escala de infraestructura.</p>
+  <h2>Los conceptos</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Concepto</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Usuario</th><td>Una persona o app con credenciales.</td></tr>
+      <tr><th>Rol</th><td>Permisos que un servicio asume (ej. tu Lambda puede leer S3).</td></tr>
+      <tr><th>Política</th><td>El documento que dice qué se permite y qué no.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>El principio del menor privilegio</h2>
+  <p>La regla de oro de IAM (y de la seguridad en general, librito 07): cada usuario y servicio recibe solo los permisos que necesita, nada más. Si tu API solo lee una tabla, su permiso es leer esa tabla, no ser administrador de todo. Así, si algo se compromete, el daño queda acotado.</p>
+  <div class="box ojo"><span class="tag">IAM mal configurado = titulares</span><p>La mayoría de las filtraciones grandes en la nube no son "hackeos" sofisticados: son permisos mal puestos. Un bucket S3 abierto al público por error, una credencial con permisos de más que se filtró. IAM es tedioso y es donde se juega la seguridad real en AWS. Menor privilegio, siempre, y nunca credenciales en el código (librito 20).</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Red y entrega</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">La tienda en AWS →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 3 · En la práctica" data-num="6" data-title="La tienda en AWS" id="tienda">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Cómo se mapea la tienda a AWS</h1>
+  <p class="lead">Juntemos todo. Así se vería la tienda de alimentos (librito 13) desplegada en AWS. Cada pieza que construimos tiene su lugar.</p>
+  <div class="codehead"><span class="lang txt">la tienda, sobre AWS</span></div>
+<pre>Usuario
+   │
+   ▼
+Route 53 (dominio)  →  CloudFront (CDN)
+   │                        │
+   │                        ▼
+   │                   S3  (frontend React + fotos de productos)
+   ▼
+Load Balancer
+   │
+   ▼
+ECS/Fargate o EC2  (la API FastAPI)   ── dentro de una VPC
+   │                        │
+   ▼                        ▼
+RDS (Postgres)         Lambda (procesar webhook de pago,
+   los pedidos          redimensionar imágenes subidas)
+   │
+   └─ todo con permisos IAM de menor privilegio</pre>
+  <h2>Pieza por pieza</h2>
+  <p>El frontend React (librito 15) y las fotos (librito 17) van en <strong>S3</strong>, servidos por <strong>CloudFront</strong>. La API (librito 13) corre en <strong>ECS/Fargate</strong> (contenedores, librito 05) o EC2. Los pedidos viven en <strong>RDS</strong> Postgres (librito 10). El webhook de MercadoPago y el redimensionado de imágenes, como son eventos puntuales, encajan en <strong>Lambda</strong>. Todo dentro de una <strong>VPC</strong>, con la base escondida, y permisos <strong>IAM</strong> ajustados.</p>
+  <div class="box nota"><span class="tag">Misma app, más piezas</span><p>Es exactamente la misma aplicación que en Railway (librito 20), pero acá vos armás y conectás cada pieza. Más control y más escala, a cambio de más complejidad. Por eso, para lanzar, un PaaS; para cuando necesitás el control fino o ya trabajás en una empresa que usa AWS, esto.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Seguridad: IAM</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Precios →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 3 · En la práctica" data-num="7" data-title="Precios" id="precios">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>El modelo de precios (y cómo no asustarte)</h1>
+  <p class="lead">AWS cobra por uso, con una granularidad enorme: por hora de máquina, por GB guardado, por millón de requests, por GB transferido. Es flexible y, si no prestás atención, una fuente de sustos. Lo que hay que saber.</p>
+  <h2>Cómo se cobra</h2>
+  <ul>
+    <li><strong>Cómputo:</strong> por tiempo que una instancia está prendida (EC2), o por ejecución (Lambda).</li>
+    <li><strong>Almacenamiento:</strong> por GB guardado por mes (S3, RDS).</li>
+    <li><strong>Transferencia de datos:</strong> sacar datos de AWS hacia internet se cobra (entrar suele ser gratis). Este es el costo que más sorprende.</li>
+    <li><strong>Cada servicio, su tarifa:</strong> no hay un precio único; se suman.</li>
+  </ul>
+  <h2>La capa gratuita y los avisos</h2>
+  <p>AWS tiene una "free tier" generosa el primer año, buena para aprender. Pero cuidado: es fácil dejar algo prendido y que empiece a cobrar. Dos hábitos que te salvan: configurar <strong>alertas de facturación</strong> (que te avise si el gasto pasa de X), y <strong>apagar lo que no usás</strong>. Muchos sustos son una instancia olvidada corriendo un mes.</p>
+  <div class="box ojo"><span class="tag">La complejidad de precios es real</span><p>Calcular cuánto va a salir algo en AWS es difícil hasta para gente con experiencia: hay una calculadora oficial justamente por eso. Para un proyecto chico, un PaaS (librito 20) suele ser más barato y previsible. AWS conviene económicamente a escala, o cuando necesitás servicios que el PaaS no tiene. No asumas que "la nube grande" es más barata: depende.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← La tienda en AWS</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">¿AWS o un PaaS? →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 3 · En la práctica" data-num="8" data-title="AWS o PaaS" id="cuando">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>¿AWS o un PaaS? Cuándo cada uno</h1>
+  <p class="lead">La pregunta práctica. AWS es potente, pero no siempre es la respuesta correcta. Elegir bien te ahorra tiempo, plata y dolores de cabeza.</p>
+  <h2>Empezá con un PaaS (Railway, Render) cuando</h2>
+  <ul>
+    <li>Estás lanzando un proyecto o un MVP y querés velocidad.</li>
+    <li>El equipo es chico y no tenés a alguien de infraestructura.</li>
+    <li>Tu app es estándar (una API, una base, un frontend).</li>
+    <li>Querés precios previsibles y simples.</li>
+  </ul>
+  <h2>Elegí AWS (o similar) cuando</h2>
+  <ul>
+    <li>Necesitás escala o control que el PaaS no da.</li>
+    <li>Tenés requisitos específicos (regiones, cumplimiento, servicios particulares).</li>
+    <li>La empresa donde trabajás ya está en AWS (muy común).</li>
+    <li>El costo a gran escala lo justifica y tenés quién lo gestione.</li>
+  </ul>
+  <div class="box nota"><span class="tag">Un camino sano</span><p>Muchos proyectos exitosos arrancan en un PaaS y migran a AWS cuando la escala lo pide. No hay premio por empezar complejo. Y saber AWS es muy valioso laboralmente aunque tus proyectos personales vivan en Railway: es lo que vas a encontrar en la mayoría de las empresas. Entender el mapa (este librito) es el primer paso; después, tutoriales concretos de cada servicio.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Precios</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Glosario y cierre →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Cierre" data-num="9" data-title="Glosario y cierre" id="cierre">
+  <div class="ch-eyebrow">Fin del librito</div>
+  <h1>Glosario y cierre</h1>
+  <p class="lead">No ejecutaste nada, pero ahora tenés el mapa de AWS: sabés qué es cada pieza grande y cómo se arma una app real con ellas. Con esto, cualquier tutorial concreto se vuelve seguible.</p>
+  <h2>Los servicios que sí o sí conviene conocer</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Servicio</th><th>Es para</th></tr></thead>
+    <tbody>
+      <tr><th>EC2</th><td>Máquinas virtuales (servidores).</td></tr>
+      <tr><th>S3</th><td>Guardar archivos.</td></tr>
+      <tr><th>RDS</th><td>Base de datos relacional gestionada.</td></tr>
+      <tr><th>Lambda</th><td>Funciones serverless, por evento.</td></tr>
+      <tr><th>IAM</th><td>Permisos: quién puede hacer qué.</td></tr>
+      <tr><th>VPC</th><td>Tu red privada en AWS.</td></tr>
+      <tr><th>CloudFront</th><td>CDN, entrega rápida global.</td></tr>
+      <tr><th>Route 53</th><td>DNS, tu dominio.</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Cómo seguir</h2>
+  <p>Con este mapa, el próximo paso concreto sería: crear una cuenta, activar las alertas de facturación, y hacer un tutorial simple (por ejemplo, servir un sitio estático con S3, o levantar una base con RDS). De a un servicio por vez, atándolo a lo que ya sabés de la colección. Y siempre con el ojo en los costos y en IAM.</p>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>AWS deja de ser una sopa de siglas: es un conjunto de piezas, cada una la versión a escala de algo que ya conocés (servidores, base, archivos, red, permisos). Sabés cuándo conviene AWS y cuándo un PaaS, y cómo se arma una app completa con sus servicios. Ese mapa mental es lo que te faltaba para no perderte, y es lo más pedido en el mercado. El resto es práctica, servicio por servicio.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← AWS o un PaaS</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('aws-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('aws-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('aws-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('aws-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

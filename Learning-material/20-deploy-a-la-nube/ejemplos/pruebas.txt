@@ -1,0 +1,15 @@
+=== DEPLOY · salida real ===
+La misma app, arrancada con el comando de PRODUCCIÓN (gunicorn + uvicorn worker),
+leyendo el puerto y el entorno de variables de entorno (como hace el hosting):
+
+$ PORT=9099 ENTORNO=production gunicorn main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+
+[INFO] Listening at: http://0.0.0.0:9099
+[INFO] Using worker: uvicorn.workers.UvicornWorker
+[INFO] Application startup complete.
+
+GET /        -> {"app":"tienda","entorno":"production"}   (leyó ENTORNO del entorno)
+GET /health  -> {"estado":"ok"}                           (lo que chequea el hosting)
+
+Nota: el Dockerfile es correcto pero no se pudo buildear acá (sin daemon Docker
+en el sandbox). El arranque de producción sí se probó de verdad, arriba.
