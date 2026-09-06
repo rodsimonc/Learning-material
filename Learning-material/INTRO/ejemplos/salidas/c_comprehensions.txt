@@ -1,0 +1,7 @@
+con IVA: [1452, 10285, 4235, 11858, 2178]
+caros: [8500, 9800]
+largos en mayus: ['PIZZA', 'GASEOSA']
+menu: {'pizza': 8500, 'flan': 3500, 'gaseosa': 1800}
+  pizza: $8500
+  flan: $3500
+  gaseosa: $1800

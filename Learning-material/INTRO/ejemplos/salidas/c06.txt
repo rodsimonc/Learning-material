@@ -1,0 +1,8 @@
+hay stock: True
+and: True
+or: True
+not: False
+entre 18 y 65: True
+lista vacia es falsa: False
+cero es falso: False
+texto con algo es verdadero: True

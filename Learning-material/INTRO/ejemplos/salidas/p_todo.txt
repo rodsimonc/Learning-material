@@ -1,0 +1,5 @@
+== lista de tareas ==
+  0. [x] comprar harina
+  1. [x] preparar la masa
+  2. [ ] hornear
+pendientes: 1

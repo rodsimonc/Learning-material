@@ -1,0 +1,8 @@
+Hola, mundo
+Carlos tiene 3 pedidos
+A - B - C
+sin salto de linea... misma linea
+linea 1
+linea 2
+tab	separado
+fin

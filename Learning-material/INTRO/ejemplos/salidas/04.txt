@@ -1,0 +1,8 @@
+
+--- Pedido 1: 2 unidades (stock actual: 3) ---
+  OK. Total con 25% off: $12750
+  stock restante: 1
+
+--- Pedido 2: 2 unidades (stock actual: 1) ---
+  RECHAZADO: sin stock suficiente.
+  pedían 2, quedan 1, faltan 1

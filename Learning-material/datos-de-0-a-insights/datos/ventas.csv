@@ -1,0 +1,787 @@
+pedido_id,fecha,producto,categoria,cantidad,precio_unit,metodo_pago
+1001,2026-07-26 23:34,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1001,2026-07-26 23:34,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1002,2026-07-03 12:05,Ensalada Cesar,Platos,1,7200,transferencia
+1002,2026-07-03 12:05,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1002,2026-07-03 12:05,Flan casero,Postres,1,3500,transferencia
+1003,2026-06-17 21:03,Milanesa con papas,Platos,1,9500,mercadopago
+1003,2026-06-17 21:03,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1003,2026-06-17 21:03,Flan casero,Postres,1,3500,mercadopago
+1004,2026-08-18 21:11,Pizza muzzarella,Pizzas,1,8500,qr
+1004,2026-08-18 21:11,Gaseosa 500ml,Bebidas,1,1800,qr
+1005,2026-07-20 13:13,Milanesa con papas,Platos,1,9500,mercadopago
+1005,2026-07-20 13:13,Flan casero,Postres,1,3500,mercadopago
+1006,2026-07-27 21:50,Pizza napolitana,Pizzas,1,9800,mercadopago
+1006,2026-07-27 21:50,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1007,2026-06-24 13:18,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1007,2026-06-24 13:18,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1007,2026-06-24 13:18,Helado 1/4,Postres,1,4200,mercadopago
+1008,2026-07-24 13:04,Empanada de carne,Empanadas,1,1200,mercadopago
+1008,2026-07-24 13:04,Empanada de pollo,Empanadas,1,1200,mercadopago
+1008,2026-07-24 13:04,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1009,2026-07-04 22:30,Pizza muzzarella,Pizzas,1,8500,qr
+1009,2026-07-04 22:30,Gaseosa 500ml,Bebidas,1,1800,qr
+1009,2026-07-04 22:30,Helado 1/4,Postres,1,4200,qr
+1010,2026-06-10 21:22,Empanada de carne,Empanadas,2,1200,mercadopago
+1010,2026-06-10 21:22,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1011,2026-06-19 12:47,Milanesa con papas,Platos,1,9500,transferencia
+1011,2026-06-19 12:47,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1012,2026-07-04 13:52,Ensalada Cesar,Platos,1,7200,mercadopago
+1012,2026-07-04 13:52,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1013,2026-07-14 15:09,Pizza muzzarella,Pizzas,1,8500,qr
+1013,2026-07-14 15:09,Gaseosa 500ml,Bebidas,1,1800,qr
+1013,2026-07-14 15:09,Flan casero,Postres,1,3500,qr
+1014,2026-09-04 20:09,Ensalada Cesar,Platos,1,7200,qr
+1014,2026-09-04 20:09,Gaseosa 500ml,Bebidas,1,1800,qr
+1015,2026-07-27 18:41,Empanada de carne,Empanadas,2,1200,transferencia
+1015,2026-07-27 18:41,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1016,2026-06-10 21:30,Ensalada Cesar,Platos,1,7200,transferencia
+1016,2026-06-10 21:30,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1016,2026-06-10 21:30,Flan casero,Postres,1,3500,transferencia
+1017,2026-07-11 13:36,Pizza napolitana,Pizzas,1,9800,transferencia
+1017,2026-07-11 13:36,Cerveza artesanal,Bebidas,1,3200,transferencia
+1018,2026-06-19 14:40,Pizza napolitana,Pizzas,1,9800,qr
+1018,2026-06-19 14:40,Cerveza artesanal,Bebidas,1,3200,qr
+1018,2026-06-19 14:40,Flan casero,Postres,1,3500,qr
+1019,2026-07-07 14:30,Milanesa con papas,Platos,1,9500,mercadopago
+1019,2026-07-07 14:30,Flan casero,Postres,1,3500,mercadopago
+1020,2026-07-24 21:01,Milanesa con papas,Platos,1,9500,qr
+1020,2026-07-24 21:01,Gaseosa 500ml,Bebidas,1,1800,qr
+1021,2026-08-18 21:41,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1021,2026-08-18 21:41,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1022,2026-07-21 18:49,Empanada de carne,Empanadas,1,1200,qr
+1022,2026-07-21 18:49,Empanada de pollo,Empanadas,1,1200,qr
+1022,2026-07-21 18:49,Gaseosa 500ml,Bebidas,1,1800,qr
+1023,2026-08-12 21:12,Milanesa con papas,Platos,1,9500,mercadopago
+1023,2026-08-12 21:12,Flan casero,Postres,1,3500,mercadopago
+1024,2026-09-02 20:22,Milanesa con papas,Platos,1,9500,qr
+1024,2026-09-02 20:22,Flan casero,Postres,1,3500,qr
+1025,2026-07-23 15:30,Milanesa con papas,Platos,1,9500,mercadopago
+1025,2026-07-23 15:30,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1026,2026-06-19 23:41,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1026,2026-06-19 23:41,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1027,2026-07-18 21:27,Empanada de carne,Empanadas,1,1200,mercadopago
+1027,2026-07-18 21:27,Empanada de pollo,Empanadas,1,1200,mercadopago
+1027,2026-07-18 21:27,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1027,2026-07-18 21:27,Helado 1/4,Postres,1,4200,mercadopago
+1028,2026-08-26 20:37,Milanesa con papas,Platos,1,9500,mercadopago
+1028,2026-08-26 20:37,Flan casero,Postres,1,3500,mercadopago
+1029,2026-06-21 18:35,Pizza napolitana,Pizzas,1,9800,qr
+1029,2026-06-21 18:35,Cerveza artesanal,Bebidas,1,3200,qr
+1029,2026-06-21 18:35,Flan casero,Postres,1,3500,qr
+1030,2026-08-19 22:01,Pizza napolitana,Pizzas,1,9800,qr
+1030,2026-08-19 22:01,Cerveza artesanal,Bebidas,1,3200,qr
+1030,2026-08-19 22:01,Flan casero,Postres,2,3500,qr
+1031,2026-07-26 13:22,Milanesa con papas,Platos,1,9500,transferencia
+1031,2026-07-26 13:22,Flan casero,Postres,1,3500,transferencia
+1032,2026-07-01 21:09,Empanada de carne,Empanadas,2,,qr
+1032,2026-07-01 21:09,Gaseosa 500ml,Bebidas,1,1800,qr
+1033,2026-06-20 14:39,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1033,2026-06-20 14:39,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1034,2026-07-01 21:03,Milanesa con papas,Platos,1,9500,qr
+1034,2026-07-01 21:03,Gaseosa 500ml,Bebidas,1,1800,qr
+1034,2026-07-01 21:03,Flan casero,Postres,1,3500,qr
+1035,2026-07-03 22:28,  Empanada de carne ,Empanadas,1,1200,qr
+1035,2026-07-03 22:28,Empanada de pollo,Empanadas,1,1200,qr
+1035,2026-07-03 22:28,Gaseosa 500ml,Bebidas,1,1800,qr
+1036,2026-07-02 12:30,Milanesa con papas,Platos,1,9500,transferencia
+1036,2026-07-02 12:30,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1037,2026-08-03 17:08,Ensalada Cesar,Platos,1,7200,mercadopago
+1037,2026-08-03 17:08,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1037,2026-08-03 17:08,Helado 1/4,Postres,1,4200,mercadopago
+1038,2026-06-12 12:07,Pizza napolitana,Pizzas,1,9800,qr
+1038,2026-06-12 12:07,Cerveza artesanal,Bebidas,1,3200,qr
+1039,2026-07-21 14:47,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1039,2026-07-21 14:47,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1040,2026-06-12 18:25,Empanada de carne,Empanadas,1,1200,mercadopago
+1040,2026-06-12 18:25,Empanada de pollo,Empanadas,1,1200,mercadopago
+1040,2026-06-12 18:25,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1041,2026-08-25 21:45,Empanada de carne,EMPANADAS,2,1200,qr
+1041,2026-08-25 21:45,Gaseosa 500ml,Bebidas,1,1800,qr
+1042,2026-07-30 22:14,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1042,2026-07-30 22:14,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1042,2026-07-30 22:14,Helado 1/4,Postres,1,4200,mercadopago
+1043,2026-08-13 12:52,Pizza napolitana,Pizzas,1,9800,qr
+1043,2026-08-13 12:52,Cerveza artesanal,Bebidas,1,3200,qr
+1043,2026-08-13 12:52,Flan casero,Postres,1,3500,qr
+1044,2026-07-02 20:51,Pizza napolitana,Pizzas,1,9800,mercadopago
+1044,2026-07-02 20:51,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1045,2026-09-03 20:14,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1045,2026-09-03 20:14,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1046,2026-09-04 13:39,Pizza napolitana,Pizzas,1,9800,transferencia
+1046,2026-09-04 13:39,Cerveza artesanal,Bebidas,1,3200,transferencia
+1046,2026-09-04 13:39,Flan casero,Postres,1,3500,transferencia
+1047,2026-08-16 12:19,Milanesa con papas,Platos,1,9500,qr
+1047,2026-08-16 12:19,Gaseosa 500ml,Bebidas,1,1800,qr
+1048,2026-08-14 14:00,Empanada de carne,EMPANADAS,2,1200,qr
+1048,2026-08-14 14:00,  Gaseosa 500ml ,Bebidas,1,1800,qr
+1049,2026-08-12 21:52,Ensalada Cesar,Platos,1,7200,qr
+1049,2026-08-12 21:52,Gaseosa 500ml,Bebidas,1,1800,qr
+1050,2026-07-17 15:21,Milanesa con papas,Platos,1,9500,qr
+1050,2026-07-17 15:21,Gaseosa 500ml,Bebidas,1,1800,qr
+1051,2026-06-16 14:08,Empanada de carne,Empanadas,2,1200,mercadopago
+1051,2026-06-16 14:08,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1051,2026-06-16 14:08,Helado 1/4,Postres,1,4200,mercadopago
+1052,2026-08-29 14:18,Milanesa con papas,Platos,1,9500,mercadopago
+1052,2026-08-29 14:18,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1053,2026-08-13 13:35,Empanada de carne,Empanadas,1,1200,mercadopago
+1053,2026-08-13 13:35,Empanada de pollo,Empanadas,1,1200,mercadopago
+1053,2026-08-13 13:35,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1053,2026-08-13 13:35,Helado 1/4,Postres,1,4200,mercadopago
+1054,2026-08-13 13:41,Milanesa con papas,Platos,1,9500,mercadopago
+1054,2026-08-13 13:41,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1054,2026-08-13 13:41,Flan casero,Postres,1,3500,mercadopago
+1055,2026-08-25 13:19,Milanesa con papas,Platos,1,9500,qr
+1055,2026-08-25 13:19,Gaseosa 500ml,Bebidas,1,1800,qr
+1055,2026-08-25 13:19,Flan casero,Postres,1,3500,qr
+1056,2026-06-21 22:18,Pizza napolitana,Pizzas,1,9800,qr
+1056,2026-06-21 22:18,Cerveza artesanal,Bebidas,1,3200,qr
+1056,2026-06-21 22:18,Helado 1/4,Postres,1,,qr
+1057,2026-07-03 13:52,Empanada de carne,Empanadas,2,1200,qr
+1057,2026-07-03 13:52,Gaseosa 500ml,Bebidas,1,1800,qr
+1058,2026-06-10 11:08,Empanada de carne,Empanadas,1,1200,mercadopago
+1058,2026-06-10 11:08,Empanada de pollo,Empanadas,1,1200,mercadopago
+1058,2026-06-10 11:08,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1059,2026-07-10 21:15,Milanesa con papas,Platos,1,9500,mercadopago
+1059,2026-07-10 21:15,Flan casero,Postres,1,3500,mercadopago
+1060,2026-08-28 21:33,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1060,2026-08-28 21:33,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1061,2026-08-27 15:47,Milanesa con papas,Platos,1,9500,mercadopago
+1061,2026-08-27 15:47,Flan casero,Postres,1,3500,mercadopago
+1062,2026-07-06 19:41,Milanesa con papas,Platos,1,9500,mercadopago
+1062,2026-07-06 19:41,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1062,2026-07-06 19:41,Flan casero,Postres,1,3500,mercadopago
+1063,2026-06-14 21:30,Empanada de carne,Empanadas,2,1200,transferencia
+1063,2026-06-14 21:30,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1064,2026-08-24 20:18,Milanesa con papas,Platos,1,9500,qr
+1064,2026-08-24 20:18,Flan casero,Postres,1,3500,qr
+1065,2026-06-27 14:18,Milanesa con papas,Platos,1,9500,transferencia
+1065,2026-06-27 14:18,Flan casero,Postres,1,3500,transferencia
+1065,2026-06-27 14:18,Helado 1/4,Postres,1,4200,transferencia
+1066,2026-07-18 14:05,Pizza napolitana,Pizzas,1,9800,mercadopago
+1066,2026-07-18 14:05,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1067,2026-07-21 14:45,Empanada de carne,Empanadas,1,1200,mercadopago
+1067,2026-07-21 14:45,Empanada de pollo,Empanadas,1,1200,mercadopago
+1067,2026-07-21 14:45,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1067,2026-07-21 14:45,Helado 1/4,Postres,1,4200,mercadopago
+1068,2026-08-16 13:46,Pizza napolitana,Pizzas,1,9800,mercadopago
+1068,2026-08-16 13:46,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1069,2026-08-21 23:25,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1069,2026-08-21 23:25,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1070,2026-09-04 17:24,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1070,2026-09-04 17:24,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1071,2026-08-01 19:18,Pizza napolitana,Pizzas,1,9800,mercadopago
+1071,2026-08-01 19:18,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1071,2026-08-01 19:18,Helado 1/4,Postres,1,4200,mercadopago
+1072,2026-07-27 13:51,Ensalada Cesar,Platos,1,7200,transferencia
+1072,2026-07-27 13:51,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1073,2026-06-27 12:28,Pizza napolitana,Pizzas,1,9800,mercadopago
+1073,2026-06-27 12:28,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1074,2026-08-30 17:21,Pizza napolitana,Pizzas,1,9800,qr
+1074,2026-08-30 17:21,Cerveza artesanal,Bebidas,1,3200,qr
+1074,2026-08-30 17:21,Flan casero,Postres,1,3500,qr
+1075,2026-06-14 13:42,Ensalada Cesar,Platos,1,7200,mercadopago
+1075,2026-06-14 13:42,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1075,2026-06-14 13:42,Flan casero,Postres,1,3500,mercadopago
+1076,2026-07-03 16:48,Milanesa con papas,Platos,1,9500,qr
+1076,2026-07-03 16:48,Flan casero,Postres,1,3500,qr
+1077,2026-08-05 13:23,Pizza napolitana,Pizzas,1,9800,mercadopago
+1077,2026-08-05 13:23,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1077,2026-08-05 13:23,Flan casero,Postres,1,3500,mercadopago
+1078,2026-09-03 21:13,Ensalada Cesar,Platos,1,7200,qr
+1078,2026-09-03 21:13,Gaseosa 500ml,Bebidas,1,1800,qr
+1079,2026-07-04 14:33,Milanesa con papas,Platos,1,9500,mercadopago
+1079,2026-07-04 14:33,Gaseosa 500ml,BEBIDAS,1,1800,mercadopago
+1079,2026-07-04 14:33,Flan casero,Postres,1,3500,mercadopago
+1080,2026-06-15 22:01,Pizza napolitana,Pizzas,1,9800,transferencia
+1080,2026-06-15 22:01,Cerveza artesanal,Bebidas,1,3200,transferencia
+1080,2026-06-15 22:01,Helado 1/4,Postres,1,4200,transferencia
+1081,2026-07-05 13:33,Milanesa con papas,Platos,1,9500,mercadopago
+1081,2026-07-05 13:33,Flan casero,Postres,1,3500,mercadopago
+1082,2026-08-23 12:52,Milanesa con papas,Platos,1,9500,mercadopago
+1082,2026-08-23 12:52,Flan casero,Postres,2,3500,mercadopago
+1083,2026-08-20 14:08,Pizza napolitana,Pizzas,1,9800,mercadopago
+1083,2026-08-20 14:08,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1083,2026-08-20 14:08,Flan casero,Postres,1,3500,mercadopago
+1084,2026-08-22 12:24,Pizza napolitana,Pizzas,1,9800,mercadopago
+1084,2026-08-22 12:24,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1084,2026-08-22 12:24,Flan casero,Postres,2,3500,mercadopago
+1085,2026-07-29 23:56,Milanesa con papas,Platos,1,9500,mercadopago
+1085,2026-07-29 23:56,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1086,2026-08-05 13:01,Milanesa con papas,Platos,1,9500,qr
+1086,2026-08-05 13:01,Gaseosa 500ml,Bebidas,1,1800,qr
+1087,2026-07-14 12:14,Milanesa con papas,Platos,1,9500,qr
+1087,2026-07-14 12:14,Flan casero,Postres,1,3500,qr
+1087,2026-07-14 12:14,Helado 1/4,Postres,1,4200,qr
+1088,2026-07-21 22:54,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1088,2026-07-21 22:54,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1088,2026-07-21 22:54,Flan casero,Postres,1,3500,mercadopago
+1089,2026-08-12 12:06,Milanesa con papas,Platos,1,9500,transferencia
+1089,2026-08-12 12:06,Flan casero,Postres,1,3500,transferencia
+1090,2026-07-05 22:59,Ensalada Cesar,Platos,1,7200,transferencia
+1090,2026-07-05 22:59,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1090,2026-07-05 22:59,Flan casero,Postres,1,3500,transferencia
+1091,2026-08-18 20:57,Empanada de carne,Empanadas,1,1200,transferencia
+1091,2026-08-18 20:57,Empanada de pollo,Empanadas,1,1200,transferencia
+1091,2026-08-18 20:57,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1092,2026-08-15 12:29,Empanada de carne,Empanadas,2,1200,qr
+1092,2026-08-15 12:29,Gaseosa 500ml,BEBIDAS,1,1800,qr
+1093,2026-07-20 11:17,Pizza muzzarella,Pizzas,1,8500,transferencia
+1093,2026-07-20 11:17,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1094,2026-08-21 21:52,Pizza napolitana,Pizzas,1,9800,mercadopago
+1094,2026-08-21 21:52,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1094,2026-08-21 21:52,Flan casero,POSTRES,1,3500,mercadopago
+1095,2026-08-30 21:12,Empanada de carne,EMPANADAS,1,1200,transferencia
+1095,2026-08-30 21:12,Empanada de pollo,Empanadas,1,1200,transferencia
+1095,2026-08-30 21:12,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1096,2026-09-02 21:02,Ensalada Cesar,Platos,1,7200,transferencia
+1096,2026-09-02 21:02,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1096,2026-09-02 21:02,Flan casero,Postres,1,3500,transferencia
+1097,2026-08-29 13:23,Pizza napolitana,Pizzas,1,9800,transferencia
+1097,2026-08-29 13:23,Cerveza artesanal,Bebidas,1,3200,transferencia
+1097,2026-08-29 13:23,Flan casero,Postres,1,3500,transferencia
+1098,2026-08-31 13:19,Empanada de carne,Empanadas,2,1200,qr
+1098,2026-08-31 13:19,Gaseosa 500ml,Bebidas,1,1800,qr
+1099,2026-06-16 11:30,Milanesa con papas,Platos,1,9500,mercadopago
+1099,2026-06-16 11:30,Flan casero,Postres,1,3500,mercadopago
+1100,2026-08-04 17:11,Empanada de carne,Empanadas,2,1200,qr
+1100,2026-08-04 17:11,Gaseosa 500ml,Bebidas,1,1800,qr
+1101,2026-06-09 20:29,Empanada de carne,Empanadas,1,1200,qr
+1101,2026-06-09 20:29,Empanada de pollo,Empanadas,1,1200,qr
+1101,2026-06-09 20:29,Gaseosa 500ml,Bebidas,1,1800,qr
+1102,2026-07-02 13:41,Empanada de carne,Empanadas,2,1200,qr
+1102,2026-07-02 13:41,Gaseosa 500ml,Bebidas,1,1800,qr
+1103,2026-08-16 16:39,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1103,2026-08-16 16:39,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1103,2026-08-16 16:39,Helado 1/4,Postres,1,4200,mercadopago
+1104,2026-07-10 12:15,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1104,2026-07-10 12:15,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1105,2026-08-01 21:28,Milanesa con papas,PLATOS,1,9500,mercadopago
+1105,2026-08-01 21:28,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1105,2026-08-01 21:28,Flan casero,POSTRES,1,3500,mercadopago
+1106,2026-06-23 12:32,Milanesa con papas,Platos,1,9500,mercadopago
+1106,2026-06-23 12:32,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1107,2026-07-08 23:14,Milanesa con papas,Platos,1,9500,mercadopago
+1107,2026-07-08 23:14,Flan casero,Postres,1,3500,mercadopago
+1108,2026-07-30 12:37,Milanesa con papas,Platos,1,9500,mercadopago
+1108,2026-07-30 12:37,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1109,2026-08-14 21:06,Empanada de carne,Empanadas,1,1200,mercadopago
+1109,2026-08-14 21:06,Empanada de pollo,Empanadas,1,1200,mercadopago
+1109,2026-08-14 21:06,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1109,2026-08-14 21:06,Helado 1/4,Postres,1,4200,mercadopago
+1110,2026-08-31 12:58,Milanesa con papas,Platos,1,9500,transferencia
+1110,2026-08-31 12:58,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1111,2026-07-15 20:02,Milanesa con papas,Platos,1,9500,mercadopago
+1111,2026-07-15 20:02,Flan casero,Postres,1,3500,mercadopago
+1112,2026-08-24 20:05,Pizza napolitana,Pizzas,1,9800,mercadopago
+1112,2026-08-24 20:05,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1113,2026-07-31 20:36,Empanada de carne,Empanadas,1,1200,mercadopago
+1113,2026-07-31 20:36,Empanada de pollo,Empanadas,1,1200,mercadopago
+1113,2026-07-31 20:36,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1114,2026-07-21 21:27,Pizza napolitana,Pizzas,1,9800,transferencia
+1114,2026-07-21 21:27,Cerveza artesanal,Bebidas,1,3200,transferencia
+1115,2026-07-16 21:00,Empanada de carne,Empanadas,2,1200,qr
+1115,2026-07-16 21:00,Gaseosa 500ml,Bebidas,1,1800,qr
+1116,2026-07-17 13:10,Pizza napolitana,Pizzas,1,9800,mercadopago
+1116,2026-07-17 13:10,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1117,2026-08-15 23:50,Milanesa con papas,Platos,1,9500,transferencia
+1117,2026-08-15 23:50,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1118,2026-08-31 19:24,Pizza muzzarella,Pizzas,1,8500,qr
+1118,2026-08-31 19:24,Gaseosa 500ml,Bebidas,1,1800,qr
+1119,2026-08-16 21:54,Milanesa con papas,Platos,1,9500,mercadopago
+1119,2026-08-16 21:54,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1120,2026-08-09 14:07,Pizza napolitana,Pizzas,1,9800,mercadopago
+1120,2026-08-09 14:07,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1120,2026-08-09 14:07,Flan casero,Postres,1,3500,mercadopago
+1121,2026-06-26 16:07,Ensalada Cesar,Platos,1,7200,qr
+1121,2026-06-26 16:07,Gaseosa 500ml,Bebidas,1,1800,qr
+1122,2026-06-17 20:27,Ensalada Cesar,Platos,1,7200,mercadopago
+1122,2026-06-17 20:27,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1123,2026-07-11 12:15,Milanesa con papas,Platos,1,9500,qr
+1123,2026-07-11 12:15,Flan casero,Postres,1,3500,qr
+1124,2026-07-09 11:08,Empanada de carne,Empanadas,1,1200,mercadopago
+1124,2026-07-09 11:08,Empanada de pollo,Empanadas,1,1200,mercadopago
+1124,2026-07-09 11:08,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1125,2026-07-11 20:05,Empanada de carne,Empanadas,1,1200,qr
+1125,2026-07-11 20:05,Empanada de pollo,Empanadas,1,1200,qr
+1125,2026-07-11 20:05,Gaseosa 500ml,Bebidas,1,1800,qr
+1126,2026-08-30 21:08,Empanada de carne,Empanadas,2,1200,transferencia
+1126,2026-08-30 21:08,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1127,2026-06-09 22:18,Pizza napolitana,Pizzas,1,9800,qr
+1127,2026-06-09 22:18,Cerveza artesanal,Bebidas,1,3200,qr
+1128,2026-08-08 13:20,Pizza napolitana,Pizzas,1,9800,mercadopago
+1128,2026-08-08 13:20,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1128,2026-08-08 13:20,Flan casero,Postres,1,3500,mercadopago
+1129,2026-08-04 20:39,Milanesa con papas,Platos,1,9500,mercadopago
+1129,2026-08-04 20:39,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1130,2026-08-13 20:57,Ensalada Cesar,Platos,1,7200,mercadopago
+1130,2026-08-13 20:57,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1130,2026-08-13 20:57,Helado 1/4,Postres,1,4200,mercadopago
+1131,2026-06-30 14:35,Pizza muzzarella,Pizzas,1,8500,qr
+1131,2026-06-30 14:35,Gaseosa 500ml,Bebidas,1,1800,qr
+1132,2026-07-17 21:36,Pizza napolitana,Pizzas,1,9800,qr
+1132,2026-07-17 21:36,Cerveza artesanal,Bebidas,1,3200,qr
+1133,2026-07-11 13:52,Pizza napolitana,Pizzas,1,9800,transferencia
+1133,2026-07-11 13:52,Cerveza artesanal,Bebidas,1,3200,transferencia
+1133,2026-07-11 13:52,Flan casero,Postres,1,3500,transferencia
+1134,2026-06-23 19:02,Milanesa con papas,Platos,1,9500,mercadopago
+1134,2026-06-23 19:02,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1134,2026-06-23 19:02,Helado 1/4,Postres,1,4200,mercadopago
+1135,2026-07-21 19:02,Empanada de carne,Empanadas,2,1200,mercadopago
+1135,2026-07-21 19:02,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1135,2026-07-21 19:02,Helado 1/4,Postres,1,4200,mercadopago
+1136,2026-07-01 12:08,Milanesa con papas,Platos,1,9500,transferencia
+1136,2026-07-01 12:08,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1137,2026-08-16 14:28,Pizza muzzarella,Pizzas,1,8500,transferencia
+1137,2026-08-16 14:28,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1137,2026-08-16 14:28,Flan casero,Postres,1,3500,transferencia
+1138,2026-08-02 20:52,Empanada de carne,Empanadas,1,1200,qr
+1138,2026-08-02 20:52,Empanada de pollo,Empanadas,1,1200,qr
+1138,2026-08-02 20:52,Gaseosa 500ml,Bebidas,1,1800,qr
+1139,2026-06-20 11:02,Empanada de carne,Empanadas,2,1200,mercadopago
+1139,2026-06-20 11:02,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1140,2026-08-06 14:35,Milanesa con papas,Platos,1,9500,qr
+1140,2026-08-06 14:35,Gaseosa 500ml,Bebidas,1,1800,qr
+1140,2026-08-06 14:35,Flan casero,Postres,1,3500,qr
+1141,2026-06-15 22:32,Pizza napolitana,Pizzas,1,9800,transferencia
+1141,2026-06-15 22:32,Cerveza artesanal,Bebidas,1,3200,transferencia
+1141,2026-06-15 22:32,Flan casero,Postres,2,3500,transferencia
+1142,2026-07-06 22:58,Milanesa con papas,Platos,1,9500,mercadopago
+1142,2026-07-06 22:58,Flan casero,Postres,1,3500,mercadopago
+1142,2026-07-06 22:58,Helado 1/4,Postres,1,4200,mercadopago
+1143,2026-08-23 13:59,Pizza napolitana,Pizzas,1,9800,mercadopago
+1143,2026-08-23 13:59,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1143,2026-08-23 13:59,Flan casero,Postres,1,3500,mercadopago
+1144,2026-06-27 22:18,Milanesa con papas,Platos,1,9500,mercadopago
+1144,2026-06-27 22:18,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1144,2026-06-27 22:18,Flan casero,Postres,1,3500,mercadopago
+1145,2026-08-06 16:12,Ensalada Cesar,Platos,1,7200,mercadopago
+1145,2026-08-06 16:12,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1146,2026-06-17 18:30,Milanesa con papas,Platos,1,9500,qr
+1146,2026-06-17 18:30,Flan casero,Postres,1,3500,qr
+1147,2026-09-02 21:50,Milanesa con papas,Platos,1,9500,qr
+1147,2026-09-02 21:50,Gaseosa 500ml,Bebidas,1,1800,qr
+1148,2026-06-25 11:39,Pizza napolitana,Pizzas,1,9800,mercadopago
+1148,2026-06-25 11:39,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1149,2026-09-02 12:44,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1149,2026-09-02 12:44,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1150,2026-06-22 22:57,Pizza muzzarella,Pizzas,1,8500,qr
+1150,2026-06-22 22:57,Gaseosa 500ml,Bebidas,1,1800,qr
+1151,2026-07-18 12:54,Pizza muzzarella,Pizzas,1,8500,qr
+1151,2026-07-18 12:54,Gaseosa 500ml,Bebidas,1,1800,qr
+1152,2026-07-31 22:13,Pizza napolitana,Pizzas,1,9800,mercadopago
+1152,2026-07-31 22:13,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1152,2026-07-31 22:13,Flan casero,Postres,1,3500,mercadopago
+1153,2026-09-03 14:23,Empanada de carne,Empanadas,1,1200,qr
+1153,2026-09-03 14:23,Empanada de pollo,Empanadas,1,1200,qr
+1153,2026-09-03 14:23,Gaseosa 500ml,Bebidas,1,1800,qr
+1154,2026-07-07 17:01,Ensalada Cesar,Platos,1,7200,mercadopago
+1154,2026-07-07 17:01,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1155,2026-07-07 20:52,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1155,2026-07-07 20:52,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1156,2026-07-12 12:00,Empanada de carne,Empanadas,1,1200,mercadopago
+1156,2026-07-12 12:00,Empanada de pollo,Empanadas,1,1200,mercadopago
+1156,2026-07-12 12:00,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1157,2026-08-13 18:16,Pizza napolitana,Pizzas,1,9800,mercadopago
+1157,2026-08-13 18:16,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1158,2026-06-08 12:05,Milanesa con papas,Platos,1,9500,qr
+1158,2026-06-08 12:05,Flan casero,Postres,1,3500,qr
+1159,2026-08-23 21:57,Pizza muzzarella,Pizzas,1,8500,qr
+1159,2026-08-23 21:57,Gaseosa 500ml,Bebidas,1,1800,qr
+1160,2026-07-20 12:10,Ensalada Cesar,Platos,1,7200,qr
+1160,2026-07-20 12:10,Gaseosa 500ml,Bebidas,1,1800,qr
+1161,2026-07-09 13:41,Empanada de carne,Empanadas,2,1200,mercadopago
+1161,2026-07-09 13:41,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1162,2026-08-17 16:10,Milanesa con papas,Platos,1,9500,qr
+1162,2026-08-17 16:10,Flan casero,Postres,1,3500,qr
+1163,2026-06-23 13:15,Milanesa con papas,Platos,1,9500,qr
+1163,2026-06-23 13:15,Gaseosa 500ml,Bebidas,1,1800,qr
+1164,2026-06-18 12:38,Empanada de carne,Empanadas,1,1200,transferencia
+1164,2026-06-18 12:38,Empanada de pollo,Empanadas,1,1200,transferencia
+1164,2026-06-18 12:38,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1164,2026-06-18 12:38,Helado 1/4,Postres,1,4200,transferencia
+1165,2026-08-03 19:06,Milanesa con papas,Platos,1,9500,transferencia
+1165,2026-08-03 19:06,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1166,2026-07-29 20:58,Pizza muzzarella,Pizzas,1,8500,transferencia
+1166,2026-07-29 20:58,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1167,2026-07-08 13:14,Pizza napolitana,Pizzas,1,9800,mercadopago
+1167,2026-07-08 13:14,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1167,2026-07-08 13:14,Flan casero,Postres,1,3500,mercadopago
+1168,2026-06-20 20:27,Ensalada Cesar,Platos,1,7200,qr
+1168,2026-06-20 20:27,Gaseosa 500ml,Bebidas,1,1800,qr
+1169,2026-06-14 23:14,Pizza napolitana,Pizzas,1,9800,mercadopago
+1169,2026-06-14 23:14,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1170,2026-07-27 13:50,Ensalada Cesar,Platos,1,7200,qr
+1170,2026-07-27 13:50,Gaseosa 500ml,Bebidas,1,1800,qr
+1171,2026-08-04 23:26,Pizza napolitana,Pizzas,1,9800,mercadopago
+1171,2026-08-04 23:26,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1172,2026-09-04 22:16,Milanesa con papas,Platos,1,9500,qr
+1172,2026-09-04 22:16,  Gaseosa 500ml ,Bebidas,1,1800,qr
+1172,2026-09-04 22:16,Flan casero,Postres,1,3500,qr
+1173,2026-08-24 17:32,Empanada de carne,Empanadas,2,1200,transferencia
+1173,2026-08-24 17:32,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1174,2026-07-01 13:11,Ensalada Cesar,Platos,1,7200,transferencia
+1174,2026-07-01 13:11,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1175,2026-06-19 12:03,Empanada de carne,Empanadas,2,1200,qr
+1175,2026-06-19 12:03,Gaseosa 500ml,Bebidas,1,1800,qr
+1175,2026-06-19 12:03,Helado 1/4,Postres,1,4200,qr
+1176,2026-06-11 12:25,Milanesa con papas,Platos,1,9500,transferencia
+1176,2026-06-11 12:25,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1177,2026-07-08 12:51,Milanesa con papas,Platos,1,9500,qr
+1177,2026-07-08 12:51,Gaseosa 500ml,Bebidas,1,1800,qr
+1178,2026-08-08 21:52,Ensalada Cesar,Platos,1,7200,mercadopago
+1178,2026-08-08 21:52,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1179,2026-06-27 21:54,Milanesa con papas,Platos,1,9500,mercadopago
+1179,2026-06-27 21:54,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1180,2026-08-04 23:46,Pizza napolitana,Pizzas,1,9800,qr
+1180,2026-08-04 23:46,Cerveza artesanal,Bebidas,1,3200,qr
+1180,2026-08-04 23:46,Flan casero,Postres,1,3500,qr
+1181,2026-07-26 21:57,Empanada de carne,Empanadas,1,1200,transferencia
+1181,2026-07-26 21:57,Empanada de pollo,Empanadas,1,1200,transferencia
+1181,2026-07-26 21:57,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1181,2026-07-26 21:57,Helado 1/4,Postres,1,4200,transferencia
+1182,2026-08-29 13:33,Empanada de carne,Empanadas,1,1200,mercadopago
+1182,2026-08-29 13:33,Empanada de pollo,Empanadas,1,1200,mercadopago
+1182,2026-08-29 13:33,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1183,2026-09-04 12:06,Pizza napolitana,Pizzas,1,9800,mercadopago
+1183,2026-09-04 12:06,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1184,2026-07-10 12:34,Pizza napolitana,Pizzas,1,9800,qr
+1184,2026-07-10 12:34,Cerveza artesanal,Bebidas,1,3200,qr
+1185,2026-08-25 22:19,Milanesa con papas,Platos,1,9500,mercadopago
+1185,2026-08-25 22:19,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1186,2026-08-26 22:07,Pizza napolitana,Pizzas,1,,transferencia
+1186,2026-08-26 22:07,Cerveza artesanal,Bebidas,1,3200,transferencia
+1186,2026-08-26 22:07,Flan casero,Postres,1,3500,transferencia
+1187,2026-07-07 21:44,Milanesa con papas,Platos,1,9500,qr
+1187,2026-07-07 21:44,Flan casero,Postres,2,3500,qr
+1188,2026-09-05 12:42,Pizza napolitana,Pizzas,1,9800,mercadopago
+1188,2026-09-05 12:42,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1188,2026-09-05 12:42,Flan casero,Postres,1,3500,mercadopago
+1189,2026-07-14 16:40,Empanada de carne,Empanadas,2,1200,qr
+1189,2026-07-14 16:40,Gaseosa 500ml,Bebidas,1,1800,qr
+1189,2026-07-14 16:40,Flan casero,Postres,1,3500,qr
+1190,2026-07-25 21:57,Pizza napolitana,Pizzas,1,9800,qr
+1190,2026-07-25 21:57,Cerveza artesanal,Bebidas,1,3200,qr
+1190,2026-07-25 21:57,Helado 1/4,Postres,1,4200,qr
+1191,2026-07-24 13:33,Milanesa con papas,Platos,1,9500,mercadopago
+1191,2026-07-24 13:33,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1192,2026-08-04 20:31,Ensalada Cesar,Platos,1,7200,transferencia
+1192,2026-08-04 20:31,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1193,2026-07-03 12:21,Milanesa con papas,Platos,1,9500,mercadopago
+1193,2026-07-03 12:21,Gaseosa 500ml,BEBIDAS,1,1800,mercadopago
+1194,2026-06-22 17:46,Ensalada Cesar,Platos,1,7200,mercadopago
+1194,2026-06-22 17:46,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1195,2026-07-29 12:38,Empanada de carne,Empanadas,2,1200,transferencia
+1195,2026-07-29 12:38,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1196,2026-06-19 12:38,Pizza muzzarella,Pizzas,1,8500,qr
+1196,2026-06-19 12:38,Gaseosa 500ml,Bebidas,1,1800,qr
+1196,2026-06-19 12:38,Helado 1/4,Postres,1,4200,qr
+1197,2026-08-14 12:06,Empanada de carne,Empanadas,2,1200,transferencia
+1197,2026-08-14 12:06,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1198,2026-07-28 20:02,Empanada de carne,Empanadas,1,1200,mercadopago
+1198,2026-07-28 20:02,Empanada de pollo,Empanadas,1,1200,mercadopago
+1198,2026-07-28 20:02,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1198,2026-07-28 20:02,Flan casero,Postres,1,3500,mercadopago
+1199,2026-07-01 12:44,Ensalada Cesar,Platos,1,7200,mercadopago
+1199,2026-07-01 12:44,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1200,2026-07-18 21:30,Ensalada Cesar,Platos,1,7200,mercadopago
+1200,2026-07-18 21:30,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1201,2026-07-07 12:00,Pizza muzzarella,Pizzas,1,8500,transferencia
+1201,2026-07-07 12:00,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1202,2026-08-09 19:36,Milanesa con papas,Platos,1,9500,qr
+1202,2026-08-09 19:36,Gaseosa 500ml,Bebidas,1,1800,qr
+1203,2026-08-30 13:46,Pizza muzzarella,Pizzas,1,8500,qr
+1203,2026-08-30 13:46,Gaseosa 500ml,Bebidas,1,1800,qr
+1204,2026-07-04 20:45,Empanada de carne,Empanadas,2,1200,transferencia
+1204,2026-07-04 20:45,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1204,2026-07-04 20:45,Flan casero,Postres,1,3500,transferencia
+1205,2026-06-10 20:38,Pizza napolitana,Pizzas,1,9800,transferencia
+1205,2026-06-10 20:38,Cerveza artesanal,Bebidas,1,3200,transferencia
+1206,2026-06-20 13:30,Pizza napolitana,Pizzas,1,9800,mercadopago
+1206,2026-06-20 13:30,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1206,2026-06-20 13:30,Flan casero,Postres,1,3500,mercadopago
+1207,2026-06-15 14:50,Milanesa con papas,PLATOS,1,9500,qr
+1207,2026-06-15 14:50,Flan casero,Postres,1,3500,qr
+1208,2026-06-25 12:45,Empanada de carne,Empanadas,1,1200,qr
+1208,2026-06-25 12:45,Empanada de pollo,Empanadas,1,1200,qr
+1208,2026-06-25 12:45,Gaseosa 500ml,Bebidas,1,1800,qr
+1209,2026-09-04 17:56,Milanesa con papas,Platos,1,9500,qr
+1209,2026-09-04 17:56,Gaseosa 500ml,Bebidas,1,1800,qr
+1210,2026-06-20 21:00,Empanada de carne,Empanadas,1,1200,mercadopago
+1210,2026-06-20 21:00,Empanada de pollo,Empanadas,1,1200,mercadopago
+1210,2026-06-20 21:00,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1211,2026-06-22 16:53,Pizza napolitana,Pizzas,1,9800,transferencia
+1211,2026-06-22 16:53,Cerveza artesanal,Bebidas,1,3200,transferencia
+1212,2026-06-24 14:43,Milanesa con papas,Platos,1,9500,mercadopago
+1212,2026-06-24 14:43,Flan casero,Postres,1,3500,mercadopago
+1213,2026-06-27 22:59,Milanesa con papas,Platos,1,,mercadopago
+1213,2026-06-27 22:59,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1214,2026-07-17 20:00,Ensalada Cesar,Platos,1,7200,mercadopago
+1214,2026-07-17 20:00,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1215,2026-07-22 21:56,Empanada de carne,Empanadas,1,,qr
+1215,2026-07-22 21:56,Empanada de pollo,Empanadas,1,1200,qr
+1215,2026-07-22 21:56,Gaseosa 500ml,Bebidas,1,1800,qr
+1216,2026-08-12 12:23,Empanada de carne,Empanadas,1,1200,qr
+1216,2026-08-12 12:23,Empanada de pollo,Empanadas,1,1200,qr
+1216,2026-08-12 12:23,Gaseosa 500ml,Bebidas,1,1800,qr
+1217,2026-08-17 14:06,  Empanada de carne ,Empanadas,1,1200,qr
+1217,2026-08-17 14:06,Empanada de pollo,Empanadas,1,1200,qr
+1217,2026-08-17 14:06,Gaseosa 500ml,Bebidas,1,1800,qr
+1218,2026-08-17 12:01,Pizza muzzarella,Pizzas,1,8500,qr
+1218,2026-08-17 12:01,Gaseosa 500ml,Bebidas,1,1800,qr
+1218,2026-08-17 12:01,Helado 1/4,Postres,1,4200,qr
+1219,2026-08-09 14:49,Pizza napolitana,Pizzas,1,9800,mercadopago
+1219,2026-08-09 14:49,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1220,2026-08-11 11:35,Empanada de carne,Empanadas,1,1200,mercadopago
+1220,2026-08-11 11:35,Empanada de pollo,Empanadas,1,1200,mercadopago
+1220,2026-08-11 11:35,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1221,2026-08-28 19:05,Pizza napolitana,Pizzas,1,9800,mercadopago
+1221,2026-08-28 19:05,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1221,2026-08-28 19:05,Flan casero,Postres,1,3500,mercadopago
+1222,2026-08-25 17:54,Pizza napolitana,Pizzas,1,9800,mercadopago
+1222,2026-08-25 17:54,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1223,2026-08-08 14:57,Empanada de carne,Empanadas,2,1200,mercadopago
+1223,2026-08-08 14:57,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1224,2026-07-02 22:06,Pizza napolitana,PIZZAS,1,9800,mercadopago
+1224,2026-07-02 22:06,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1225,2026-08-11 21:41,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1225,2026-08-11 21:41,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1226,2026-07-18 13:51,Pizza napolitana,Pizzas,1,9800,transferencia
+1226,2026-07-18 13:51,Cerveza artesanal,Bebidas,1,3200,transferencia
+1227,2026-07-08 20:14,Pizza muzzarella,Pizzas,1,8500,transferencia
+1227,2026-07-08 20:14,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1228,2026-08-19 22:53,Empanada de carne,Empanadas,2,1200,mercadopago
+1228,2026-08-19 22:53,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1229,2026-07-24 12:09,Empanada de carne,Empanadas,1,1200,mercadopago
+1229,2026-07-24 12:09,  Empanada de pollo ,Empanadas,1,1200,mercadopago
+1229,2026-07-24 12:09,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1229,2026-07-24 12:09,Flan casero,Postres,1,3500,mercadopago
+1230,2026-07-10 22:26,Ensalada Cesar,Platos,1,7200,mercadopago
+1230,2026-07-10 22:26,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1230,2026-07-10 22:26,Flan casero,Postres,1,3500,mercadopago
+1231,2026-07-30 12:29,Milanesa con papas,Platos,1,9500,qr
+1231,2026-07-30 12:29,Flan casero,Postres,2,3500,qr
+1232,2026-06-12 11:16,Milanesa con papas,Platos,1,9500,mercadopago
+1232,2026-06-12 11:16,Gaseosa 500ml,Bebidas,1,,mercadopago
+1233,2026-08-03 16:26,Pizza napolitana,Pizzas,1,9800,mercadopago
+1233,2026-08-03 16:26,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1233,2026-08-03 16:26,Helado 1/4,Postres,1,4200,mercadopago
+1234,2026-06-16 14:28,Empanada de carne,EMPANADAS,2,1200,transferencia
+1234,2026-06-16 14:28,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1235,2026-07-31 13:17,Pizza napolitana,Pizzas,1,9800,qr
+1235,2026-07-31 13:17,Cerveza artesanal,Bebidas,1,3200,qr
+1235,2026-07-31 13:17,Flan casero,Postres,1,3500,qr
+1236,2026-08-07 20:56,Milanesa con papas,Platos,1,9500,mercadopago
+1236,2026-08-07 20:56,Flan casero,Postres,1,3500,mercadopago
+1237,2026-08-19 22:19,Milanesa con papas,Platos,1,9500,transferencia
+1237,2026-08-19 22:19,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1237,2026-08-19 22:19,Helado 1/4,Postres,1,4200,transferencia
+1238,2026-08-29 20:55,Milanesa con papas,Platos,1,9500,transferencia
+1238,2026-08-29 20:55,Flan casero,Postres,1,3500,transferencia
+1238,2026-08-29 20:55,Helado 1/4,Postres,1,4200,transferencia
+1239,2026-07-06 13:53,  Empanada de carne ,Empanadas,1,1200,qr
+1239,2026-07-06 13:53,Empanada de pollo,Empanadas,1,1200,qr
+1239,2026-07-06 13:53,Gaseosa 500ml,Bebidas,1,1800,qr
+1239,2026-07-06 13:53,Helado 1/4,Postres,1,4200,qr
+1240,2026-09-05 14:07,Empanada de carne,Empanadas,1,1200,transferencia
+1240,2026-09-05 14:07,Empanada de pollo,Empanadas,1,1200,transferencia
+1240,2026-09-05 14:07,  Gaseosa 500ml ,Bebidas,1,1800,transferencia
+1241,2026-07-26 21:18,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1241,2026-07-26 21:18,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1242,2026-07-02 14:05,Milanesa con papas,Platos,1,9500,mercadopago
+1242,2026-07-02 14:05,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1243,2026-07-28 14:59,Milanesa con papas,Platos,1,9500,transferencia
+1243,2026-07-28 14:59,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1244,2026-06-16 21:22,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1244,2026-06-16 21:22,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1245,2026-08-21 21:07,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1245,2026-08-21 21:07,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1246,2026-06-22 12:47,Ensalada Cesar,Platos,1,7200,transferencia
+1246,2026-06-22 12:47,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1246,2026-06-22 12:47,Flan casero,Postres,1,3500,transferencia
+1247,2026-07-18 21:25,Empanada de carne,Empanadas,2,1200,mercadopago
+1247,2026-07-18 21:25,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1248,2026-08-06 18:51,  Empanada de carne ,Empanadas,1,1200,transferencia
+1248,2026-08-06 18:51,Empanada de pollo,Empanadas,1,1200,transferencia
+1248,2026-08-06 18:51,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1249,2026-08-30 12:15,Ensalada Cesar,Platos,1,7200,mercadopago
+1249,2026-08-30 12:15,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1250,2026-08-23 21:42,Empanada de carne,Empanadas,2,1200,transferencia
+1250,2026-08-23 21:42,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1250,2026-08-23 21:42,Helado 1/4,Postres,1,4200,transferencia
+1251,2026-07-09 22:02,Pizza napolitana,Pizzas,1,9800,qr
+1251,2026-07-09 22:02,Cerveza artesanal,Bebidas,1,3200,qr
+1251,2026-07-09 22:02,Flan casero,Postres,1,3500,qr
+1252,2026-06-17 21:07,Empanada de carne,Empanadas,2,1200,transferencia
+1252,2026-06-17 21:07,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1253,2026-07-31 13:38,Pizza napolitana,Pizzas,1,9800,mercadopago
+1253,2026-07-31 13:38,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1253,2026-07-31 13:38,Flan casero,Postres,2,3500,mercadopago
+1254,2026-07-02 12:17,Milanesa con papas,Platos,1,9500,qr
+1254,2026-07-02 12:17,Gaseosa 500ml,Bebidas,1,1800,qr
+1255,2026-07-31 19:24,Milanesa con papas,Platos,1,9500,mercadopago
+1255,2026-07-31 19:24,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1256,2026-06-27 13:15,Empanada de carne,Empanadas,1,1200,transferencia
+1256,2026-06-27 13:15,Empanada de pollo,Empanadas,1,1200,transferencia
+1256,2026-06-27 13:15,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1256,2026-06-27 13:15,Helado 1/4,Postres,1,4200,transferencia
+1257,2026-07-17 13:20,Empanada de carne,Empanadas,1,1200,mercadopago
+1257,2026-07-17 13:20,Empanada de pollo,Empanadas,1,1200,mercadopago
+1257,2026-07-17 13:20,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1258,2026-08-09 13:38,Empanada de carne,Empanadas,1,1200,mercadopago
+1258,2026-08-09 13:38,Empanada de pollo,Empanadas,1,1200,mercadopago
+1258,2026-08-09 13:38,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1259,2026-07-18 18:14,Pizza napolitana,Pizzas,1,9800,qr
+1259,2026-07-18 18:14,Cerveza artesanal,Bebidas,1,3200,qr
+1260,2026-08-19 22:53,Pizza muzzarella,Pizzas,1,8500,qr
+1260,2026-08-19 22:53,Gaseosa 500ml,Bebidas,1,1800,qr
+1261,2026-07-07 13:08,Ensalada Cesar,Platos,1,7200,mercadopago
+1261,2026-07-07 13:08,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1262,2026-06-27 22:09,Ensalada Cesar,Platos,1,7200,mercadopago
+1262,2026-06-27 22:09,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1263,2026-06-18 21:18,Empanada de carne,Empanadas,1,1200,mercadopago
+1263,2026-06-18 21:18,Empanada de pollo,Empanadas,1,1200,Mercado Pago
+1263,2026-06-18 21:18,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1264,2026-06-26 20:54,Milanesa con papas,Platos,1,9500,mercadopago
+1264,2026-06-26 20:54,Flan casero,Postres,1,3500,mercadopago
+1265,2026-06-29 12:14,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1265,2026-06-29 12:14,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1266,2026-06-20 17:57,Empanada de carne,Empanadas,2,1200,qr
+1266,2026-06-20 17:57,Gaseosa 500ml,Bebidas,1,1800,qr
+1266,2026-06-20 17:57,Helado 1/4,Postres,1,4200,qr
+1267,2026-07-04 13:27,Ensalada Cesar,Platos,1,7200,mercadopago
+1267,2026-07-04 13:27,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1268,2026-06-21 20:33,Milanesa con papas,Platos,1,9500,qr
+1268,2026-06-21 20:33,Gaseosa 500ml,Bebidas,1,1800,qr
+1268,2026-06-21 20:33,Helado 1/4,Postres,1,4200,qr
+1269,2026-06-14 22:31,Ensalada Cesar,Platos,1,7200,qr
+1269,2026-06-14 22:31,Gaseosa 500ml,Bebidas,1,1800,qr
+1270,2026-06-22 13:23,Empanada de carne,Empanadas,1,1200,mercadopago
+1270,2026-06-22 13:23,Empanada de pollo,Empanadas,1,1200,mercadopago
+1270,2026-06-22 13:23,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1271,2026-07-28 22:21,Ensalada Cesar,Platos,1,7200,qr
+1271,2026-07-28 22:21,Gaseosa 500ml,Bebidas,1,1800,qr
+1272,2026-07-02 14:40,Pizza muzzarella,Pizzas,1,8500,transferencia
+1272,2026-07-02 14:40,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1273,2026-06-16 20:19,Empanada de carne,Empanadas,2,1200,mercadopago
+1273,2026-06-16 20:19,Gaseosa 500ml,BEBIDAS,1,1800,mercadopago
+1274,2026-08-24 20:49,Pizza napolitana,Pizzas,1,9800,transferencia
+1274,2026-08-24 20:49,Cerveza artesanal,Bebidas,1,3200,transferencia
+1274,2026-08-24 20:49,Flan casero,Postres,1,3500,transferencia
+1275,2026-07-02 11:09,Pizza napolitana,Pizzas,1,9800,qr
+1275,2026-07-02 11:09,Cerveza artesanal,Bebidas,1,3200,qr
+1276,2026-09-02 12:29,Ensalada Cesar,Platos,1,7200,mercadopago
+1276,2026-09-02 12:29,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1277,2026-09-04 20:22,Pizza napolitana,Pizzas,1,9800,qr
+1277,2026-09-04 20:22,Cerveza artesanal,Bebidas,1,3200,qr
+1277,2026-09-04 20:22,Flan casero,Postres,1,3500,qr
+1277,2026-09-04 20:22,Helado 1/4,Postres,1,4200,qr
+1278,2026-06-23 12:03,Milanesa con papas,Platos,1,9500,qr
+1278,2026-06-23 12:03,Gaseosa 500ml,Bebidas,1,1800,qr
+1279,2026-08-31 20:10,Pizza napolitana,Pizzas,1,9800,transferencia
+1279,2026-08-31 20:10,Cerveza artesanal,Bebidas,1,3200,transferencia
+1280,2026-07-09 13:04,Milanesa con papas,Platos,1,9500,qr
+1280,2026-07-09 13:04,Gaseosa 500ml,Bebidas,1,1800,qr
+1281,2026-06-23 12:01,Milanesa con papas,Platos,1,9500,mercadopago
+1281,2026-06-23 12:01,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1281,2026-06-23 12:01,Flan casero,Postres,1,3500,mercadopago
+1282,2026-08-13 14:07,Empanada de carne,EMPANADAS,1,1200,mercadopago
+1282,2026-08-13 14:07,Empanada de pollo,Empanadas,1,1200,mercadopago
+1282,2026-08-13 14:07,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1283,2026-07-16 21:35,Milanesa con papas,Platos,1,9500,mercadopago
+1283,2026-07-16 21:35,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1284,2026-07-23 12:51,Pizza napolitana,Pizzas,1,9800,mercadopago
+1284,2026-07-23 12:51,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1284,2026-07-23 12:51,Flan casero,Postres,1,3500,mercadopago
+1285,2026-08-02 21:53,Milanesa con papas,Platos,1,9500,mercadopago
+1285,2026-08-02 21:53,Gaseosa 500ml,Bebidas,1,,mercadopago
+1285,2026-08-02 21:53,Helado 1/4,Postres,1,4200,mercadopago
+1286,2026-07-16 14:32,Milanesa con papas,Platos,1,9500,qr
+1286,2026-07-16 14:32,Gaseosa 500ml,Bebidas,1,1800,qr
+1286,2026-07-16 14:32,Helado 1/4,Postres,1,4200,qr
+1287,2026-08-03 22:15,Ensalada Cesar,Platos,1,7200,mercadopago
+1287,2026-08-03 22:15,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1288,2026-08-21 22:49,Ensalada Cesar,Platos,1,7200,mercadopago
+1288,2026-08-21 22:49,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1288,2026-08-21 22:49,Flan casero,Postres,1,3500,mercadopago
+1289,2026-07-18 21:20,Milanesa con papas,Platos,1,9500,mercadopago
+1289,2026-07-18 21:20,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1290,2026-06-26 15:04,Pizza napolitana,Pizzas,1,9800,mercadopago
+1290,2026-06-26 15:04,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1290,2026-06-26 15:04,Flan casero,Postres,1,3500,mercadopago
+1290,2026-06-26 15:04,Helado 1/4,Postres,1,4200,mercadopago
+1291,2026-07-16 13:40,Pizza napolitana,Pizzas,1,9800,mercadopago
+1291,2026-07-16 13:40,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1292,2026-07-21 21:01,  Milanesa con papas ,Platos,1,9500,mercadopago
+1292,2026-07-21 21:01,Flan casero,Postres,1,3500,mercadopago
+1292,2026-07-21 21:01,Helado 1/4,Postres,1,4200,mercadopago
+1293,2026-06-17 12:46,Milanesa con papas,Platos,1,9500,mercadopago
+1293,2026-06-17 12:46,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1294,2026-08-31 21:24,Empanada de carne,Empanadas,2,1200,qr
+1294,2026-08-31 21:24,Gaseosa 500ml,Bebidas,1,1800,qr
+1295,2026-08-14 21:16,Ensalada Cesar,Platos,1,7200,qr
+1295,2026-08-14 21:16,Gaseosa 500ml,Bebidas,1,1800,qr
+1296,2026-09-05 13:56,Empanada de carne,Empanadas,2,1200,qr
+1296,2026-09-05 13:56,Gaseosa 500ml,Bebidas,1,1800,qr
+1297,2026-09-01 22:58,Pizza muzzarella,Pizzas,1,8500,qr
+1297,2026-09-01 22:58,Gaseosa 500ml,Bebidas,1,1800,qr
+1298,2026-06-19 20:28,Empanada de carne,EMPANADAS,1,1200,qr
+1298,2026-06-19 20:28,Empanada de pollo,Empanadas,1,1200,qr
+1298,2026-06-19 20:28,Gaseosa 500ml,Bebidas,1,1800,qr
+1299,2026-06-17 21:27,Pizza napolitana,Pizzas,1,9800,mercadopago
+1299,2026-06-17 21:27,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1300,2026-06-08 20:49,Milanesa con papas,Platos,1,,mercadopago
+1300,2026-06-08 20:49,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1301,2026-08-29 13:19,Pizza napolitana,Pizzas,1,9800,qr
+1301,2026-08-29 13:19,Cerveza artesanal,Bebidas,1,3200,qr
+1301,2026-08-29 13:19,Helado 1/4,Postres,1,4200,qr
+1302,2026-08-06 21:59,Empanada de carne,Empanadas,1,1200,mercadopago
+1302,2026-08-06 21:59,Empanada de pollo,Empanadas,1,1200,mercadopago
+1302,2026-08-06 21:59,Gaseosa 500ml,Bebidas,1,1800,Mercado Pago
+1303,2026-08-18 21:35,Ensalada Cesar,Platos,1,7200,mercadopago
+1303,2026-08-18 21:35,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1304,2026-06-12 14:53,Milanesa con papas,Platos,1,9500,mercadopago
+1304,2026-06-12 14:53,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1304,2026-06-12 14:53,Helado 1/4,Postres,1,4200,mercadopago
+1305,2026-07-05 12:07,Pizza napolitana,Pizzas,1,9800,mercadopago
+1305,2026-07-05 12:07,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1305,2026-07-05 12:07,Flan casero,Postres,1,3500,mercadopago
+1306,2026-07-26 20:04,Empanada de carne,Empanadas,2,1200,mercadopago
+1306,2026-07-26 20:04,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1306,2026-07-26 20:04,Helado 1/4,Postres,1,4200,mercadopago
+1307,2026-07-25 17:27,Milanesa con papas,Platos,1,9500,mercadopago
+1307,2026-07-25 17:27,Flan casero,Postres,1,3500,mercadopago
+1307,2026-07-25 17:27,Helado 1/4,Postres,1,4200,mercadopago
+1308,2026-08-25 22:44,  Pizza napolitana ,Pizzas,1,9800,mercadopago
+1308,2026-08-25 22:44,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1308,2026-08-25 22:44,Flan casero,Postres,1,3500,mercadopago
+1309,2026-09-02 13:11,Pizza napolitana,Pizzas,1,9800,qr
+1309,2026-09-02 13:11,Cerveza artesanal,Bebidas,1,3200,qr
+1309,2026-09-02 13:11,Helado 1/4,Postres,1,4200,qr
+1310,2026-07-26 13:23,Pizza napolitana,Pizzas,1,9800,mercadopago
+1310,2026-07-26 13:23,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1311,2026-08-04 12:58,Ensalada Cesar,Platos,1,7200,transferencia
+1311,2026-08-04 12:58,Gaseosa 500ml,Bebidas,1,1800,transferencia
+1312,2026-07-04 22:37,Pizza muzzarella,Pizzas,1,8500,mercadopago
+1312,2026-07-04 22:37,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1312,2026-07-04 22:37,Flan casero,Postres,1,3500,mercadopago
+1313,2026-07-11 22:28,Milanesa con papas,Platos,1,9500,mercadopago
+1313,2026-07-11 22:28,Flan casero,Postres,1,3500,mercadopago
+1313,2026-07-11 22:28,Helado 1/4,Postres,1,4200,mercadopago
+1314,2026-06-19 16:04,Empanada de carne,Empanadas,2,1200,mercadopago
+1314,2026-06-19 16:04,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1315,2026-07-24 12:57,Pizza napolitana,Pizzas,1,9800,mercadopago
+1315,2026-07-24 12:57,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1316,2026-06-25 21:20,Milanesa con papas,Platos,1,9500,qr
+1316,2026-06-25 21:20,Flan casero,Postres,1,3500,qr
+1317,2026-06-17 18:05,Empanada de carne,Empanadas,2,1200,Mercado Pago
+1317,2026-06-17 18:05,Gaseosa 500ml,Bebidas,1,1800,mercadopago
+1318,2026-06-13 13:42,Pizza napolitana,Pizzas,1,9800,mercadopago
+1318,2026-06-13 13:42,Cerveza artesanal,Bebidas,1,3200,mercadopago
+1319,2026-06-16 12:44,Pizza muzzarella,Pizzas,1,8500,qr
+1319,2026-06-16 12:44,Gaseosa 500ml,Bebidas,1,1800,qr
+1319,2026-06-16 12:44,Helado 1/4,Postres,1,4200,qr
+1320,2026-07-14 12:07,Milanesa con papas,Platos,1,9500,qr
+1320,2026-07-14 12:07,Gaseosa 500ml,Bebidas,1,1800,qr
+1320,2026-07-14 12:07,Flan casero,Postres,1,3500,qr
+1001,2026-07-26 23:34,Pizza muzzarella,Pizzas,1,8500,mercadopago

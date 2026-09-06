@@ -1,0 +1,7 @@
+1000 con 25% off: 750.0
+8500 con 10% off: 7650.0
+3 pizzas con 15% off: 21675.0
+Pizza muzza cuesta 8500 y hay 5
+vendidas 2 de Pizza muzza, quedan 3
+vendidas 2 de Pizza muzza, quedan 1
+sin stock de Pizza muzza (quedan 1)

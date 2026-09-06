@@ -1,0 +1,13 @@
+== Ranking de productos por facturación (window function) ==
+  #1  $   864,500  Milanesa con papas
+  #2  $   695,800  Pizza napolitana
+  #3  $   387,000  Gaseosa 500ml
+  #4  $   357,000  Pizza muzzarella
+  #5  $   353,500  Flan casero
+
+== Participación de cada categoría con CTE ==
+   32.5%  Platos
+   29.7%  Pizzas
+   17.3%  Bebidas
+   15.3%  Postres
+    5.1%  Empanadas

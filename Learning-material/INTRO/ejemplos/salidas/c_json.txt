@@ -1,0 +1,14 @@
+== JSON (texto) ==
+{
+  "cliente": "Carlos",
+  "items": [
+    {
+      "producto": "Pizza",
+      "cant": 2
+    }
+  ],
+  "total": 17000
+}
+
+cliente: Carlos
+primer item: Pizza

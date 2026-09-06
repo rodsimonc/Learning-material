@@ -1,0 +1,11 @@
+suma: 10
+resta: 4
+multiplicacion: 21
+division: 2.3333333333333335
+division entera: 2
+resto (modulo): 1
+potencia: 1024
+sin parentesis: 14
+con parentesis: 20
+redondear: 4356.79
+par o impar (con modulo): True

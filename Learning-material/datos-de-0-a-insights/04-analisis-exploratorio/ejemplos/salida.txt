@@ -1,0 +1,37 @@
+== Top productos por unidades ==
+producto
+Gaseosa 500ml         215
+Empanada de carne     112
+Flan casero           101
+Milanesa con papas     91
+Cerveza artesanal      71
+
+== Facturación por categoría ==
+categoria
+Platos       $1,152,500
+Pizzas       $1,052,800
+Bebidas        $614,200
+Postres        $542,500
+Empanadas      $182,400
+
+== Ventas por método de pago (participación) ==
+metodo_pago
+mercadopago      51.8%
+qr               30.8%
+transferencia    17.5%
+
+== Pedidos por hora (pico) ==
+hora
+12    55
+21    55
+13    50
+20    36
+
+== Tabla dinámica: importe por categoría y método ==
+metodo_pago mercadopago    qr transferencia
+categoria                                  
+Bebidas            314k  185k          115k
+Empanadas           79k   62k           41k
+Pizzas             569k  305k          178k
+Platos             598k  366k          188k
+Postres            274k  172k           97k

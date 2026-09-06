@@ -1,0 +1,2328 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Python de 0, el libro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">INTRO · programar desde cero, completo</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="c0">
+  <div class="ch-eyebrow">INTRO · El libro de Python</div>
+  <h1>Python de 0, el libro</h1>
+  <p class="lead">Este es el punto de partida de toda la colección y un libro completo por sí mismo. Si nunca programaste, empezás acá y salís sabiendo programar de verdad: desde qué es una variable hasta escribir programas con objetos, manejar errores, leer archivos, y conectar Python con una página web y una base de datos. Sin apuro, con muchísimos ejemplos y su resolución explicada paso a paso.</p>
+  <div class="box nota"><span class="tag">Todo el código está probado</span><p>Cada ejemplo se ejecutó de verdad en Python. Los bloques con <span class="tested">✓ salida real</span> son exactamente lo que la computadora respondió. Podés copiar cualquier ejemplo y correrlo: están todos en la carpeta <code>ejemplos/</code>.</p></div>
+  <h2>Cómo está armado</h2>
+  <p>El libro tiene diez partes que van de menos a más. Las primeras seis te dan todo Python (datos, decisiones, repeticiones, estructuras, funciones y objetos). La séptima te hace un programador más robusto (errores, archivos, módulos). La octava es puro ejercicio resuelto, subiendo la dificultad. La novena conecta Python con la web y las bases de datos. La décima cierra con buenas prácticas y a dónde seguir.</p>
+  <div class="box nota"><span class="tag">Cómo leerlo</span><p>En orden, sin saltear. Cada tema se apoya en el anterior. Y sobre todo: <strong>escribí el código vos</strong>. Leer programación es como leer sobre nadar: necesario, pero recién aprendés cuando te tirás al agua. Copiá los ejemplos, cambialos, rompelos, arreglalos. Ahí se aprende.</p></div>
+  <h2>Un hilo que recorre todo</h2>
+  <p>Para que los ejemplos no sean abstractos, casi todos giran alrededor de un negocio: una tienda de comida con productos, precios, stock y pedidos. Vas a calcular un total, aplicar un descuento, controlar el stock. El mismo problema crece con vos, y es el mismo que después resolvés "en grande" en el resto de la colección.</p>
+  <div class="box nota"><span class="tag">Cómo moverte</span><p>Índice a la izquierda, o flechas <span class="kbd">←</span> <span class="kbd">→</span>. El libro recuerda dónde quedaste, así que podés leerlo de a ratos.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">Qué es programar →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Primeros pasos" data-num="1" data-title="Qué es programar" id="c1">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Qué es programar</h1>
+  <p class="lead">Programar es darle a una computadora una lista de instrucciones, en un orden preciso, para que haga algo por vos. Nada más místico que eso. La computadora no es inteligente en el sentido humano: es rapidísima y obediente. Hace exactamente lo que le decís, en el orden que se lo decís, sin adivinar lo que quisiste decir.</p>
+  <h2>Una receta, pero para la máquina</h2>
+  <p>Pensá en una receta de cocina: "poné agua, esperá a que hierva, agregá la pasta, esperá 10 minutos, colá". Es una secuencia de pasos, en orden, y cada paso es claro. Un programa es igual: una secuencia de instrucciones. La diferencia es que la computadora es literal al extremo. Si en la receta te salteás "esperá a que hierva", una persona lo deduce; la computadora no. Por eso programar exige precisión, y por eso al principio vas a cometer errores de detalle. Es normal, le pasa a todos, siempre.</p>
+  <h2>Cómo piensa la computadora</h2>
+  <p>Por dentro, la computadora solo entiende números (ceros y unos). Escribir en ese idioma sería imposible para nosotros, así que se inventaron los <strong>lenguajes de programación</strong>: idiomas intermedios, más parecidos al humano, que después se traducen a lo que la máquina entiende. Nosotros escribimos en el lenguaje, y un programa traductor se encarga del resto.</p>
+  <h2>Por qué Python</h2>
+  <p>Hay muchos lenguajes (Python, JavaScript, Java, C, y decenas más). Empezamos con <strong>Python</strong> por buenas razones: se lee casi como inglés simple, es limpio y perdona (no te obliga a detalles que distraen al principio), y es de los más usados del mundo, en páginas web, análisis de datos, inteligencia artificial y automatización. Lo que aprendas de programar con Python (la forma de pensar) te sirve para cualquier otro lenguaje después.</p>
+  <div class="box nota"><span class="tag">Lo que de verdad vas a aprender</span><p>Este libro enseña Python, sí, pero lo más importante que te llevás no es la sintaxis (esa se olvida y se vuelve a buscar mil veces, todos lo hacemos). Lo que queda es <em>pensar como programador</em>: descomponer un problema en pasos, y traducir esos pasos a instrucciones. Esa habilidad es la que vale, y es la misma en todos los lenguajes.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Cómo correr Python →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Primeros pasos" data-num="2" data-title="Cómo correr Python" id="c2">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Cómo se ejecuta un programa</h1>
+  <p class="lead">Antes de escribir, entendamos qué pasa cuando "corrés" un programa. Vos escribís texto (el código) en un archivo; un programa llamado el intérprete de Python lo lee de arriba a abajo y ejecuta cada instrucción en orden. El resultado aparece en la consola (o terminal): una ventana de texto donde el programa te habla.</p>
+  <h2>Las formas de correr Python</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Opción</th><th>Qué es</th><th>Cuándo</th></tr></thead>
+    <tbody>
+      <tr><th>Editor online</th><td>Una web donde escribís y corrés sin instalar nada (replit.com, o buscá "Python online")</td><td>Para empezar YA, sin fricción</td></tr>
+      <tr><th>Python instalado + editor</th><td>Instalás Python y usás un editor como VS Code</td><td>Para proyectos de verdad</td></tr>
+      <tr><th>El intérprete interactivo (REPL)</th><td>Una consola donde escribís una línea y ves el resultado al instante</td><td>Para probar cosas sueltas</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Para empezar, lo más simple</h2>
+  <p>No pierdas tiempo con instalaciones ahora. Entrá a un editor de Python online, pegás el ejemplo, y le das a "Run". Vas a ver el resultado en la consola. Cuando ya te enganches y quieras hacer algo serio, instalás Python (python.org) y VS Code (un editor gratis y excelente). Pero eso puede esperar: primero, entender.</p>
+  <h2>Tu primer programa (spoiler del próximo capítulo)</h2>
+  <div class="codehead"><span class="lang py">hola.py</span></div>
+<pre>print("Hola, mundo")</pre>
+  <p>Guardás eso en un archivo <code>hola.py</code> y lo corrés. En la consola aparece <code>Hola, mundo</code>. Ese <code>.py</code> es la extensión de los archivos de Python, como <code>.doc</code> para Word. "Hola, mundo" es, por tradición, el primer programa que todo el mundo escribe en cualquier lenguaje.</p>
+  <div class="box nota"><span class="tag">La consola es tu compañera</span><p>Casi todo lo que hagas en este libro se muestra en la consola con <code>print</code>. Es la forma más simple de que el programa te cuente qué está haciendo, y también tu principal herramienta para entender por qué algo no anda: ponés <code>print</code> por el medio para "espiar" los valores. No la subestimes: hasta los programadores expertos depuran con prints.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← Qué es programar</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">print y la consola →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 1 · Primeros pasos" data-num="3" data-title="print y la consola" id="c3">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>print: mostrar cosas en pantalla</h1>
+  <p class="lead"><code>print</code> es tu primera instrucción y la que más vas a usar mientras aprendés. Muestra en la consola lo que le pongas entre paréntesis. Simple, pero tiene más detalles útiles de los que parece.</p>
+  <h2>Lo básico</h2>
+  <div class="codehead"><span class="lang py">c02_print.py</span></div>
+<pre>print("Hola, mundo")
+print("Carlos", "tiene", 3, "pedidos")   # varios valores separados por coma
+print("A", "B", "C", sep=" - ")           # sep cambia el separador
+print("sin salto de linea... ", end="")
+print("misma linea")                      # end evita el salto de linea
+print("linea 1\nlinea 2")                 # \n es un salto de linea
+print("tab\tseparado")                    # \t es una tabulacion</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">Hola, mundo
+Carlos tiene 3 pedidos
+A - B - C
+sin salto de linea... misma linea
+linea 1
+linea 2
+tab	separado</pre>
+  <h2>Lo que acabás de ver</h2>
+  <ul>
+    <li><strong>Varios valores:</strong> <code>print</code> acepta varias cosas separadas por comas, y las muestra con un espacio entre ellas. Podés mezclar texto y números.</li>
+    <li><strong><code>sep</code>:</strong> cambia lo que va entre los valores (por defecto, un espacio).</li>
+    <li><strong><code>end</code>:</strong> lo que va al final (por defecto, un salto de línea). Con <code>end=""</code>, el siguiente print sigue en la misma línea.</li>
+    <li><strong><code>\n</code> y <code>\t</code>:</strong> son "secuencias de escape". <code>\n</code> es un salto de línea (una Enter), <code>\t</code> una tabulación. La barra invertida <code>\</code> le avisa a Python que lo que sigue es especial.</li>
+  </ul>
+  <h2>Texto entre comillas</h2>
+  <p>Fijate que el texto siempre va entre comillas: <code>"Hola"</code>. Podés usar comillas dobles <code>"</code> o simples <code>'</code>, es lo mismo, pero elegí una y sé consistente. Los números NO llevan comillas: <code>3</code> es el número tres; <code>"3"</code> es el texto que contiene el carácter tres (y como vas a ver, no son la misma cosa).</p>
+  <div class="box ojo"><span class="tag">Errores típicos con print</span><p>Los tres tropiezos del primer día: olvidarse de cerrar el paréntesis <code>print("hola"</code> (falta el <code>)</code>); olvidarse una comilla <code>print("hola)</code>; y escribir <code>Print</code> con mayúscula (Python distingue mayúsculas de minúsculas, es <code>print</code>). Si algo no anda, revisá estos tres primero. Los mensajes de error de Python te señalan la línea; leelos, son tus amigos.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Cómo correr Python</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Comentarios y estilo →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 1 · Primeros pasos" data-num="4" data-title="Comentarios y estilo" id="c4">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Comentarios y buen estilo</h1>
+  <p class="lead">El código no lo lee solo la computadora: lo leés vos dentro de un mes, y otras personas. Escribir código claro, con comentarios donde hacen falta, es parte de programar bien desde el día uno. Un programa que anda pero no se entiende es una bomba de tiempo.</p>
+  <h2>Comentarios</h2>
+  <p>Un comentario es texto que Python ignora por completo: está ahí para los humanos. Se escribe con el símbolo <code>#</code>; todo lo que va después en esa línea es comentario.</p>
+  <div class="codehead"><span class="lang py">comentarios</span></div>
+<pre># Esto es un comentario: explica QUÉ o POR QUÉ, no lo obvio
+precio = 8500  # precio de la pizza muzzarella
+
+# Calculamos el total del pedido de 2 unidades
+total = precio * 2</pre>
+  <h2>Buenos comentarios vs malos</h2>
+  <p>Un comentario no debe repetir lo que el código ya dice. <code>x = x + 1  # sumar 1 a x</code> es inútil: se ve. El buen comentario explica el <em>por qué</em>, o aclara algo que no es obvio: <code># sumamos 1 porque las posiciones empiezan en 0</code>. La regla: si el código es claro, no necesita comentario; el comentario es para lo que el código no puede decir por sí mismo.</p>
+  <h2>Nombres que se entienden</h2>
+  <p>La mejor forma de que el código se explique solo es con buenos nombres. Compará:</p>
+  <div class="codehead"><span class="lang py">malo vs bueno</span></div>
+<pre># malo: ¿qué es x? ¿qué es y?
+x = 8500
+y = 2
+z = x * y
+
+# bueno: se lee como una frase
+precio_unitario = 8500
+cantidad = 2
+total = precio_unitario * cantidad</pre>
+  <p>Los nombres en Python se escriben en minúsculas, y si tienen varias palabras, se separan con guión bajo: <code>precio_unitario</code>, <code>total_con_iva</code>. Este estilo se llama "snake_case" y es la convención de Python.</p>
+  <div class="box nota"><span class="tag">El código se lee más de lo que se escribe</span><p>Vas a escribir una línea una vez y leerla decenas de veces (vos y otros) mientras la corregís y ampliás. Por eso vale la pena que sea clara: buenos nombres, comentarios donde ayudan, y orden. No es perfeccionismo, es practicidad. El "yo del futuro" te lo va a agradecer.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← print y la consola</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Variables →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · Datos y variables" data-num="5" data-title="Variables" id="c5">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Variables: guardar datos</h1>
+  <p class="lead">Un programa trabaja con datos: precios, nombres, cantidades. Para guardarlos y usarlos después, se usan variables. Una variable es un nombre al que le asignás un valor. La imagen clásica: una caja con una etiqueta, donde guardás algo.</p>
+  <h2>Crear una variable</h2>
+  <div class="codehead"><span class="lang py">asignación</span></div>
+<pre>precio = 1200
+nombre = "Pizza"
+cantidad = 3</pre>
+  <p>El signo <code>=</code> es la asignación: "guardá el valor de la derecha en la variable de la izquierda". A partir de ahí, cada vez que escribas <code>precio</code>, Python usa 1200. Si mañana el precio cambia, lo modificás en un solo lugar y todo el programa se actualiza.</p>
+  <div class="box ojo"><span class="tag">= no significa "es igual a"</span><p>Este es un quiebre mental importante. En matemática, <code>=</code> es igualdad. En programación, <code>=</code> es una <em>acción</em>: "guardá esto acá". Por eso <code>precio = precio + 100</code> tiene sentido (no sería posible como igualdad matemática): significa "tomá el precio actual, sumale 100, y guardá el resultado de vuelta en precio". Para preguntar si dos cosas son iguales se usa <code>==</code> (doble), que vemos más adelante.</p></div>
+  <h2>Los tipos de dato básicos</h2>
+  <p>Cada valor tiene un tipo. Los cuatro fundamentales:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>Qué es</th><th>Ejemplos</th></tr></thead>
+    <tbody>
+      <tr><th>int</th><td>Número entero</td><td><code>1200</code>, <code>0</code>, <code>-5</code></td></tr>
+      <tr><th>float</th><td>Número con decimales</td><td><code>0.25</code>, <code>3.14</code>, <code>1.0</code></td></tr>
+      <tr><th>str</th><td>Texto (string), entre comillas</td><td><code>"Pizza"</code>, <code>"hola"</code></td></tr>
+      <tr><th>bool</th><td>Verdadero o falso</td><td><code>True</code>, <code>False</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="codehead"><span class="lang py">c03_variables.py · ver el tipo y reasignar</span></div>
+<pre>precio = 1200            # int
+descuento = 0.25         # float
+nombre = "Pizza"         # str
+disponible = True        # bool
+print(type(precio), type(descuento), type(nombre), type(disponible))
+
+precio = 1500            # reasignar: ahora vale otra cosa
+print("nuevo precio:", precio)</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">&lt;class 'int'&gt; &lt;class 'float'&gt; &lt;class 'str'&gt; &lt;class 'bool'&gt;
+nuevo precio: 1500</pre>
+  <p><code>type()</code> te dice el tipo de un valor. Es útil cuando algo no anda y sospechás que un dato no es lo que creías (un clásico: tener un número guardado como texto).</p>
+  <h2>Reglas para los nombres</h2>
+  <ul>
+    <li>Pueden tener letras, números y guión bajo, pero no empezar con número.</li>
+    <li>Distinguen mayúsculas: <code>precio</code> y <code>Precio</code> son variables distintas.</li>
+    <li>No pueden ser palabras reservadas de Python (<code>if</code>, <code>for</code>, <code>print</code>, etc.).</li>
+    <li>Por convención: minúsculas y snake_case (<code>precio_unitario</code>).</li>
+  </ul>
+  <div class="box nota"><span class="tag">Python no te obliga a declarar el tipo</span><p>En otros lenguajes tenés que decir "esta variable es un número". En Python no: le asignás un valor y Python deduce el tipo solo. Es más cómodo para empezar. La contra es que un error de tipo (multiplicar texto por texto) aparece recién al correr, no antes; por eso el <code>type()</code> es útil para chequear.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Comentarios y estilo</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Números y operaciones →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 2 · Datos y variables" data-num="6" data-title="Números y operaciones" id="c6">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Números y operaciones</h1>
+  <p class="lead">Los números son la base de casi todo cálculo. Python maneja enteros (int) y decimales (float), y trae todos los operadores matemáticos que necesitás, más un par que quizás no conocés.</p>
+  <h2>Todos los operadores</h2>
+  <div class="codehead"><span class="lang py">c04_numeros.py</span></div>
+<pre>print("suma:", 7 + 3)              # 10
+print("resta:", 7 - 3)            # 4
+print("multiplicacion:", 7 * 3)   # 21
+print("division:", 7 / 3)         # 2.333... (siempre da float)
+print("division entera:", 7 // 3) # 2 (descarta los decimales)
+print("resto (modulo):", 7 % 3)   # 1 (lo que sobra de dividir)
+print("potencia:", 2 ** 10)       # 1024 (2 elevado a 10)</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">suma: 10
+resta: 4
+multiplicacion: 21
+division: 2.3333333333333335
+division entera: 2
+resto (modulo): 1
+potencia: 1024</pre>
+  <h2>Dos que sorprenden: // y %</h2>
+  <p>La <strong>división entera</strong> <code>//</code> te da cuántas veces entra un número en otro, sin decimales: <code>7 // 3</code> es 2 (el 3 entra 2 veces en el 7). El <strong>módulo</strong> <code>%</code> te da lo que sobra: <code>7 % 3</code> es 1. Parecen raros pero son utilísimos. El truco más común: <code>numero % 2 == 0</code> te dice si un número es par (si el resto de dividir por 2 es cero).</p>
+  <h2>Precedencia: el orden importa</h2>
+  <div class="codehead"><span class="lang py">precedencia</span></div>
+<pre>print("sin parentesis:", 2 + 3 * 4)     # 14 (primero 3*4, despues +2)
+print("con parentesis:", (2 + 3) * 4)   # 20 (primero el parentesis)</pre>
+  <p>Como en matemática: primero se resuelven multiplicaciones y divisiones, después sumas y restas. Y los paréntesis mandan sobre todo. En la duda, poné paréntesis: aclaran la intención y evitan errores.</p>
+  <h2>Redondeo y decimales</h2>
+  <div class="codehead"><span class="lang py">redondear</span></div>
+<pre>print("redondear:", round(4356.789, 2))   # 4356.79 (a 2 decimales)
+print("par?:", 10 % 2 == 0)                # True</pre>
+  <div class="box ojo"><span class="tag">Los decimales tienen truquitos</span><p>Habrás notado que <code>7 / 3</code> dio <code>2.3333333333333335</code> con un 5 raro al final. Los float guardan decimales con precisión limitada, así que a veces aparecen esas colas. Para mostrar, usá <code>round()</code> o el formato de los f-strings (próximo capítulo). Y ojo con el dinero: para plata exacta, en sistemas reales se evita el float (se usan enteros de centavos o tipos especiales), justamente por esto.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Variables</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Texto (strings) →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 2 · Datos y variables" data-num="7" data-title="Texto (strings)" id="c7">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>Texto: los strings a fondo</h1>
+  <p class="lead">Casi todo programa maneja texto: nombres, mensajes, datos que llegan como texto. En Python el texto es el tipo <code>str</code> (string), y viene con un montón de herramientas para manipularlo. Este es un tema grande porque el texto está en todos lados.</p>
+  <h2>Crear y medir</h2>
+  <div class="codehead"><span class="lang py">c05_texto.py</span></div>
+<pre>nombre = "Pizza Muzzarella"
+print("largo:", len(nombre))              # 16 caracteres
+print("mayusculas:", nombre.upper())
+print("minusculas:", nombre.lower())
+print("reemplazar:", nombre.replace("Muzzarella", "Napolitana"))</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">largo: 16
+mayusculas: PIZZA MUZZARELLA
+minusculas: pizza muzzarella
+reemplazar: Pizza Napolitana</pre>
+  <p><code>len()</code> cuenta los caracteres (incluye espacios). Los <strong>métodos</strong> como <code>.upper()</code>, <code>.lower()</code>, <code>.replace()</code> se escriben con un punto después del texto, y devuelven un texto nuevo (no cambian el original: el texto en Python es "inmutable").</p>
+  <h2>Acceder a partes: indexado y slicing</h2>
+  <div class="codehead"><span class="lang py">indexado y slicing</span></div>
+<pre>print("primera letra:", nombre[0])   # P (se cuenta desde 0)
+print("ultimas 4:", nombre[-4:])     # ella (negativo cuenta desde el final)
+print("primeras 5:", nombre[0:5])    # Pizza (de la 0 a la 5, sin incluir la 5)</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">primera letra: P
+ultimas 4: ella
+primeras 5: Pizza</pre>
+  <p>Un texto es una secuencia de caracteres numerados desde 0. <code>nombre[0]</code> es el primero. Los negativos cuentan desde el final: <code>nombre[-1]</code> es el último. El "slicing" <code>[inicio:fin]</code> saca un pedazo (el <code>fin</code> no se incluye). Esto mismo vale para las listas, como vas a ver.</p>
+  <h2>Dividir y unir</h2>
+  <div class="codehead"><span class="lang py">split y join</span></div>
+<pre>partes = "carne,pollo,jamon".split(",")   # dividir por la coma
+print("split:", partes)                    # ['carne', 'pollo', 'jamon']
+print("unir:", " + ".join(partes))         # carne + pollo + jamon
+sucio = "   hola   "
+print("strip:", repr(sucio.strip()))       # 'hola' (saca espacios de los bordes)</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">split: ['carne', 'pollo', 'jamon']
+unir: carne + pollo + jamon
+strip: 'hola'</pre>
+  <p><code>.split()</code> parte un texto en una lista; <code>.join()</code> hace lo inverso. <code>.strip()</code> saca espacios sobrantes de los bordes (clave al limpiar datos que escribe la gente).</p>
+  <h2>f-strings: armar texto con valores</h2>
+  <p>La forma moderna y cómoda de meter valores dentro de un texto. Ponés una <code>f</code> antes de las comillas, y lo que va entre llaves <code>{}</code> se reemplaza por su valor.</p>
+  <div class="codehead"><span class="lang py">f-strings</span></div>
+<pre>precio = 8500; cant = 2
+print(f"{cant} pizzas = ${precio*cant}")
+print(f"con formato: ${precio*cant:,.2f}")  # miles con coma y 2 decimales</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">2 pizzas = $17000
+con formato: $17,000.00</pre>
+  <div class="box nota"><span class="tag">Los f-strings son tu mejor amigo</span><p>Vas a usarlos todo el tiempo para armar mensajes con datos. Podés meter cualquier expresión entre las llaves (<code>{precio*cant}</code>), y darle formato después de dos puntos (<code>:,.2f</code> = separador de miles y 2 decimales). Es mucho más claro que andar concatenando con <code>+</code>.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Números y operaciones</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Booleanos y comparaciones →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 2 · Datos y variables" data-num="8" data-title="Booleanos y comparaciones" id="c8">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Booleanos: verdadero o falso</h1>
+  <p class="lead">Un booleano solo puede valer <code>True</code> (verdadero) o <code>False</code> (falso). Parece poca cosa, pero es la base de todas las decisiones de un programa: "¿hay stock?", "¿está pago?", "¿el número es par?". Todo eso son preguntas cuya respuesta es un booleano.</p>
+  <h2>Las comparaciones dan booleanos</h2>
+  <p>Cuando comparás dos valores, el resultado es <code>True</code> o <code>False</code>:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Operador</th><th>Pregunta</th><th>Ejemplo → resultado</th></tr></thead>
+    <tbody>
+      <tr><td><code>==</code></td><td>¿son iguales?</td><td><code>5 == 5</code> → True</td></tr>
+      <tr><td><code>!=</code></td><td>¿son distintos?</td><td><code>5 != 3</code> → True</td></tr>
+      <tr><td><code>&lt;</code> <code>&gt;</code></td><td>menor / mayor</td><td><code>3 &lt; 5</code> → True</td></tr>
+      <tr><td><code>&lt;=</code> <code>&gt;=</code></td><td>menor-igual / mayor-igual</td><td><code>5 &gt;= 5</code> → True</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box ojo"><span class="tag">Un = o dos ==</span><p>El error más común de principiante: usar <code>=</code> (asignar) donde va <code>==</code> (comparar). <code>precio = 8500</code> guarda; <code>precio == 8500</code> pregunta si son iguales y da True/False. Uno guarda, dos preguntan. Python casi siempre te avisa si los confundís, pero grabate la diferencia desde ahora.</p></div>
+  <h2>Combinar condiciones: and, or, not</h2>
+  <div class="codehead"><span class="lang py">c06_booleanos.py</span></div>
+<pre>stock = 5; pedido = 3; pagado = True
+print("hay stock:", pedido &lt;= stock)              # True
+print("and:", pedido &lt;= stock and pagado)          # True (las dos verdaderas)
+print("or:", pedido &gt; stock or pagado)             # True (al menos una)
+print("not:", not pagado)                           # False (invierte)
+print("entre 18 y 65:", 18 &lt;= 25 &lt;= 65)             # True (encadenada)</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">hay stock: True
+and: True
+or: True
+not: False
+entre 18 y 65: True</pre>
+  <ul>
+    <li><strong><code>and</code></strong> (y): verdadero solo si las dos condiciones lo son.</li>
+    <li><strong><code>or</code></strong> (o): verdadero si al menos una lo es.</li>
+    <li><strong><code>not</code></strong> (no): invierte, convierte True en False y viceversa.</li>
+    <li>Podés encadenar: <code>18 &lt;= edad &lt;= 65</code> pregunta si está en el rango, tal como lo escribirías en matemática.</li>
+  </ul>
+  <h2>Valores "verdaderos" y "falsos"</h2>
+  <div class="codehead"><span class="lang py">falsy</span></div>
+<pre>print(bool([]))      # False: una lista vacia
+print(bool(0))       # False: el cero
+print(bool(""))      # False: texto vacio
+print(bool("hola"))  # True: texto con contenido</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">lista vacia es falsa: False
+cero es falso: False
+texto con algo es verdadero: True</pre>
+  <div class="box nota"><span class="tag">Vacío es falso</span><p>En Python, el cero, el texto vacío y las listas vacías se consideran "falsos" cuando se los usa como condición. Esto es muy práctico: en vez de <code>if len(lista) &gt; 0:</code> podés escribir <code>if lista:</code> ("si la lista tiene algo"). Se lee mejor y es la forma pythónica.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Texto (strings)</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Conversión de tipos e input →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Parte 2 · Datos y variables" data-num="9" data-title="Conversión e input" id="c9">
+  <div class="ch-eyebrow">Capítulo 9</div>
+  <h1>Convertir tipos y pedir datos al usuario</h1>
+  <p class="lead">Los datos no siempre vienen en el tipo que necesitás. Un número que escribe el usuario llega como texto. Saber convertir entre tipos, y pedirle datos a quien usa el programa, es lo que hace tus programas interactivos.</p>
+  <h2>Convertir de un tipo a otro</h2>
+  <div class="codehead"><span class="lang py">c03_variables.py</span></div>
+<pre>cantidad_texto = "3"                 # esto es texto, no numero
+cantidad = int(cantidad_texto)       # convertir a entero
+print("doble:", cantidad * 2)        # ahora se puede multiplicar: 6
+print("como texto:", str(1500) + " pesos")   # numero a texto para concatenar
+print("a decimal:", float("2.5") + 1)         # 3.5</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">doble: 6
+como texto: 1500 pesos
+a decimal: 3.5</pre>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Función</th><th>Convierte a</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><code>int(x)</code></td><td>entero</td><td><code>int("3")</code> → 3</td></tr>
+      <tr><td><code>float(x)</code></td><td>decimal</td><td><code>float("2.5")</code> → 2.5</td></tr>
+      <tr><td><code>str(x)</code></td><td>texto</td><td><code>str(1500)</code> → "1500"</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box ojo"><span class="tag">Por qué "3" + "3" no es 6</span><p>Si sumás dos textos, Python los pega: <code>"3" + "3"</code> da <code>"33"</code>, no 6. Y <code>"3" * 2</code> da <code>"33"</code> (repite el texto). Por eso, cuando un número te llega como texto, tenés que convertirlo con <code>int()</code> antes de operar. Es una fuente clásica de bugs: revisá los tipos con <code>type()</code> si un cálculo da cualquier cosa.</p></div>
+  <h2>input: pedirle datos al usuario</h2>
+  <p>La función <code>input()</code> muestra un mensaje y espera a que el usuario escriba algo y apriete Enter. Devuelve siempre <strong>texto</strong>, así que casi siempre lo convertís.</p>
+  <div class="codehead"><span class="lang py">un programa interactivo</span></div>
+<pre>nombre = input("¿Cómo te llamás? ")
+cantidad = int(input("¿Cuántas pizzas querés? "))   # convertimos a número
+precio = 8500
+print(f"Hola {nombre}, son {cantidad} pizzas = ${precio * cantidad}")</pre>
+  <div class="codehead"><span class="lang sh">ejemplo de ejecución (el usuario escribe Carlos y 2)</span></div>
+<pre>¿Cómo te llamás? Carlos
+¿Cuántas pizzas querés? 2
+Hola Carlos, son 2 pizzas = $17000</pre>
+  <p>Fijate el <code>int(input(...))</code>: primero <code>input</code> trae el texto, después <code>int</code> lo convierte a número para poder multiplicar. Sin esa conversión, <code>cantidad</code> sería texto y el cálculo fallaría.</p>
+  <div class="box nota"><span class="tag">Ojo: el usuario escribe cualquier cosa</span><p>¿Qué pasa si a "¿cuántas pizzas?" el usuario escribe "dos" en vez de "2"? El <code>int()</code> falla con un error. Los programas robustos anticipan esto y lo manejan con <code>try/except</code> (Parte 7). Por ahora, tené en cuenta que todo dato que viene de afuera puede venir "mal": validarlo es parte del oficio.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Booleanos y comparaciones</span></button><button class="navbtn next" data-goto="10"><span class="dir">Siguiente</span><span class="t">Condicionales →</span></button></div>
+</section>
+
+<!-- 10 -->
+<section class="chapter" data-part="Parte 3 · Control de flujo" data-num="10" data-title="Condicionales" id="c10">
+  <div class="ch-eyebrow">Capítulo 10</div>
+  <h1>Condicionales: if / elif / else</h1>
+  <p class="lead">Hasta ahora los programas iban en línea recta: instrucción tras instrucción. Los condicionales le dan al programa la capacidad de decidir: hacer una cosa u otra según la situación. "Si hay stock, vendé; si no, avisá." Es el primer gran salto en poder.</p>
+  <h2>El if básico</h2>
+  <div class="codehead"><span class="lang py">01_fundamentos.py</span></div>
+<pre>stock = 5
+pedido = 8
+if pedido &lt;= stock:
+    print("hay stock")
+elif pedido - stock &lt;= 3:
+    print("falta poco, reponer")
+else:
+    print("sin stock suficiente")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">falta poco, reponer</pre>
+  <h2>Cómo se lee, línea por línea</h2>
+  <p>Python evalúa de arriba a abajo. Primero: ¿el pedido (8) es menor o igual al stock (5)? No, es falso, así que salta ese bloque. Después el <code>elif</code> ("si no, y si..."): ¿la diferencia (8-5=3) es menor o igual a 3? Sí → ejecuta ese bloque y muestra "falta poco". El <code>else</code> ("si no, entonces") es lo que pasa cuando ninguna condición anterior se cumplió; acá no llegó porque el <code>elif</code> ya dio verdadero. En cuanto una condición se cumple, ejecuta su bloque y se saltea el resto.</p>
+  <h2>Las tres piezas</h2>
+  <ul>
+    <li><strong><code>if</code></strong> (si): la primera condición. Es obligatoria.</li>
+    <li><strong><code>elif</code></strong> (contracción de "else if"): condiciones adicionales, tantas como quieras. Es opcional.</li>
+    <li><strong><code>else</code></strong> (si no): el caso "para todo lo demás". Opcional, y no lleva condición.</li>
+  </ul>
+  <h2>La sangría no es decoración</h2>
+  <p>Fijate que las líneas dentro de cada <code>if</code> están corridas hacia la derecha (4 espacios). En Python, esa sangría (indentación) es cómo el lenguaje sabe qué código pertenece a qué bloque. Todo lo que esté sangrado debajo del <code>if:</code> se ejecuta si la condición se cumple. Y ojo con los dos puntos <code>:</code> al final de la línea del <code>if</code>: son obligatorios.</p>
+  <div class="codehead"><span class="lang py">un if simple, sin elif ni else</span></div>
+<pre>edad = 20
+if edad &gt;= 18:
+    print("es mayor de edad")
+    print("puede entrar")     # este también está dentro del if
+print("esta línea siempre se ejecuta")  # esta NO está sangrada: siempre corre</pre>
+  <div class="box ojo"><span class="tag">El error de sangría</span><p>Es el error número uno al empezar con Python. Mezclar espacios y tabulaciones, o poner distinta cantidad de espacios, hace que Python se queje con un <code>IndentationError</code>. La regla salvadora: usá siempre 4 espacios, nunca mezcles con tabs, y sé consistente. Los buenos editores lo hacen por vos.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="9"><span class="dir">Anterior</span><span class="t">← Conversión e input</span></button><button class="navbtn next" data-goto="11"><span class="dir">Siguiente</span><span class="t">Condiciones compuestas →</span></button></div>
+</section>
+
+<!-- 11 -->
+<section class="chapter" data-part="Parte 3 · Control de flujo" data-num="11" data-title="Condiciones compuestas" id="c11">
+  <div class="ch-eyebrow">Capítulo 11</div>
+  <h1>Condiciones compuestas y anidadas</h1>
+  <p class="lead">Las decisiones reales suelen combinar varias condiciones. "Si hay stock Y está pago, preparar el pedido." Para eso usamos los <code>and</code>, <code>or</code> y <code>not</code> del capítulo de booleanos, ahora dentro de los <code>if</code>.</p>
+  <h2>Combinar con and y or</h2>
+  <div class="codehead"><span class="lang py">condiciones compuestas</span></div>
+<pre>stock = 5
+pedido = 3
+pagado = True
+
+if pedido &lt;= stock and pagado:
+    print("preparar el pedido")
+else:
+    print("no se puede preparar todavía")
+
+# con or: entra si es cliente VIP o si el pedido es grande
+es_vip = False
+monto = 20000
+if es_vip or monto &gt; 15000:
+    print("envío gratis")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">preparar el pedido
+envío gratis</pre>
+  <h2>Condiciones anidadas</h2>
+  <p>A veces una decisión depende de otra. Podés poner un <code>if</code> dentro de otro: eso es "anidar".</p>
+  <div class="codehead"><span class="lang py">anidado</span></div>
+<pre>if pedido &lt;= stock:
+    if pagado:
+        print("preparar")
+    else:
+        print("hay stock, falta el pago")
+else:
+    print("sin stock")</pre>
+  <div class="box nota"><span class="tag">Anidar poco, combinar mejor</span><p>Anidar muchos <code>if</code> dentro de otros vuelve el código difícil de seguir (la "escalera al infierno"). Muchas veces se puede aplanar combinando condiciones con <code>and</code>, o resolviendo primero los casos que cortan (ver abajo). Si te encontrás con tres o cuatro niveles de sangría, pará y buscá simplificar.</p></div>
+  <h2>El patrón de "salida temprana"</h2>
+  <p>Un truco de código limpio: en vez de anidar, resolvé primero lo que descarta, y seguí. Compará con el anidado de arriba:</p>
+  <div class="codehead"><span class="lang py">salida temprana (dentro de una función)</span></div>
+<pre>def preparar(pedido, stock, pagado):
+    if pedido &gt; stock:
+        return "sin stock"        # corta acá si no hay stock
+    if not pagado:
+        return "falta el pago"    # corta acá si no está pago
+    return "preparar"             # si llegó hasta acá, todo bien</pre>
+  <p>Cada <code>return</code> corta la función. Así vas descartando casos malos al principio, y al final queda el caso bueno, sin anidar. Es un patrón que vas a ver mucho, y que hace el código mucho más legible.</p>
+  <div class="navrow"><button class="navbtn" data-goto="10"><span class="dir">Anterior</span><span class="t">← Condicionales</span></button><button class="navbtn next" data-goto="12"><span class="dir">Siguiente</span><span class="t">El bucle for →</span></button></div>
+</section>
+
+<!-- 12 -->
+<section class="chapter" data-part="Parte 3 · Control de flujo" data-num="12" data-title="El bucle for" id="c12">
+  <div class="ch-eyebrow">Capítulo 12</div>
+  <h1>El bucle for: repetir para cada cosa</h1>
+  <p class="lead">La computadora brilla repitiendo. El bucle <code>for</code> recorre una colección (una lista, un rango de números, un texto) y ejecuta el mismo bloque para cada elemento. Es el bucle que más vas a usar.</p>
+  <h2>for con range</h2>
+  <p><code>range</code> genera una secuencia de números. Tiene tres formas:</p>
+  <div class="codehead"><span class="lang py">c10_control.py</span></div>
+<pre>for i in range(3):        print("range(3):", i)       # 0, 1, 2
+for i in range(2, 5):     print("range(2,5):", i)     # 2, 3, 4
+for i in range(0, 10, 2): print("range(0,10,2):", i)  # 0, 2, 4, 6, 8</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">range(3): 0
+range(3): 1
+range(3): 2
+range(2,5): 2
+range(2,5): 3
+range(2,5): 4
+range(0,10,2): 0
+range(0,10,2): 2
+range(0,10,2): 4
+range(0,10,2): 6
+range(0,10,2): 8</pre>
+  <ul>
+    <li><code>range(3)</code> → del 0 al 2 (arranca en 0, el 3 no se incluye).</li>
+    <li><code>range(2, 5)</code> → del 2 al 4 (desde, hasta-sin-incluir).</li>
+    <li><code>range(0, 10, 2)</code> → de 2 en 2 (desde, hasta, paso).</li>
+  </ul>
+  <h2>for sobre una lista, y enumerate</h2>
+  <div class="codehead"><span class="lang py">recorrer con y sin índice</span></div>
+<pre>for producto in ["pizza", "flan"]:
+    print("producto:", producto)
+
+# enumerate te da también la posición
+for pos, prod in enumerate(["pizza", "flan"], start=1):
+    print(f"{pos}. {prod}")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">1. pizza
+2. flan</pre>
+  <p>El <code>for producto in lista:</code> toma cada elemento y lo pone en <code>producto</code>. Cuando además necesitás el número de cada uno, <code>enumerate</code> te da la posición y el elemento a la vez.</p>
+  <h2>Acumular: el patrón más útil</h2>
+  <div class="codehead"><span class="lang py">sumar todos los precios</span></div>
+<pre>total = 0                        # empezamos en cero
+for precio in [1200, 8500, 3500]:
+    total += precio             # total = total + precio
+print("total acumulado:", total)   # 13200</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">total acumulado: 13200</pre>
+  <div class="box nota"><span class="tag">El acumulador</span><p>Este patrón (empezar en cero y sumar en cada vuelta) se llama acumulador, y lo vas a usar constantemente: sumar precios, contar cosas, juntar resultados. La clave es inicializar la variable ANTES del bucle (<code>total = 0</code>) y actualizarla adentro. El <code>+=</code> es un atajo de <code>total = total + precio</code>.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="11"><span class="dir">Anterior</span><span class="t">← Condiciones compuestas</span></button><button class="navbtn next" data-goto="13"><span class="dir">Siguiente</span><span class="t">El bucle while →</span></button></div>
+</section>
+
+<!-- 13 -->
+<section class="chapter" data-part="Parte 3 · Control de flujo" data-num="13" data-title="El bucle while" id="c13">
+  <div class="ch-eyebrow">Capítulo 13</div>
+  <h1>El bucle while: repetir mientras...</h1>
+  <p class="lead">El <code>for</code> repite un número conocido de veces (por cada elemento). El <code>while</code> repite <em>mientras</em> se cumpla una condición, sin saber de antemano cuántas veces. "Mientras el usuario no elija salir", "mientras quede stock".</p>
+  <h2>Cómo funciona</h2>
+  <div class="codehead"><span class="lang py">cuenta regresiva</span></div>
+<pre>n = 3
+while n &gt; 0:
+    print(n)
+    n = n - 1     # ¡clave! achicamos n para que el bucle termine</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">3
+2
+1</pre>
+  <p>Se lee: "mientras n sea mayor que 0, mostrá n y restale 1". Python evalúa la condición antes de cada vuelta. Cuando n llega a 0, la condición <code>n &gt; 0</code> es falsa y el bucle termina.</p>
+  <h2>El temido bucle infinito</h2>
+  <div class="codehead"><span class="lang py">MAL: esto no termina nunca</span></div>
+<pre>n = 3
+while n &gt; 0:
+    print(n)
+    # nos olvidamos de restar: n siempre vale 3, la condición siempre es True</pre>
+  <div class="box ojo"><span class="tag">Todo while necesita una salida</span><p>Si dentro del <code>while</code> nada cambia lo que evalúa la condición, se repite para siempre y el programa se cuelga. Cada <code>while</code> necesita que algo adentro, tarde o temprano, haga que la condición sea falsa (un contador que baja, una variable que cambia, un <code>break</code>). Si tu programa "se queda pensando" sin terminar, sospechá de esto. Para cortarlo a mano: Ctrl+C en la consola.</p></div>
+  <h2>El patrón de menú (while + input)</h2>
+  <p>Un uso clásico del <code>while</code>: repetir hasta que el usuario elija salir.</p>
+  <div class="codehead"><span class="lang py">menú interactivo</span></div>
+<pre>opcion = ""
+while opcion != "salir":
+    opcion = input("Escribí una opción (o 'salir'): ")
+    if opcion != "salir":
+        print("elegiste:", opcion)
+print("¡Chau!")</pre>
+  <p>El bucle sigue mientras la opción no sea "salir". Cuando el usuario escribe "salir", la condición se vuelve falsa y el programa termina. Este patrón es la base de cualquier programa interactivo de consola.</p>
+  <div class="box nota"><span class="tag">for o while: cuál elegir</span><p>Regla práctica: si sabés sobre qué repetir (una lista, un rango), usá <code>for</code>. Si repetís hasta que pase algo (el usuario sale, se acaba el stock, se cumple una condición), usá <code>while</code>. El <code>for</code> es más común y más seguro (no se cuelga); el <code>while</code> es para cuando no sabés cuántas vueltas van a ser.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="12"><span class="dir">Anterior</span><span class="t">← El bucle for</span></button><button class="navbtn next" data-goto="14"><span class="dir">Siguiente</span><span class="t">break, continue y patrones →</span></button></div>
+</section>
+
+<!-- 14 -->
+<section class="chapter" data-part="Parte 3 · Control de flujo" data-num="14" data-title="break, continue y patrones" id="c14">
+  <div class="ch-eyebrow">Capítulo 14</div>
+  <h1>break, continue y patrones de bucle</h1>
+  <p class="lead">Dos palabras clave dan control fino sobre los bucles: <code>break</code> (cortar el bucle) y <code>continue</code> (saltar a la próxima vuelta). Y con lo que ya sabés, hay unos patrones que resuelven la mayoría de los problemas con bucles.</p>
+  <h2>break y continue</h2>
+  <div class="codehead"><span class="lang py">c10_control.py</span></div>
+<pre>for n in range(1, 10):
+    if n == 5:
+        break          # corta el bucle apenas llega a 5
+    if n % 2 == 0:
+        continue       # saltea los pares (va directo a la próxima vuelta)
+    print("impar antes del 5:", n)</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">impar antes del 5: 1
+impar antes del 5: 3</pre>
+  <p><code>break</code> abandona el bucle por completo (útil cuando ya encontraste lo que buscabas). <code>continue</code> salta el resto de esta vuelta y sigue con la próxima (útil para ignorar ciertos casos). Acá: cuando <code>n</code> es par, <code>continue</code> saltea el print; cuando llega a 5, <code>break</code> corta todo.</p>
+  <h2>Patrón: buscar algo</h2>
+  <div class="codehead"><span class="lang py">buscar el primer producto caro</span></div>
+<pre>precios = [1200, 1800, 8500, 3500]
+encontrado = None
+for p in precios:
+    if p &gt; 5000:
+        encontrado = p
+        break              # lo encontré, no sigo buscando
+print("primer caro:", encontrado)   # 8500</pre>
+  <h2>Patrón: contar con condición</h2>
+  <div class="codehead"><span class="lang py">c10_control.py</span></div>
+<pre>caros = 0
+for p in [1200, 8500, 3500, 9800]:
+    if p &gt; 5000:
+        caros += 1
+print("productos caros:", caros)    # 2</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">productos caros: 2</pre>
+  <h2>Los patrones que resuelven casi todo</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Patrón</th><th>Cómo</th></tr></thead>
+    <tbody>
+      <tr><th>Acumular</th><td>variable en 0 antes, <code>+=</code> adentro (sumar, total)</td></tr>
+      <tr><th>Contar</th><td>contador en 0, <code>+= 1</code> cuando se cumple algo</td></tr>
+      <tr><th>Buscar</th><td>recorrer y <code>break</code> al encontrar</td></tr>
+      <tr><th>Filtrar</th><td>recorrer y guardar en una lista nueva los que cumplen</td></tr>
+      <tr><th>Máximo/mínimo</th><td>guardar el mejor visto hasta ahora, comparar en cada vuelta</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Estos cinco patrones son oro</span><p>La enorme mayoría de los problemas con bucles son una variante de estos cinco. Cuando enfrentes un problema nuevo, preguntate: ¿estoy acumulando, contando, buscando, filtrando, o buscando un extremo? Identificar el patrón es la mitad de la solución. Los vas a usar en todos los ejercicios de la Parte 8.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="13"><span class="dir">Anterior</span><span class="t">← El bucle while</span></button><button class="navbtn next" data-goto="15"><span class="dir">Siguiente</span><span class="t">Listas →</span></button></div>
+</section>
+
+<!-- 15 -->
+<section class="chapter" data-part="Parte 4 · Estructuras de datos" data-num="15" data-title="Listas" id="c15">
+  <div class="ch-eyebrow">Capítulo 15</div>
+  <h1>Listas: muchos valores en orden</h1>
+  <p class="lead">Una variable guarda un valor. Una lista guarda muchos, en orden, bajo un solo nombre. "Los productos del menú", "los precios de hoy", "los pedidos pendientes": todo eso son listas. Es la estructura de datos que más vas a usar.</p>
+  <h2>Crear y acceder</h2>
+  <div class="codehead"><span class="lang py">01_fundamentos.py</span></div>
+<pre>productos = ["empanada", "pizza", "flan"]
+print("primero:", productos[0])       # empanada (se cuenta desde 0)
+print("último:", productos[-1])        # flan (negativo desde el final)
+print("cuántos:", len(productos))      # 3</pre>
+  <p>Se crean entre corchetes, con los elementos separados por comas. Se accede por posición, <strong>empezando en 0</strong>: el primero es <code>[0]</code>, el segundo <code>[1]</code>. Los negativos cuentan desde atrás: <code>[-1]</code> es el último. <code>len()</code> te dice cuántos hay.</p>
+  <h2>Modificar una lista</h2>
+  <div class="codehead"><span class="lang py">agregar, sacar, cambiar</span></div>
+<pre>productos = ["empanada", "pizza", "flan"]
+productos.append("gaseosa")       # agregar al final
+productos.insert(0, "agua")        # agregar en una posición
+productos.remove("pizza")          # sacar por valor
+ultimo = productos.pop()           # sacar el último y devolverlo
+productos[0] = "soda"              # cambiar por posición
+print(productos)</pre>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Método</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td><code>.append(x)</code></td><td>agrega x al final</td></tr>
+      <tr><td><code>.insert(i, x)</code></td><td>inserta x en la posición i</td></tr>
+      <tr><td><code>.remove(x)</code></td><td>saca la primera aparición de x</td></tr>
+      <tr><td><code>.pop()</code></td><td>saca y devuelve el último (o el de una posición)</td></tr>
+      <tr><td><code>.sort()</code></td><td>ordena la lista</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Recorrer y preguntar</h2>
+  <div class="codehead"><span class="lang py">01_fundamentos.py</span></div>
+<pre>productos = ["empanada", "pizza", "flan", "gaseosa"]
+for p in productos:
+    print("  -", p)
+print("hay pizza?:", "pizza" in productos)   # True
+print("total:", len(productos))</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">productos: ['empanada', 'pizza', 'flan', 'gaseosa']
+primero: empanada | total: 4
+  - empanada
+  - pizza
+  - flan
+  - gaseosa</pre>
+  <p>El <code>for</code> recorre la lista elemento por elemento (lo viste en la Parte 3). El operador <code>in</code> pregunta si algo está en la lista, y da un booleano. Con <code>len</code>, <code>sum</code>, <code>max</code>, <code>min</code> sacás cuenta rápida de una lista de números.</p>
+  <div class="box ojo"><span class="tag">Se cuenta desde CERO</span><p>Insisto porque es la trampa clásica: la primera posición es 0, no 1. En una lista de 4 elementos, las posiciones válidas van de 0 a 3. Pedir <code>productos[4]</code> en esa lista da un error <code>IndexError</code> ("index out of range"). Cuando lo veas, casi siempre es esto: te pasaste por uno.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="14"><span class="dir">Anterior</span><span class="t">← break, continue y patrones</span></button><button class="navbtn next" data-goto="16"><span class="dir">Siguiente</span><span class="t">Tuplas →</span></button></div>
+</section>
+
+<!-- 16 -->
+<section class="chapter" data-part="Parte 4 · Estructuras de datos" data-num="16" data-title="Tuplas" id="c16">
+  <div class="ch-eyebrow">Capítulo 16</div>
+  <h1>Tuplas: listas que no cambian</h1>
+  <p class="lead">Una tupla es como una lista, pero con una diferencia clave: una vez creada, no se puede modificar. Se usa para datos que van juntos y no deberían cambiar: unas coordenadas, un par (nombre, precio), un registro fijo.</p>
+  <div class="codehead"><span class="lang py">c16_estructuras.py</span></div>
+<pre>punto = (10, 20)              # se crean con paréntesis
+print("tupla:", punto, "x =", punto[0])   # se accede igual que una lista
+# punto[0] = 99   # ESTO DA ERROR: una tupla no se puede modificar</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">tupla: (10, 20) x = 10</pre>
+  <h2>Desempaquetar tuplas</h2>
+  <p>Un truco muy usado: asignar los valores de una tupla a varias variables de una vez.</p>
+  <div class="codehead"><span class="lang py">desempaquetar</span></div>
+<pre>producto = ("Pizza", 8500)
+nombre, precio = producto        # nombre="Pizza", precio=8500
+print(nombre, "cuesta", precio)
+
+# es lo que pasa en un for con enumerate o con pares:
+for nombre, precio in [("Pizza", 8500), ("Flan", 3500)]:
+    print(f"{nombre}: ${precio}")</pre>
+  <div class="box nota"><span class="tag">Lista o tupla</span><p>Usá una <strong>lista</strong> cuando la colección va a cambiar (agregar/sacar productos). Usá una <strong>tupla</strong> cuando son datos fijos que van juntos y no deben cambiar (un par nombre-precio, una coordenada). En la práctica las listas son más comunes, pero las tuplas aparecen todo el tiempo, sobre todo al recorrer pares con <code>for</code>, muchas veces sin que te des cuenta.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="15"><span class="dir">Anterior</span><span class="t">← Listas</span></button><button class="navbtn next" data-goto="17"><span class="dir">Siguiente</span><span class="t">Diccionarios →</span></button></div>
+</section>
+
+<!-- 17 -->
+<section class="chapter" data-part="Parte 4 · Estructuras de datos" data-num="17" data-title="Diccionarios" id="c17">
+  <div class="ch-eyebrow">Capítulo 17</div>
+  <h1>Diccionarios: datos con etiqueta</h1>
+  <p class="lead">Una lista guarda cosas en orden, numeradas. Un diccionario las guarda con nombre: pares de "clave: valor". Es perfecto para los datos de una cosa: un pedido tiene un producto, una cantidad, un precio. En vez de recordar "la posición 2 es el precio", accedés por el nombre.</p>
+  <h2>Crear y acceder</h2>
+  <div class="codehead"><span class="lang py">01_fundamentos.py</span></div>
+<pre>pedido = {"producto": "pizza", "cantidad": 2, "precio": 8500}
+print("cantidad:", pedido["cantidad"])   # 2 (accedo por la clave)
+pedido["pagado"] = True                    # agregar un dato nuevo
+print(pedido)</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">el pedido es de 2 pizza
+{'producto': 'pizza', 'cantidad': 2, 'precio': 8500, 'pagado': True}</pre>
+  <p>Se crean con llaves <code>{}</code>, con <code>clave: valor</code> separados por comas. Accedés a un valor por su clave entre corchetes: <code>pedido["precio"]</code>. Agregás o cambiás datos asignando a una clave.</p>
+  <h2>Acceso seguro con get</h2>
+  <div class="codehead"><span class="lang py">get: sin romper si no existe</span></div>
+<pre>pedido = {"producto": "pizza", "cantidad": 2}
+print(pedido.get("precio"))            # None (no existe, pero no rompe)
+print(pedido.get("precio", 0))          # 0 (valor por defecto si no está)
+# pedido["precio"]  # ESTO daría error KeyError porque la clave no existe</pre>
+  <p>Acceder con corchetes a una clave que no existe da error. Con <code>.get()</code>, si no existe devuelve <code>None</code> (o el valor por defecto que le pases). Útil cuando no estás seguro de que la clave esté.</p>
+  <h2>Recorrer un diccionario</h2>
+  <div class="codehead"><span class="lang py">recorrer claves y valores</span></div>
+<pre>pedido = {"producto": "pizza", "cantidad": 2, "precio": 8500}
+for clave, valor in pedido.items():
+    print(f"  {clave}: {valor}")
+print("claves:", list(pedido.keys()))
+print("valores:", list(pedido.values()))</pre>
+  <p><code>.items()</code> te da pares (clave, valor) para recorrer con <code>for</code>. <code>.keys()</code> da las claves y <code>.values()</code> los valores. Es lo que usás para procesar todos los datos de un registro.</p>
+  <div class="box nota"><span class="tag">Lista o diccionario</span><p>La regla de oro: <strong>lista</strong> para muchas cosas del mismo tipo (muchos productos); <strong>diccionario</strong> para varios datos de una misma cosa (los datos de un pedido). Y se combinan: una lista de diccionarios es "muchos pedidos, cada uno con sus datos". Esa combinación es cómo se representan los datos en prácticamente toda aplicación, y es el próximo tema.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="16"><span class="dir">Anterior</span><span class="t">← Tuplas</span></button><button class="navbtn next" data-goto="18"><span class="dir">Siguiente</span><span class="t">Conjuntos (sets) →</span></button></div>
+</section>
+
+<!-- 18 -->
+<section class="chapter" data-part="Parte 4 · Estructuras de datos" data-num="18" data-title="Conjuntos (sets)" id="c18">
+  <div class="ch-eyebrow">Capítulo 18</div>
+  <h1>Conjuntos (sets): sin duplicados</h1>
+  <p class="lead">Un set es una colección sin orden y sin elementos repetidos. Su superpoder es justamente ese: eliminar duplicados y responder rapidísimo "¿está esto acá?". Se usa menos que listas y diccionarios, pero para lo suyo es imbatible.</p>
+  <div class="codehead"><span class="lang py">c16_estructuras.py</span></div>
+<pre>tags = {"oferta", "nuevo", "oferta"}   # el "oferta" repetido se ignora
+print("set sin duplicados:", tags)
+print("está 'nuevo'?:", "nuevo" in tags)</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">set sin duplicados: {'oferta', 'nuevo'}
+esta 'nuevo'?: True</pre>
+  <h2>El uso más común: sacar duplicados de una lista</h2>
+  <div class="codehead"><span class="lang py">quitar repetidos</span></div>
+<pre>clientes = ["Ana", "Luis", "Ana", "Marta", "Luis"]
+unicos = list(set(clientes))       # convertir a set saca duplicados
+print("clientes únicos:", unicos)
+print("cuántos distintos:", len(set(clientes)))   # 3</pre>
+  <p>Convertir una lista a set y de vuelta a lista es la forma rápida de eliminar repetidos. Y como el set no permite duplicados, <code>len(set(...))</code> te dice cuántos valores distintos hay.</p>
+  <div class="box nota"><span class="tag">Cuándo un set</span><p>Usá un set cuando el orden no importa y no querés duplicados: etiquetas, valores únicos, "¿ya vi este?". Preguntar <code>x in mi_set</code> es muchísimo más rápido que en una lista grande, así que si vas a chequear pertenencia muchas veces sobre muchos datos, un set es la herramienta. Para todo lo demás, listas y diccionarios.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="17"><span class="dir">Anterior</span><span class="t">← Diccionarios</span></button><button class="navbtn next" data-goto="19"><span class="dir">Siguiente</span><span class="t">Estructuras anidadas →</span></button></div>
+</section>
+
+<!-- 19 -->
+<section class="chapter" data-part="Parte 4 · Estructuras de datos" data-num="19" data-title="Estructuras anidadas" id="c19">
+  <div class="ch-eyebrow">Capítulo 19</div>
+  <h1>Estructuras anidadas: la lista de diccionarios</h1>
+  <p class="lead">Acá se junta todo. Los datos reales no son valores sueltos: son colecciones de registros. Un menú es una lista de productos, y cada producto es un diccionario con sus datos. Esta combinación (lista de diccionarios) es LA forma de representar datos en casi toda aplicación. Dominarla es clave.</p>
+  <h2>Un menú de verdad</h2>
+  <div class="codehead"><span class="lang py">c16_estructuras.py</span></div>
+<pre>menu = [
+    {"nombre": "Pizza", "precio": 8500},
+    {"nombre": "Flan", "precio": 3500},
+    {"nombre": "Gaseosa", "precio": 1800},
+]
+for item in menu:
+    print(f"  {item['nombre']}: ${item['precio']}")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">  Pizza: $8500
+  Flan: $3500
+  Gaseosa: $1800</pre>
+  <p>La lista tiene tres elementos, y cada uno es un diccionario. El <code>for</code> recorre la lista; adentro, <code>item</code> es un diccionario, así que accedés a sus datos con <code>item["nombre"]</code>. Leelo despacio: lista por fuera, diccionario por dentro.</p>
+  <h2>Operar sobre la colección</h2>
+  <div class="codehead"><span class="lang py">c16_estructuras.py</span></div>
+<pre>total = sum(item["precio"] for item in menu)   # sumar todos los precios
+print("total del menú:", total)
+
+mas_caro = max(menu, key=lambda x: x["precio"])  # el de mayor precio
+print("más caro:", mas_caro["nombre"])</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">total del menu: 13800
+mas caro: Pizza</pre>
+  <p>El <code>sum(item["precio"] for item in menu)</code> suma el precio de cada item (es un acumulador, compacto). El <code>max(..., key=lambda x: x["precio"])</code> encuentra el diccionario con el precio más alto: el <code>key</code> le dice "compará por el precio". No te preocupes por el <code>lambda</code> ahora (es una función corta sin nombre); lo importante es el patrón.</p>
+  <div class="box nota"><span class="tag">Esto es cómo llegan los datos de verdad</span><p>Cuando pidas datos a una API (librito 01) o a una base (librito 10), casi siempre llegan como una lista de diccionarios: una lista de productos, de usuarios, de pedidos, cada uno un diccionario con sus campos. Todo el track de Datos trabaja sobre esto. Si te sentís cómodo recorriendo y operando una lista de diccionarios, tenés ganada la estructura de datos más importante del mundo real.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="18"><span class="dir">Anterior</span><span class="t">← Conjuntos (sets)</span></button><button class="navbtn next" data-goto="20"><span class="dir">Siguiente</span><span class="t">Funciones: lo básico →</span></button></div>
+</section>
+
+<!-- 20 -->
+<section class="chapter" data-part="Parte 5 · Funciones" data-num="20" data-title="Funciones: lo básico" id="c20">
+  <div class="ch-eyebrow">Capítulo 20</div>
+  <h1>Funciones: empaquetar y reutilizar</h1>
+  <p class="lead">Una función es un bloque de código con nombre, que hace una tarea y podés usar cuantas veces quieras. Son la herramienta más importante para organizar un programa: en vez de repetir el mismo cálculo en diez lugares, lo escribís una vez y lo llamás por su nombre.</p>
+  <h2>Definir y llamar</h2>
+  <div class="codehead"><span class="lang py">02_funciones_poo.py</span></div>
+<pre>def con_descuento(precio, porcentaje):
+    return precio - (precio * porcentaje / 100)
+
+print("1000 con 25% off:", con_descuento(1000, 25))
+print("8500 con 10% off:", con_descuento(8500, 10))</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">1000 con 25% off: 750.0
+8500 con 10% off: 7650.0</pre>
+  <h2>Las partes de una función</h2>
+  <ul>
+    <li><strong><code>def</code></strong> arranca la definición, seguido del nombre y paréntesis.</li>
+    <li>Entre paréntesis van los <strong>parámetros</strong>: los datos que la función recibe (<code>precio</code>, <code>porcentaje</code>).</li>
+    <li>El cuerpo va sangrado (como en el <code>if</code>).</li>
+    <li><strong><code>return</code></strong> es el resultado que la función entrega. Cuando Python llega al <code>return</code>, la función termina y devuelve ese valor.</li>
+    <li>Para usarla, la <strong>llamás</strong> con valores concretos: <code>con_descuento(1000, 25)</code>.</li>
+  </ul>
+  <h2>Definir no es ejecutar</h2>
+  <p>Un detalle importante: cuando escribís <code>def</code>, la función queda <em>definida</em> pero no corre. Recién se ejecuta cuando la <em>llamás</em>. Es como una receta escrita: existe, pero no cocina nada hasta que alguien la sigue. Podés definir una función arriba y llamarla muchas veces abajo.</p>
+  <h2>return vs print</h2>
+  <div class="codehead"><span class="lang py">la diferencia clave</span></div>
+<pre>def suma_print(a, b):
+    print(a + b)        # muestra, pero no devuelve nada usable
+
+def suma_return(a, b):
+    return a + b        # devuelve el valor, que podés seguir usando
+
+x = suma_return(2, 3)   # x vale 5, puedo usarlo
+total = x * 10          # 50
+# y = suma_print(2, 3)  # muestra 5, pero y queda en None (no sirve para calcular)</pre>
+  <div class="box ojo"><span class="tag">return y print no son lo mismo</span><p>Confusión clásica del principio. <code>print</code> muestra algo en pantalla y ya. <code>return</code> entrega un valor que el resto del programa puede usar (guardar, sumar, pasar a otra función). Una función que calcula debe <code>return</code>ar su resultado; si solo hace <code>print</code>, el valor se "pierde" apenas se muestra. Regla: si vas a usar el resultado, <code>return</code>.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="19"><span class="dir">Anterior</span><span class="t">← Estructuras anidadas</span></button><button class="navbtn next" data-goto="21"><span class="dir">Siguiente</span><span class="t">Parámetros y retorno a fondo →</span></button></div>
+</section>
+
+<!-- 21 -->
+<section class="chapter" data-part="Parte 5 · Funciones" data-num="21" data-title="Parámetros a fondo" id="c21">
+  <div class="ch-eyebrow">Capítulo 21</div>
+  <h1>Parámetros y retorno a fondo</h1>
+  <p class="lead">Las funciones tienen más flexibilidad de la que parece: valores por defecto, argumentos con nombre, cantidad variable de argumentos, y devolver varios valores a la vez. Con esto escribís funciones cómodas de usar.</p>
+  <h2>Valores por defecto y argumentos nombrados</h2>
+  <div class="codehead"><span class="lang py">c21_funciones.py</span></div>
+<pre>def precio_final(precio, iva=0.21, descuento=0):
+    return precio * (1 + iva) * (1 - descuento)
+
+print("solo precio:", precio_final(1000))              # usa iva y descuento por defecto
+print("con descuento:", precio_final(1000, descuento=0.25))  # nombro el que quiero
+print("nombrados:", precio_final(precio=1000, iva=0.105))</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">solo precio: 1210.0
+con descuento: 907.5
+nombrados: 1105.0</pre>
+  <p>El <code>iva=0.21</code> es un valor por defecto: si no lo pasás, vale 0.21. Y podés pasar argumentos por nombre (<code>descuento=0.25</code>), lo que te deja saltear los del medio y hace la llamada más clara. Fijate que <code>precio_final(1000, descuento=0.25)</code> no toca el iva (queda en su default).</p>
+  <h2>Cantidad variable: *args</h2>
+  <div class="codehead"><span class="lang py">c21_funciones.py</span></div>
+<pre>def sumar(*numeros):        # recibe todos los que le pases
+    return sum(numeros)
+print("sumar varios:", sumar(1, 2, 3, 4, 5))   # 15</pre>
+  <h2>Devolver varios valores</h2>
+  <div class="codehead"><span class="lang py">c21_funciones.py</span></div>
+<pre>def analizar(precios):
+    return min(precios), max(precios), sum(precios)/len(precios)
+
+minimo, maximo, promedio = analizar([1200, 8500, 3500])
+print(f"min={minimo} max={maximo} prom={promedio:.0f}")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">solo precio: 1210.0
+con descuento: 907.5
+nombrados: 1105.0
+sumar varios: 15
+min=1200 max=8500 prom=4400</pre>
+  <p>Una función puede devolver varios valores separados por comas (en realidad devuelve una tupla, capítulo 16), y los recibís en varias variables de una vez. Muy cómodo cuando un cálculo produce más de un resultado.</p>
+  <div class="box nota"><span class="tag">Funciones que usan funciones</span><p>Lo potente es combinarlas: una función puede llamar a otra. En el capítulo 20, <code>total_pedido</code> usaba <code>con_descuento</code> por dentro. Así se construyen programas grandes: funciones chiquitas y claras que se combinan, cada una haciendo una cosa bien. Es la misma idea de "descomponer en pasos" del capítulo 1, hecha código.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="20"><span class="dir">Anterior</span><span class="t">← Funciones: lo básico</span></button><button class="navbtn next" data-goto="22"><span class="dir">Siguiente</span><span class="t">Ámbito y buenas prácticas →</span></button></div>
+</section>
+
+<!-- 22 -->
+<section class="chapter" data-part="Parte 5 · Funciones" data-num="22" data-title="Ámbito y buenas prácticas" id="c22">
+  <div class="ch-eyebrow">Capítulo 22</div>
+  <h1>Ámbito (scope) y buenas prácticas</h1>
+  <p class="lead">Un tema que confunde y conviene entender temprano: dónde "viven" las variables. Una variable creada dentro de una función existe solo ahí adentro. Eso se llama ámbito (scope), y es una buena cosa: mantiene las funciones independientes.</p>
+  <h2>Las variables locales no salen de la función</h2>
+  <div class="codehead"><span class="lang py">c21_funciones.py</span></div>
+<pre>def f():
+    x = 10          # x vive solo dentro de f
+    return x
+
+print("retorno:", f())   # 10
+# print(x)   # ESTO daría error: x no existe acá afuera</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">retorno: 10</pre>
+  <p>La variable <code>x</code> nace y muere dentro de <code>f</code>. Afuera no existe. Por eso, para "sacar" un valor de una función, se usa <code>return</code>. Esto es bueno: cada función es una cajita cerrada, y no se pisan variables entre funciones sin querer.</p>
+  <h2>Docstrings: documentar una función</h2>
+  <div class="codehead"><span class="lang py">una función bien documentada</span></div>
+<pre>def total_pedido(precio, cantidad, descuento=0):
+    """Calcula el total de un pedido con un descuento opcional (0 a 1)."""
+    subtotal = precio * cantidad
+    return subtotal * (1 - descuento)</pre>
+  <p>El texto entre triples comillas justo debajo del <code>def</code> es un "docstring": describe qué hace la función. No es obligatorio, pero es una gran costumbre: quien use la función (o vos en un mes) entiende qué hace sin leer el código.</p>
+  <h2>Buenas prácticas de funciones</h2>
+  <ul>
+    <li><strong>Una función, una tarea.</strong> Si hace muchas cosas, partila en varias.</li>
+    <li><strong>Nombre que diga qué hace:</strong> <code>calcular_total</code>, no <code>hacer_cosa</code>.</li>
+    <li><strong>Cortita.</strong> Si no entra en una pantalla, probablemente convenga dividirla.</li>
+    <li><strong>Que reciba lo que necesita por parámetros</strong> y devuelva su resultado con <code>return</code>, en vez de depender de variables de afuera.</li>
+  </ul>
+  <div class="box nota"><span class="tag">Por qué funciones, en una frase</span><p>Las funciones te dan tres cosas: no repetís código, le ponés nombre a las ideas (el programa se lee mejor), y si hay que corregir algo, lo cambiás en un solo lugar. Son el primer paso hacia programas grandes que no se vuelven un caos. La programación orientada a objetos, que viene ahora, lleva esta idea un paso más allá.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="21"><span class="dir">Anterior</span><span class="t">← Parámetros a fondo</span></button><button class="navbtn next" data-goto="23"><span class="dir">Siguiente</span><span class="t">Clases y objetos →</span></button></div>
+</section>
+
+<!-- 23 -->
+<section class="chapter" data-part="Parte 6 · Objetos (POO)" data-num="23" data-title="Clases y objetos" id="c23">
+  <div class="ch-eyebrow">Capítulo 23</div>
+  <h1>Programación orientada a objetos</h1>
+  <p class="lead">La POO es una forma de organizar el código que agrupa los datos de una cosa junto con las acciones que operan sobre esos datos. Suena abstracto; con el ejemplo del producto se vuelve concreto. Un producto tiene datos (nombre, precio, stock) y cosas que puede hacer (venderse, revisar su stock). Una clase junta las dos cosas en un solo lugar.</p>
+  <h2>Clase = molde, objeto = cosa concreta</h2>
+  <p>Una <strong>clase</strong> es el molde que describe cómo es algo. Un <strong>objeto</strong> es cada cosa concreta hecha con ese molde. La clase <code>Producto</code> describe qué tiene y qué hace cualquier producto; <code>pizza</code> y <code>gaseosa</code> son dos objetos hechos con ese molde, cada uno con sus propios datos.</p>
+  <div class="codehead"><span class="lang py">02_funciones_poo.py</span></div>
+<pre>class Producto:
+    def __init__(self, nombre, precio, stock):
+        self.nombre = nombre        # atributos: los datos del objeto
+        self.precio = precio
+        self.stock = stock
+
+    def hay_stock(self, cantidad):  # métodos: lo que el objeto puede hacer
+        return self.stock &gt;= cantidad</pre>
+  <h2>Crear objetos a partir de la clase</h2>
+  <div class="codehead"><span class="lang py">crear y usar</span></div>
+<pre>pizza = Producto("Pizza muzza", 8500, 5)   # crear un objeto
+gaseosa = Producto("Gaseosa", 1800, 20)     # otro, independiente
+print(pizza.nombre, "cuesta", pizza.precio, "y hay", pizza.stock)
+print("¿alcanza para 3 pizzas?:", pizza.hay_stock(3))</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">Pizza muzza cuesta 8500 y hay 5</pre>
+  <p>Creás un objeto llamando a la clase como si fuera una función: <code>Producto("Pizza muzza", 8500, 5)</code>. Eso ejecuta el <code>__init__</code> y guarda los datos. Después accedés a sus atributos con punto (<code>pizza.nombre</code>) y llamás sus métodos igual (<code>pizza.hay_stock(3)</code>). Cada objeto tiene sus propios datos: la pizza y la gaseosa no se pisan.</p>
+  <div class="box nota"><span class="tag">Las dos palabras raras</span><p><code>__init__</code> es el "constructor": se ejecuta automáticamente al crear el objeto, y ahí se guardan los datos iniciales. <code>self</code> significa "este objeto en particular": <code>self.stock</code> es el stock de esta pizza puntual, distinto del de la gaseosa. Las dos suenan raras las primeras veces; después se vuelven automáticas. Todos los métodos reciben <code>self</code> como primer parámetro.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="22"><span class="dir">Anterior</span><span class="t">← Ámbito y buenas prácticas</span></button><button class="navbtn next" data-goto="24"><span class="dir">Siguiente</span><span class="t">Métodos y estado →</span></button></div>
+</section>
+
+<!-- 24 -->
+<section class="chapter" data-part="Parte 6 · Objetos (POO)" data-num="24" data-title="Métodos y estado" id="c24">
+  <div class="ch-eyebrow">Capítulo 24</div>
+  <h1>Métodos que cambian el estado del objeto</h1>
+  <p class="lead">Lo interesante de un objeto es que recuerda su estado y lo cambia. Un producto que se vende tiene menos stock después. El método <code>vender</code> modifica el <code>self.stock</code> del objeto, y ese cambio persiste.</p>
+  <div class="codehead"><span class="lang py">02_funciones_poo.py</span></div>
+<pre>class Producto:
+    def __init__(self, nombre, precio, stock):
+        self.nombre = nombre
+        self.precio = precio
+        self.stock = stock
+
+    def hay_stock(self, cantidad):
+        return self.stock &gt;= cantidad
+
+    def vender(self, cantidad):
+        if not self.hay_stock(cantidad):
+            return f"sin stock de {self.nombre} (quedan {self.stock})"
+        self.stock -= cantidad            # cambia el estado del objeto
+        return f"vendidas {cantidad} de {self.nombre}, quedan {self.stock}"</pre>
+  <div class="codehead"><span class="lang py">el objeto recuerda entre llamadas</span></div>
+<pre>pizza = Producto("Pizza muzza", 8500, 5)
+print(pizza.vender(2))
+print(pizza.vender(2))
+print(pizza.vender(2))   # este se pasa: solo queda 1</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">Pizza muzza cuesta 8500 y hay 5
+vendidas 2 de Pizza muzza, quedan 3
+vendidas 2 de Pizza muzza, quedan 1
+sin stock de Pizza muzza (quedan 1)</pre>
+  <h2>Qué pasó, paso a paso</h2>
+  <p>La pizza empieza con stock 5. La primera venta de 2 lo baja a 3. La segunda, a 1. La tercera pide 2, pero <code>hay_stock(2)</code> es falso (solo queda 1), así que <code>vender</code> devuelve el mensaje de "sin stock" sin tocar nada. El objeto <strong>recordó</strong> su stock entre una llamada y otra: eso es el estado. Un método (<code>vender</code>) usa a otro (<code>hay_stock</code>) del mismo objeto, con <code>self.</code>.</p>
+  <div class="box nota"><span class="tag">Datos y lógica, juntos</span><p>Fijate lo prolijo: el producto sabe cuánto stock tiene Y sabe controlarlo al vender. Los datos y la lógica que los cuida viven en el mismo lugar. Nadie puede vender más de lo que hay sin pasar por <code>vender</code>, que lo controla. Esa es la gran ventaja de la POO: el objeto protege sus propios datos y garantiza que se usen bien.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="23"><span class="dir">Anterior</span><span class="t">← Clases y objetos</span></button><button class="navbtn next" data-goto="25"><span class="dir">Siguiente</span><span class="t">Objetos que interactúan →</span></button></div>
+</section>
+
+<!-- 25 -->
+<section class="chapter" data-part="Parte 6 · Objetos (POO)" data-num="25" data-title="Objetos que interactúan" id="c25">
+  <div class="ch-eyebrow">Capítulo 25</div>
+  <h1>Varios objetos que trabajan juntos</h1>
+  <p class="lead">Los programas reales tienen muchos objetos de distintas clases que colaboran. Un carrito contiene productos y les pide que se vendan. Ver cómo un objeto usa a otro es entender de qué está hecho el software.</p>
+  <div class="codehead"><span class="lang py">c26_poo.py</span></div>
+<pre>class Carrito:
+    def __init__(self):
+        self.items = []       # lista de lo agregado
+        self.total = 0
+
+    def agregar(self, producto, cantidad):
+        importe = producto.vender(cantidad)   # el carrito le pide al producto que se venda
+        self.items.append((producto.nombre, cantidad, importe))
+        self.total += importe
+
+    def resumen(self):
+        for nombre, cant, imp in self.items:
+            print(f"  {cant}x {nombre} = ${imp}")
+        print(f"  TOTAL: ${self.total}")</pre>
+  <div class="codehead"><span class="lang py">dos clases colaborando</span></div>
+<pre>pizza = Producto("Pizza", 8500, 5)
+gaseosa = Producto("Gaseosa", 1800, 10)
+carrito = Carrito()
+carrito.agregar(pizza, 2)
+carrito.agregar(gaseosa, 3)
+carrito.resumen()
+print("stock pizza tras la venta:", pizza.stock)</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">  2x Pizza = $17000
+  3x Gaseosa = $5400
+  TOTAL: $22400
+stock pizza tras la venta: 3</pre>
+  <p>El <code>Carrito</code> no sabe cómo un producto controla su stock: solo le pide <code>producto.vender(cantidad)</code> y confía en que el producto sabe hacerlo. Cada clase se ocupa de lo suyo (el producto, de su stock; el carrito, de juntar items y sumar el total) y colaboran. Fijate que al vender por el carrito, el stock de la pizza igual bajó a 3: es el mismo objeto pizza.</p>
+  <div class="box nota"><span class="tag">Así se construye el software</span><p>Este reparto (cada objeto hace su parte, y colaboran) es la esencia del diseño de software. Un sistema grande es muchos objetos de muchas clases pasándose mensajes. La tienda del librito 13 es exactamente esto en grande: productos, pedidos, pagos, cada uno una clase que hace lo suyo. Lo que acabás de ver es el modelo mental de todo eso.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="24"><span class="dir">Anterior</span><span class="t">← Métodos y estado</span></button><button class="navbtn next" data-goto="26"><span class="dir">Siguiente</span><span class="t">Herencia →</span></button></div>
+</section>
+
+<!-- 26 -->
+<section class="chapter" data-part="Parte 6 · Objetos (POO)" data-num="26" data-title="Herencia" id="c26">
+  <div class="ch-eyebrow">Capítulo 26</div>
+  <h1>Herencia: reutilizar y especializar</h1>
+  <p class="lead">A veces una clase es una versión especial de otra. Un producto con descuento ES un producto, con algo extra. La herencia te deja crear una clase basada en otra, heredando todo lo que ya tiene y agregando o cambiando lo que necesites, sin repetir código.</p>
+  <div class="codehead"><span class="lang py">c26_poo.py</span></div>
+<pre>class ProductoConDescuento(Producto):     # hereda de Producto
+    def __init__(self, nombre, precio, stock, descuento):
+        super().__init__(nombre, precio, stock)   # reusa el init del padre
+        self.descuento = descuento                 # y agrega lo suyo
+
+    def vender(self, cantidad):                     # cambia el comportamiento
+        base = super().vender(cantidad)             # usa el vender del padre
+        return base * (1 - self.descuento)          # y le aplica el descuento</pre>
+  <div class="codehead"><span class="lang py">usarla</span></div>
+<pre>flan = ProductoConDescuento("Flan", 3500, 8, 0.20)
+print("flan con 20% off, 2 unidades:", flan.vender(2))</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">flan con 20% off, 2 unidades: 5600.0</pre>
+  <h2>Qué pasó</h2>
+  <p><code>ProductoConDescuento(Producto)</code> significa "esta clase hereda de Producto": arranca con todo lo que Producto tiene (nombre, precio, stock, hay_stock). <code>super()</code> se refiere a la clase padre: <code>super().__init__(...)</code> reusa su constructor, y <code>super().vender(...)</code> reusa su venta, a la que después le aplica el descuento. El flan de 3500 × 2 = 7000, con 20% off = 5600. No reescribimos nada de Producto: lo aprovechamos.</p>
+  <div class="box nota"><span class="tag">Herencia: usar con criterio</span><p>La herencia es potente pero se abusa. La regla sana: usala cuando de verdad hay una relación "es un/una" (un ProductoConDescuento <em>es un</em> Producto). Si solo querés reusar código sin esa relación, muchas veces es mejor que un objeto <em>tenga</em> a otro (como el carrito tiene productos, capítulo 25). Por ahora, alcanza con entender la idea: heredar lo que ya existe y especializarlo.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="25"><span class="dir">Anterior</span><span class="t">← Objetos que interactúan</span></button><button class="navbtn next" data-goto="27"><span class="dir">Siguiente</span><span class="t">Errores y excepciones →</span></button></div>
+</section>
+
+<!-- 27 -->
+<section class="chapter" data-part="Parte 7 · Robustez" data-num="27" data-title="Errores y excepciones" id="c27">
+  <div class="ch-eyebrow">Capítulo 27</div>
+  <h1>Errores y excepciones</h1>
+  <p class="lead">Los errores son parte de programar, no un fracaso. Hay dos clases: los de escritura (un paréntesis sin cerrar, que Python no deja ni arrancar) y los que pasan mientras el programa corre (dividir por cero, convertir "hola" a número). A estos últimos se los llama excepciones, y podés manejarlos para que tu programa no se caiga.</p>
+  <h2>Leer un error</h2>
+  <p>Cuando algo falla en ejecución, Python muestra un "traceback": varias líneas que terminan con el tipo de error y un mensaje. No te asustes: leelo de abajo hacia arriba. La última línea te dice qué pasó (<code>ZeroDivisionError: division by zero</code>) y arriba, en qué línea. El 90% de depurar es leer bien el error.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Error común</th><th>Qué significa</th></tr></thead>
+    <tbody>
+      <tr><td><code>SyntaxError</code></td><td>Escribiste mal (falta un <code>:</code>, un paréntesis)</td></tr>
+      <tr><td><code>NameError</code></td><td>Usaste una variable que no existe (¿un typo?)</td></tr>
+      <tr><td><code>TypeError</code></td><td>Operación entre tipos incompatibles (texto por número)</td></tr>
+      <tr><td><code>ValueError</code></td><td>El valor no sirve (<code>int("hola")</code>)</td></tr>
+      <tr><td><code>IndexError</code></td><td>Pediste una posición que no existe en la lista</td></tr>
+      <tr><td><code>KeyError</code></td><td>Pediste una clave que no existe en el diccionario</td></tr>
+    </tbody>
+  </table></div>
+  <h2>try / except: manejar el error</h2>
+  <div class="codehead"><span class="lang py">c30_errores.py</span></div>
+<pre>def dividir(a, b):
+    try:
+        return a / b
+    except ZeroDivisionError:
+        return "no se puede dividir por cero"
+
+print(dividir(10, 2))    # 5.0
+print(dividir(10, 0))    # el mensaje, en vez de romper</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">5.0
+no se puede dividir por cero</pre>
+  <p>El <code>try</code> intenta ejecutar el código. Si sale bien, el <code>except</code> se ignora. Si ocurre el error nombrado, en vez de caerse, el programa salta al <code>except</code> y sigue. Es la red de seguridad para lo que puede fallar.</p>
+  <h2>Validar entrada del usuario</h2>
+  <div class="codehead"><span class="lang py">c30_errores.py</span></div>
+<pre>def a_entero(texto):
+    try:
+        return int(texto)
+    except ValueError:
+        return None                 # si no es número, avisamos con None
+
+for valor in ["10", "abc", "5"]:
+    n = a_entero(valor)
+    if n is None:
+        print(f"  '{valor}' no es un numero, lo salteo")
+    else:
+        print(f"  '{valor}' x2 = {n*2}")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">'42' -> 42
+'hola' -> None
+  '10' x2 = 20
+  'abc' no es un numero, lo salteo
+  '5' x2 = 10</pre>
+  <div class="box ojo"><span class="tag">Todo lo que viene de afuera puede venir mal</span><p>Lo que escribe un usuario, lo que llega de una API, lo que se lee de un archivo: nada de eso es confiable. Un programa robusto asume que puede venir cualquier cosa y lo maneja con <code>try/except</code> o validaciones, en vez de asumir que siempre estará perfecto. Esta mentalidad ("¿qué pasa si esto falla?") es lo que separa un programa de juguete de uno serio, y reaparece en toda la colección (validar entradas, manejar errores en producción, seguridad).</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="26"><span class="dir">Anterior</span><span class="t">← Herencia</span></button><button class="navbtn next" data-goto="28"><span class="dir">Siguiente</span><span class="t">Archivos →</span></button></div>
+</section>
+
+<!-- 28 -->
+<section class="chapter" data-part="Parte 7 · Robustez" data-num="28" data-title="Archivos" id="c28">
+  <div class="ch-eyebrow">Capítulo 28</div>
+  <h1>Leer y escribir archivos</h1>
+  <p class="lead">Hasta ahora, cuando el programa termina, todo lo que hizo se pierde. Para que los datos sobrevivan, hay que guardarlos: en un archivo (lo simple) o en una base de datos (lo serio, capítulo 40). Empecemos por los archivos.</p>
+  <h2>Escribir un archivo</h2>
+  <div class="codehead"><span class="lang py">c31_archivos.py</span></div>
+<pre>with open("pedidos.txt", "w") as f:      # "w" = write (escribir)
+    f.write("Pizza,2\n")                  # el \n es el salto de línea
+    f.write("Gaseosa,3\n")</pre>
+  <p>El <code>open</code> abre (o crea) el archivo; el modo <code>"w"</code> es para escribir (ojo: borra lo que hubiera). El <code>with</code> se encarga de cerrar el archivo solo cuando termina, aunque haya un error. Es la forma correcta y segura de trabajar con archivos.</p>
+  <h2>Leer un archivo</h2>
+  <div class="codehead"><span class="lang py">c31_archivos.py</span></div>
+<pre>with open("pedidos.txt") as f:           # sin modo = leer
+    for linea in f:                       # recorre línea por línea
+        producto, cantidad = linea.strip().split(",")
+        print(f"  {cantidad} x {producto}")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">== contenido ==
+  2 x Pizza
+  3 x Gaseosa</pre>
+  <p>Recorrés el archivo con un <code>for</code>, línea por línea. Cada línea es texto; <code>.strip()</code> le saca el salto de línea, y <code>.split(",")</code> la parte por la coma en producto y cantidad (todo lo de la Parte 2 y 4, junto). Fijate cómo se combina todo lo aprendido: bucle, strings, desempaquetado de tupla.</p>
+  <div class="box nota"><span class="tag">De archivos a bases de datos</span><p>Guardar en un archivo de texto sirve para cosas simples. Cuando los datos crecen y necesitás buscarlos, filtrarlos y relacionarlos, se usa una base de datos (capítulo 40 y todo el librito 10). Pero la idea es la misma: sacar los datos de la memoria (que se borra) a algo que persiste. Los formatos <code>.csv</code> (como el de arriba) y <code>.json</code> son los más comunes para intercambiar datos.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="27"><span class="dir">Anterior</span><span class="t">← Errores y excepciones</span></button><button class="navbtn next" data-goto="29"><span class="dir">Siguiente</span><span class="t">Módulos y librería estándar →</span></button></div>
+</section>
+
+<!-- 29 -->
+<section class="chapter" data-part="Parte 7 · Robustez" data-num="29" data-title="Módulos" id="c29">
+  <div class="ch-eyebrow">Capítulo 29</div>
+  <h1>Módulos: código que ya está hecho</h1>
+  <p class="lead">No hace falta escribir todo desde cero. Python viene con una enorme "librería estándar": módulos con funciones ya listas para fechas, números aleatorios, matemática, y muchísimo más. Y hay miles de librerías externas para todo lo demás. Programar es, en gran parte, saber reutilizar.</p>
+  <h2>Importar y usar</h2>
+  <div class="codehead"><span class="lang py">c31_archivos.py</span></div>
+<pre>import datetime, random, math
+
+print("hoy:", datetime.date.today())
+print("random 1-6:", random.randint(1, 6))
+print("raíz de 144:", math.sqrt(144))</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">hoy: 2026-09-06
+random 1-6: 2
+raiz de 144: 12.0</pre>
+  <p>La palabra <code>import</code> trae un módulo a tu programa. Después usás sus funciones con <code>modulo.funcion()</code>. <code>datetime</code> maneja fechas, <code>random</code> genera azar, <code>math</code> tiene funciones matemáticas. El número aleatorio de arriba puede darte otro valor cada vez que lo corras, claro.</p>
+  <h2>Módulos útiles para conocer</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Módulo</th><th>Para</th></tr></thead>
+    <tbody>
+      <tr><td><code>datetime</code></td><td>Fechas y horas</td></tr>
+      <tr><td><code>random</code></td><td>Azar (elegir, mezclar, números aleatorios)</td></tr>
+      <tr><td><code>math</code></td><td>Raíz, potencias, redondeos, pi</td></tr>
+      <tr><td><code>json</code></td><td>Leer/escribir datos en formato JSON (el de las APIs)</td></tr>
+      <tr><td><code>sqlite3</code></td><td>Bases de datos (capítulo 40)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Librerías externas: pip</span><p>Además de la librería estándar, hay un universo de librerías externas que se instalan con una herramienta llamada <code>pip</code> (<code>pip install pandas</code>, por ejemplo). Pandas (para datos), FastAPI (para backends), requests (para pedir a APIs): todo lo que usa el resto de la colección son librerías que se importan igual que estas. No reinventes la rueda: casi siempre alguien ya resolvió tu problema y lo empaquetó en una librería.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="28"><span class="dir">Anterior</span><span class="t">← Archivos</span></button><button class="navbtn next" data-goto="30"><span class="dir">Siguiente</span><span class="t">Cómo pensar un problema →</span></button></div>
+</section>
+
+<!-- 30 -->
+<section class="chapter" data-part="Parte 8 · Ejercicios resueltos" data-num="30" data-title="Cómo pensar un problema" id="c30">
+  <div class="ch-eyebrow">Capítulo 30</div>
+  <h1>Cómo se piensa un problema</h1>
+  <p class="lead">Ya tenés todas las herramientas de Python. Ahora lo más importante y lo que menos se enseña: cómo pasar de "quiero que haga X" a código. El secreto no es saber más Python, es pensar el problema en pasos chiquitos antes de escribir una sola línea.</p>
+  <h2>El método, en 4 pasos</h2>
+  <div class="codehead"><span class="lang txt">antes de escribir código</span></div>
+<pre>1. ¿Qué me dan?      los datos de entrada (un precio, una cantidad)
+2. ¿Qué quiero?      el resultado (el total a pagar)
+3. ¿Cómo se calcula? los pasos, en palabras, como una receta
+4. Recién ahí:       traducir cada paso a código</pre>
+  <p>La mayoría de quienes se traban al programar no se traban con Python: se traban porque saltaron al código sin tener claro el paso 3. Si podés explicar la solución en palabras, traducirla a Python es lo fácil.</p>
+  <h2>Escribir la receta primero</h2>
+  <p>Un truco que funciona siempre: escribí los pasos en castellano, como comentarios, antes de codear. Después, debajo de cada comentario, ponés el código. Con la receta clara, cada línea sale sola.</p>
+  <div class="codehead"><span class="lang py">primero la receta, después el código</span></div>
+<pre># 1. tomar el precio y la cantidad
+# 2. calcular el subtotal (precio x cantidad)
+# 3. mostrar el resultado
+precio = 8500
+cantidad = 2
+subtotal = precio * cantidad
+print("subtotal:", subtotal)</pre>
+  <div class="box nota"><span class="tag">Descomponer es la habilidad</span><p>Un problema grande da miedo; diez pasos chicos, no. "Hacer una calculadora" suena difícil; "hacer una función que sume dos números", después "otra que reste", después "elegir cuál según el signo" es fácil. Toda la programación es esto: partir lo grande en pedazos manejables. Los próximos ejercicios lo muestran en acción, subiendo la dificultad.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="29"><span class="dir">Anterior</span><span class="t">← Módulos</span></button><button class="navbtn next" data-goto="31"><span class="dir">Siguiente</span><span class="t">Ejercicios fáciles →</span></button></div>
+</section>
+
+<!-- 31 -->
+<section class="chapter" data-part="Parte 8 · Ejercicios resueltos" data-num="31" data-title="Ejercicios fáciles" id="c31">
+  <div class="ch-eyebrow">Capítulo 31 · Ejercicios</div>
+  <h1>Cinco ejercicios para calentar</h1>
+  <p class="lead">Antes de los grandes, cinco ejercicios cortos que combinan lo básico. Intentá resolverlos vos antes de mirar la solución: pausá, pensá la receta, escribilo. Después comparás.</p>
+  <div class="codehead"><span class="lang py">e_faciles.py</span></div>
+<pre># 1. Promedio de tres notas
+notas = [7, 9, 8]
+print("promedio:", sum(notas) / len(notas))
+
+# 2. ¿Es par?
+n = 14
+print(f"{n} es par:", n % 2 == 0)
+
+# 3. El más caro de una lista
+precios = [1200, 8500, 3500]
+print("más caro:", max(precios))
+
+# 4. Contar vocales en un texto
+texto = "programar en python"
+vocales = 0
+for letra in texto:
+    if letra in "aeiou":
+        vocales += 1
+print("vocales:", vocales)
+
+# 5. Total de un carrito
+carrito = [("Pizza", 8500, 2), ("Gaseosa", 1800, 3)]
+total = 0
+for nombre, precio, cant in carrito:
+    total += precio * cant
+print("total carrito:", total)</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">promedio: 8.0
+14 es par: True
+más caro: 8500
+vocales: 5
+total carrito: 22400</pre>
+  <h2>Qué patrón usa cada uno</h2>
+  <ul>
+    <li><strong>1:</strong> <code>sum</code> y <code>len</code> sobre una lista (cuenta directa).</li>
+    <li><strong>2:</strong> el módulo <code>% 2</code> y una comparación (booleano).</li>
+    <li><strong>3:</strong> <code>max</code> (buscar el extremo).</li>
+    <li><strong>4:</strong> un contador con <code>for</code> + <code>if</code> + <code>in</code> (el patrón de contar del cap. 14).</li>
+    <li><strong>5:</strong> un acumulador recorriendo tuplas (los patrones del cap. 12 y 16).</li>
+  </ul>
+  <div class="box nota"><span class="tag">Reconocer el patrón</span><p>Fijate cómo cada ejercicio es una combinación de los patrones que ya viste. Programar no es inventar de cero cada vez: es reconocer "esto es un contador", "esto es un acumulador", "esto es buscar un máximo", y aplicar el patrón. Cuanto más practiques, más rápido los reconocés.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="30"><span class="dir">Anterior</span><span class="t">← Cómo pensar un problema</span></button><button class="navbtn next" data-goto="32"><span class="dir">Siguiente</span><span class="t">Pedido con 25% off →</span></button></div>
+</section>
+
+<!-- 32 -->
+<section class="chapter" data-part="Parte 8 · Ejercicios resueltos" data-num="32" data-title="Pedido con 25% off" id="c32">
+  <div class="ch-eyebrow">Capítulo 32 · Ejercicio</div>
+  <h1>Un pedido de 2 unidades con 25% de descuento</h1>
+  <p class="lead">El enunciado: "entra un pedido de 2 unidades de un producto de $8500, y hay que descontarle el 25%. ¿Cuánto se paga?". Resolvámoslo con el método de los 4 pasos, despacio.</p>
+  <h2>Pasos 1 y 2: qué tengo, qué quiero</h2>
+  <p>Tengo el precio de una unidad ($8500) y la cantidad (2). Quiero el total a pagar, ya con el 25% descontado.</p>
+  <h2>Paso 3: la receta en palabras</h2>
+  <div class="codehead"><span class="lang txt">cómo lo pensás</span></div>
+<pre>1. El subtotal es precio por cantidad:   8500 x 2 = 17000
+2. El 25% de 17000 es:                    17000 x 25 / 100 = 4250
+3. Lo que se paga es subtotal - descuento: 17000 - 4250 = 12750</pre>
+  <h2>Paso 4: traducir a Python</h2>
+  <div class="codehead"><span class="lang py">03_pedido_descuento.py</span></div>
+<pre>precio_unitario = 8500     # 1. cuánto sale una unidad
+cantidad = 2               # 2. cuántas unidades entran
+subtotal = precio_unitario * cantidad          # 3. precio sin descuento
+descuento = subtotal * 25 / 100                # 4. cuánto es el 25%
+total = subtotal - descuento                   # 5. lo que se paga
+
+print(f"subtotal:        ${subtotal}   (8500 x 2)")
+print(f"descuento 25%:   -${descuento:.0f}")
+print(f"TOTAL A PAGAR:   ${total:.0f}")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">precio unitario: $8500
+cantidad:        2
+subtotal:        $17000   (8500 x 2)
+descuento 25%:   -$4250
+TOTAL A PAGAR:   $12750</pre>
+  <p>Cada línea de código es un paso de la receta. Escribiste la solución en palabras y la tradujiste. Eso es programar: pensar el problema, y expresarlo en el idioma que la computadora entiende.</p>
+  <h2>Mejorándolo: hacerlo una función</h2>
+  <p>Si vas a calcular esto seguido, conviene una función (Parte 5): recibe precio, cantidad y descuento, y devuelve el total. Así lo reusás con cualquier pedido.</p>
+  <div class="codehead"><span class="lang py">la versión reutilizable</span></div>
+<pre>def total_pedido(precio, cantidad, descuento_pct):
+    subtotal = precio * cantidad
+    return subtotal * (1 - descuento_pct / 100)
+
+print(total_pedido(8500, 2, 25))   # 12750.0</pre>
+  <div class="box nota"><span class="tag">El formato :.0f</span><p>Ese <code>{descuento:.0f}</code> muestra el número sin decimales (redondeado). Sin él verías 4250.0. Son detalles de formato de los f-strings (cap. 7) para que la salida quede prolija. No hace falta memorizarlos: se buscan cuando hacen falta.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="31"><span class="dir">Anterior</span><span class="t">← Ejercicios fáciles</span></button><button class="navbtn next" data-goto="33"><span class="dir">Siguiente</span><span class="t">Descuentos escalonados →</span></button></div>
+</section>
+
+<!-- 33 -->
+<section class="chapter" data-part="Parte 8 · Ejercicios resueltos" data-num="33" data-title="Descuentos escalonados" id="c33">
+  <div class="ch-eyebrow">Capítulo 33 · Ejercicio</div>
+  <h1>Descuentos por cantidad (escalonados)</h1>
+  <p class="lead">Subimos un escalón. Ahora el descuento depende de cuánto se compra: 0% hasta 2 unidades, 10% de 3 a 5, y 20% de 6 en adelante. Esto necesita decidir el descuento según la cantidad, con un <code>if/elif/else</code>, y después aplicarlo.</p>
+  <h2>La receta</h2>
+  <div class="codehead"><span class="lang txt">cómo lo pensás</span></div>
+<pre>1. Según la cantidad, elegir el porcentaje de descuento (un if escalonado)
+2. Calcular el subtotal (precio x cantidad)
+3. Aplicar el descuento elegido</pre>
+  <p>El truco del <code>if</code> escalonado: chequear de mayor a menor. Si preguntás primero por 6+, después por 3+, el que llega a 4 falla el primero y entra en el segundo, correcto. Si lo hicieras al revés, un pedido de 8 entraría en "3 o más" y nunca llegaría al 20%.</p>
+  <h2>El código</h2>
+  <div class="codehead"><span class="lang py">e_escalonado.py</span></div>
+<pre>def descuento_por_cantidad(cantidad):
+    if cantidad &gt;= 6: return 0.20
+    if cantidad &gt;= 3: return 0.10
+    return 0.0
+
+def total(precio, cantidad):
+    subtotal = precio * cantidad
+    desc = descuento_por_cantidad(cantidad)
+    return subtotal * (1 - desc), desc     # devuelve total y descuento
+
+for c in [1, 4, 8]:
+    t, d = total(1200, c)
+    print(f"{c} empanadas: ${t:.0f}  (descuento {int(d*100)}%)")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">1 empanadas: $1200  (descuento 0%)
+4 empanadas: $4320  (descuento 10%)
+8 empanadas: $7680  (descuento 20%)</pre>
+  <p>Separamos la decisión (<code>descuento_por_cantidad</code>) del cálculo (<code>total</code>): cada función hace una cosa. El <code>for</code> prueba con 1, 4 y 8 unidades, y cada una cae en su escalón. 1 empanada sin descuento, 4 con 10%, 8 con 20%. Fijate que <code>total</code> devuelve dos valores (el total y el descuento), que recibimos con <code>t, d =</code> (cap. 21).</p>
+  <div class="box nota"><span class="tag">El orden de los if importa</span><p>En un <code>if/elif</code> escalonado, el orden de las condiciones es todo. Chequeá siempre del caso más restrictivo al menos (de 6+ hacia 3+ hacia el resto). Es un error clásico ponerlos al revés y que un caso "se coma" a otro. Cuando algo cae en el escalón equivocado, revisá el orden.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="32"><span class="dir">Anterior</span><span class="t">← Pedido con 25% off</span></button><button class="navbtn next" data-goto="34"><span class="dir">Siguiente</span><span class="t">Dos pedidos y el stock →</span></button></div>
+</section>
+
+<!-- 34 -->
+<section class="chapter" data-part="Parte 8 · Ejercicios resueltos" data-num="34" data-title="Dos pedidos y el stock" id="c34">
+  <div class="ch-eyebrow">Capítulo 34 · Ejercicio</div>
+  <h1>Dos pedidos, y el segundo se queda sin stock</h1>
+  <p class="lead">Un ejercicio que junta casi todo. Entran <strong>dos</strong> pedidos, solo quedan 3 unidades, y cada uno pide 2. El primero entra bien; el segundo no tiene stock suficiente. El programa tiene que darse cuenta y rechazarlo. Usamos variables, un bucle, un <code>if</code>, y el descuento del ejercicio 32.</p>
+  <h2>La clave del problema</h2>
+  <p>Lo importante: el stock <strong>cambia</strong> entre un pedido y el otro. Después del primero quedan menos unidades, y con eso se evalúa el segundo. Por eso el stock es una variable que actualizamos dentro del bucle, no un valor fijo.</p>
+  <h2>La receta en palabras</h2>
+  <div class="codehead"><span class="lang txt">cómo lo pensás</span></div>
+<pre>Tengo stock = 3, y dos pedidos que piden 2 cada uno.
+Para CADA pedido (por eso un bucle):
+  - ¿La cantidad pedida entra en el stock que queda? (un if)
+      SÍ  -> calculo el total con 25% off, y descuento del stock
+      NO  -> lo rechazo y aviso cuántos faltan</pre>
+  <h2>El código</h2>
+  <div class="codehead"><span class="lang py">04_dos_pedidos_stock.py</span></div>
+<pre>stock = 3                       # solo quedan 3 unidades
+precio_unitario = 8500
+pedidos = [2, 2]                # pedido 1 pide 2, pedido 2 pide 2
+
+for numero, cantidad in enumerate(pedidos, start=1):
+    print(f"\n--- Pedido {numero}: {cantidad} unidades (stock actual: {stock}) ---")
+    if cantidad &lt;= stock:                        # ¿alcanza el stock?
+        subtotal = precio_unitario * cantidad
+        total = subtotal - subtotal * 25 / 100  # con 25% off
+        stock = stock - cantidad                # descontamos del stock
+        print(f"  OK. Total con 25% off: ${total:.0f}")
+        print(f"  stock restante: {stock}")
+    else:
+        faltan = cantidad - stock
+        print(f"  RECHAZADO: sin stock suficiente.")
+        print(f"  pedían {cantidad}, quedan {stock}, faltan {faltan}")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">--- Pedido 1: 2 unidades (stock actual: 3) ---
+  OK. Total con 25% off: $12750
+  stock restante: 1
+
+--- Pedido 2: 2 unidades (stock actual: 1) ---
+  RECHAZADO: sin stock suficiente.
+  pedían 2, quedan 1, faltan 1</pre>
+  <h2>Qué pasó, paso a paso</h2>
+  <p>El primer pedido pide 2 y hay 3: entra. Se cobra con descuento ($12750, el mismo cálculo del ejercicio 32) y el stock baja a 1. El segundo pide 2, pero ahora solo queda 1: la condición <code>cantidad &lt;= stock</code> es falsa, entra al <code>else</code> y lo rechaza, avisando que falta 1. Ese "el stock cambió entre un pedido y otro" es exactamente lo que hace un sistema real.</p>
+  <div class="box ojo"><span class="tag">Este es el salto importante</span><p>Si entendiste este ejercicio, entendiste el corazón de la programación: datos que cambian con el tiempo, decisiones según esos datos, y repetición. Todo lo demás son variantes de esto. Es, además, el mismo problema que resolvés "en grande" en el librito 13 (la tienda): validar stock antes de cobrar, y descontarlo. Volvé a leerlo si hace falta.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="33"><span class="dir">Anterior</span><span class="t">← Descuentos escalonados</span></button><button class="navbtn next" data-goto="35"><span class="dir">Siguiente</span><span class="t">Carrito completo (POO) →</span></button></div>
+</section>
+
+<!-- 35 -->
+<section class="chapter" data-part="Parte 8 · Ejercicios resueltos" data-num="35" data-title="Carrito completo (POO)" id="c35">
+  <div class="ch-eyebrow">Capítulo 35 · Ejercicio</div>
+  <h1>Un carrito completo con objetos</h1>
+  <p class="lead">El mismo problema del stock, ahora resuelto con objetos (Parte 6). Un <code>Producto</code> que controla su stock, y un <code>Carrito</code> que junta productos y suma. Compará con el ejercicio anterior: la lógica es la misma, pero organizada en clases, más parecida a un sistema real.</p>
+  <div class="codehead"><span class="lang py">c26_poo.py</span></div>
+<pre>class Producto:
+    def __init__(self, nombre, precio, stock):
+        self.nombre, self.precio, self.stock = nombre, precio, stock
+    def vender(self, cantidad):
+        if cantidad &gt; self.stock:
+            raise ValueError(f"sin stock de {self.nombre} (quedan {self.stock})")
+        self.stock -= cantidad
+        return self.precio * cantidad
+
+class Carrito:
+    def __init__(self):
+        self.items = []
+        self.total = 0
+    def agregar(self, producto, cantidad):
+        importe = producto.vender(cantidad)   # le pide al producto que se venda
+        self.items.append((producto.nombre, cantidad, importe))
+        self.total += importe
+    def resumen(self):
+        for nombre, cant, imp in self.items:
+            print(f"  {cant}x {nombre} = ${imp}")
+        print(f"  TOTAL: ${self.total}")</pre>
+  <div class="codehead"><span class="lang py">usarlo</span></div>
+<pre>pizza = Producto("Pizza", 8500, 5)
+gaseosa = Producto("Gaseosa", 1800, 10)
+carrito = Carrito()
+carrito.agregar(pizza, 2)
+carrito.agregar(gaseosa, 3)
+carrito.resumen()
+print("stock pizza tras la venta:", pizza.stock)</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">  2x Pizza = $17000
+  3x Gaseosa = $5400
+  TOTAL: $22400
+stock pizza tras la venta: 3</pre>
+  <h2>Fijate la diferencia con el ejercicio 34</h2>
+  <p>Antes, el stock era una variable suelta y la lógica estaba toda junta en el bucle. Ahora cada producto cuida su propio stock (en <code>vender</code>), y el carrito solo coordina. Es más código, pero más ordenado y más fácil de crecer: agregar un producto nuevo, o un descuento (con herencia, cap. 26), no toca el carrito. Así se organizan los sistemas de verdad.</p>
+  <div class="box nota"><span class="tag">Cuándo POO y cuándo no</span><p>Para un cálculo puntual (el ejercicio 34), variables y funciones alcanzan y sobran. Para un sistema con muchas entidades que interactúan y crecen (productos, pedidos, usuarios), la POO paga: mantiene todo ordenado. No uses objetos porque sí; usalos cuando el problema tiene "cosas" con datos y comportamiento. Con la práctica, la intuición llega sola.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="34"><span class="dir">Anterior</span><span class="t">← Dos pedidos y el stock</span></button><button class="navbtn next" data-goto="36"><span class="dir">Siguiente</span><span class="t">Proyecto: calculadora →</span></button></div>
+</section>
+
+<!-- 36 -->
+<section class="chapter" data-part="Parte 8 · Ejercicios resueltos" data-num="36" data-title="Proyecto: calculadora" id="c36">
+  <div class="ch-eyebrow">Capítulo 36 · Proyecto</div>
+  <h1>Proyecto: una calculadora</h1>
+  <p class="lead">Primer proyecto que junta varios temas: una calculadora que suma, resta, multiplica y divide, y que maneja bien el caso de dividir por cero. Usa funciones, condicionales y un bucle.</p>
+  <h2>La receta</h2>
+  <div class="codehead"><span class="lang txt">cómo lo pensás</span></div>
+<pre>Necesito una función que reciba: un número, una operación (+ - * /), otro número.
+Según la operación (un if por cada una), devolver el resultado.
+Caso especial: dividir por cero no se puede -> avisar en vez de romper.</pre>
+  <div class="codehead"><span class="lang py">05_calculadora.py</span></div>
+<pre>def calcular(a, operacion, b):
+    if operacion == "+": return a + b
+    if operacion == "-": return a - b
+    if operacion == "*": return a * b
+    if operacion == "/":
+        if b == 0:
+            return "error: no se puede dividir por cero"
+        return a / b
+    return "operación no válida"
+
+operaciones = [(10, "+", 5), (10, "-", 3), (4, "*", 6), (20, "/", 4), (5, "/", 0)]
+for a, op, b in operaciones:
+    print(f"{a} {op} {b} = {calcular(a, op, b)}")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">10 + 5 = 15
+10 - 3 = 7
+4 * 6 = 24
+20 / 4 = 5.0
+5 / 0 = error: no se puede dividir por cero</pre>
+  <p>Una función con la lógica, y un bucle que la prueba con varios casos. Fijate el cuidado del último: antes de dividir, chequea si <code>b</code> es cero, y si lo es, avisa en vez de romper. Anticipar los casos que pueden fallar (Parte 7) es lo que separa un programa frágil de uno robusto.</p>
+  <h2>Convertirla en interactiva</h2>
+  <div class="codehead"><span class="lang py">versión con input y bucle</span></div>
+<pre>while True:
+    a = float(input("primer número: "))
+    op = input("operación (+ - * /): ")
+    b = float(input("segundo número: "))
+    print("resultado:", calcular(a, op, b))
+    if input("¿otra? (s/n): ") != "s":
+        break
+print("¡Chau!")</pre>
+  <div class="box nota"><span class="tag">De los datos fijos a la interacción</span><p>La versión probada usa una lista de operaciones; la interactiva le pide los números al usuario con <code>input</code> (cap. 9) y repite con un <code>while</code> (cap. 13) hasta que quiera salir. La lógica del cálculo (<code>calcular</code>) es idéntica: solo cambia de dónde vienen los números. Reutilizar la función en las dos versiones es la ventaja de haberla separado.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="35"><span class="dir">Anterior</span><span class="t">← Carrito completo (POO)</span></button><button class="navbtn next" data-goto="37"><span class="dir">Siguiente</span><span class="t">Proyecto: gestor de stock →</span></button></div>
+</section>
+
+<!-- 37 -->
+<section class="chapter" data-part="Parte 8 · Ejercicios resueltos" data-num="37" data-title="Proyecto: gestor de stock" id="c37">
+  <div class="ch-eyebrow">Capítulo 37 · Proyecto</div>
+  <h1>Proyecto: un gestor de stock</h1>
+  <p class="lead">El proyecto que junta casi todo el libro: un mini gestor de inventario con una lista de diccionarios, funciones para buscar, vender y ver qué reponer. Es, en chiquito, lo que hace el dashboard de una tienda real.</p>
+  <h2>El diseño</h2>
+  <p>Los datos: una lista de diccionarios (cap. 19), cada producto con nombre, precio y stock. Las acciones, cada una una función (Parte 5): <code>buscar</code> un producto, <code>vender</code> (con control de stock), y <code>reponer</code> (los que están bajos).</p>
+  <div class="codehead"><span class="lang py">e_gestor.py</span></div>
+<pre>inventario = [
+    {"nombre": "Pizza", "precio": 8500, "stock": 5},
+    {"nombre": "Empanada", "precio": 1200, "stock": 40},
+    {"nombre": "Flan", "precio": 3500, "stock": 3},
+]
+
+def buscar(nombre):
+    for prod in inventario:
+        if prod["nombre"] == nombre:
+            return prod
+    return None                         # no lo encontró
+
+def vender(nombre, cantidad):
+    prod = buscar(nombre)
+    if prod is None:
+        return f"no existe {nombre}"
+    if prod["stock"] &lt; cantidad:
+        return f"sin stock de {nombre} (quedan {prod['stock']})"
+    prod["stock"] -= cantidad
+    return f"vendidas {cantidad} de {nombre}. Total: ${prod['precio']*cantidad}. Quedan {prod['stock']}"
+
+def reponer():
+    return [p["nombre"] for p in inventario if p["stock"] &lt;= 5]</pre>
+  <div class="codehead"><span class="lang py">probarlo</span></div>
+<pre>print(vender("Pizza", 2))
+print(vender("Pizza", 10))
+print(vender("Empanada", 12))
+print(vender("Sushi", 1))
+print("hay que reponer:", reponer())</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">vendidas 2 de Pizza. Total: $17000. Quedan 3
+sin stock de Pizza (quedan 3)
+vendidas 12 de Empanada. Total: $14400. Quedan 28
+no existe Sushi
+hay que reponer: ['Pizza', 'Flan']
+
+inventario final:
+  Pizza: 3 en stock
+  Empanada: 28 en stock
+  Flan: 3 en stock</pre>
+  <h2>Todo junto</h2>
+  <p>Mirá cuánto de lo aprendido hay acá: lista de diccionarios (cap. 19), funciones (Parte 5), <code>if</code> con varios casos (Parte 3), recorrer con <code>for</code> (cap. 12), el patrón de filtrar en <code>reponer</code> (cap. 14, con una "list comprehension" compacta), y el control de stock del ejercicio 34. Vende, rechaza lo que no hay, avisa si no existe, y calcula qué reponer. Eso ya es una aplicación de verdad, chiquita pero completa.</p>
+  <div class="box nota"><span class="tag">De acá a la tienda del librito 13</span><p>Este gestor es la semilla de la tienda de alimentos del librito 13. Ahí, los mismos datos viven en una base de datos (no en una lista en memoria), las funciones se exponen como una API para que un frontend las use, y hay pagos y reservas. Pero el corazón (productos, stock, vender, reponer) es exactamente esto. Acabás de escribir, en miniatura, la lógica de un sistema real.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="36"><span class="dir">Anterior</span><span class="t">← Proyecto: calculadora</span></button><button class="navbtn next" data-goto="38"><span class="dir">Siguiente</span><span class="t">Cliente, servidor y Python →</span></button></div>
+</section>
+
+<!-- 38 -->
+<section class="chapter" data-part="Parte 9 · Python en la web" data-num="38" data-title="Cliente, servidor y Python" id="c38">
+  <div class="ch-eyebrow">Capítulo 38</div>
+  <h1>Cómo se conecta todo: cliente, servidor y dónde entra Python</h1>
+  <p class="lead">Antes de ver Python generando páginas y hablando con bases, entendamos el mapa. Una aplicación web tiene dos lados que se hablan: el frontend (lo que ves en el navegador) y el backend (el programa en un servidor). Python vive en el backend.</p>
+  <h2>Los dos lados</h2>
+  <div class="codehead"><span class="lang txt">el mapa</span></div>
+<pre>TU NAVEGADOR (frontend)                    UN SERVIDOR (backend)
+  muestra la página          --pide-->       un programa (Python)
+  HTML, CSS, JavaScript      &lt;--responde--    consulta la base de datos
+                                              arma la respuesta</pre>
+  <p>Cuando entrás a una web, tu navegador le pide algo al servidor. El servidor corre un programa (que puede estar escrito en Python) que arma la respuesta (muchas veces buscando datos en una base) y se la manda al navegador, que la muestra. Ese ida y vuelta es toda la web.</p>
+  <h2>Dónde entra Python</h2>
+  <p>Python es uno de los lenguajes más usados para el <strong>backend</strong>: el programa del servidor. Puede generar el HTML de una página, recibir los datos de un formulario, guardar y buscar en una base de datos, y responderle al navegador. Los dos capítulos que siguen muestran justo eso, con Python: cómo se arma la estructura de una página (frontend) y cómo se le pide a una base (backend).</p>
+  <div class="box nota"><span class="tag">Este es el puente al resto de la colección</span><p>Todo lo que sigue en la colección vive en este mapa. El track de Frontend es el lado del navegador. Los libritos de backend (10, 11), APIs (01) y la tienda (13) son el lado del servidor, donde Python hace su trabajo. Lo que ves acá en miniatura, allá se hace en grande con frameworks como FastAPI o Django. Pero la idea es esta.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="37"><span class="dir">Anterior</span><span class="t">← Proyecto: gestor de stock</span></button><button class="navbtn next" data-goto="39"><span class="dir">Siguiente</span><span class="t">Frontend: generar HTML →</span></button></div>
+</section>
+
+<!-- 39 -->
+<section class="chapter" data-part="Parte 9 · Python en la web" data-num="39" data-title="Frontend: generar HTML" id="c39">
+  <div class="ch-eyebrow">Capítulo 39</div>
+  <h1>Python y la estructura del frontend</h1>
+  <p class="lead">El frontend se escribe en HTML, pero acá vemos su estructura usando Python, para que entiendas de qué está hecho. La gran revelación: un <code>div</code> y una lista no son magia, son texto con una forma. Y Python puede generar ese texto.</p>
+  <h2>Qué es un div y una lista, en el fondo</h2>
+  <p>El HTML es texto con "etiquetas" que envuelven contenido. Un <code>&lt;div&gt;</code> es una caja que agrupa cosas. Una lista es un <code>&lt;ul&gt;</code> (la lista) con varios <code>&lt;li&gt;</code> adentro (cada ítem). Las etiquetas se abren con <code>&lt;etiqueta&gt;</code> y se cierran con <code>&lt;/etiqueta&gt;</code>.</p>
+  <div class="codehead"><span class="lang py">06_frontend.py · generar HTML con funciones</span></div>
+<pre>def div(contenido, clase=""):
+    c = f' class="{clase}"' if clase else ""
+    return f"&lt;div{c}&gt;{contenido}&lt;/div&gt;"
+
+def lista(items):
+    lis = "".join(f"  &lt;li&gt;{x}&lt;/li&gt;\n" for x in items)
+    return f"&lt;ul&gt;\n{lis}&lt;/ul&gt;"
+
+productos = ["Pizza", "Empanada", "Flan"]
+print(div("Hola", clase="saludo"))
+print(lista(productos))
+print(div(lista(productos), clase="menu"))   # anidar: una lista dentro de un div</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">== un div ==
+&lt;div class="saludo"&gt;Hola&lt;/div&gt;
+
+== una lista (ul &gt; li) ==
+&lt;ul&gt;
+  &lt;li&gt;Pizza&lt;/li&gt;
+  &lt;li&gt;Empanada&lt;/li&gt;
+  &lt;li&gt;Flan&lt;/li&gt;
+&lt;/ul&gt;
+
+== un div con una lista adentro ==
+&lt;div class="menu"&gt;&lt;ul&gt; ... &lt;/ul&gt;&lt;/div&gt;</pre>
+  <p>Son dos funciones (Parte 5) que devuelven texto con la forma del HTML. <code>div</code> envuelve contenido en una caja; <code>lista</code> recorre los ítems con un <code>for</code> y arma un <code>&lt;li&gt;</code> por cada uno. Y se anidan: metés una lista dentro de un div, tal como el HTML se anida de verdad.</p>
+  <div class="box nota"><span class="tag">Esto es lo que hace un backend web</span><p>Generar HTML desde el servidor es exactamente lo que hace un backend cuando te muestra una página: arma el texto HTML (muchas veces con datos de la base, como una lista de productos) y se lo manda al navegador, que lo dibuja. Frameworks de Python como Django o Flask hacen esto con "plantillas", pero por dentro es esta idea: producir texto con la estructura correcta. Ahora sabés de qué está hecha una página.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="38"><span class="dir">Anterior</span><span class="t">← Cliente, servidor y Python</span></button><button class="navbtn next" data-goto="40"><span class="dir">Siguiente</span><span class="t">Backend: base de datos →</span></button></div>
+</section>
+
+<!-- 40 -->
+<section class="chapter" data-part="Parte 9 · Python en la web" data-num="40" data-title="Backend: base de datos" id="c40">
+  <div class="ch-eyebrow">Capítulo 40</div>
+  <h1>Python y la base de datos</h1>
+  <p class="lead">El backend guarda y busca datos en una base de datos. Vemos la estructura de esas peticiones con Python, usando SQLite (que viene incluido, sin instalar nada). Son cuatro operaciones: crear, insertar, leer y actualizar.</p>
+  <h2>La forma de una petición</h2>
+  <p>Siempre el mismo baile: te conectás a la base, y le mandás instrucciones en un lenguaje llamado SQL (que verás a fondo en el librito 03). Cada instrucción es una petición.</p>
+  <div class="codehead"><span class="lang py">07_backend_db.py</span></div>
+<pre>import sqlite3
+con = sqlite3.connect(":memory:")   # conectarse a la base
+cur = con.cursor()
+
+# 1. CREAR una tabla (la estructura de los datos)
+cur.execute("""CREATE TABLE productos (
+    id INTEGER PRIMARY KEY, nombre TEXT, precio INTEGER, stock INTEGER)""")
+
+# 2. INSERTAR datos (los ? se rellenan con los valores: es lo seguro)
+cur.execute("INSERT INTO productos (nombre, precio, stock) VALUES (?, ?, ?)",
+            ("Pizza muzza", 8500, 5))
+con.commit()
+
+# 3. LEER con una condición
+for fila in cur.execute("SELECT nombre, precio FROM productos WHERE precio &gt; ?", (5000,)):
+    print(fila)
+
+# 4. ACTUALIZAR (descontar stock tras una venta)
+cur.execute("UPDATE productos SET stock = stock - ? WHERE nombre = ?", (2, "Pizza muzza"))
+con.commit()</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">== todos los productos ==
+  ('Pizza muzza', 8500, 5)
+  ('Empanada', 1200, 40)
+== productos de más de 5000 ==
+  ('Pizza muzza', 8500)
+== stock de la pizza tras vender 2 ==
+  ('Pizza muzza', 3)</pre>
+  <h2>Las cuatro operaciones</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Instrucción SQL</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><th>CREATE TABLE</th><td>Define la estructura (qué columnas tiene)</td></tr>
+      <tr><th>INSERT</th><td>Agrega datos nuevos</td></tr>
+      <tr><th>SELECT</th><td>Busca y lee datos (con WHERE para filtrar)</td></tr>
+      <tr><th>UPDATE</th><td>Modifica datos existentes</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box ojo"><span class="tag">El ? no es un adorno</span><p>Fijate que los valores nunca se pegan dentro del texto de la consulta: van con <code>?</code> y se pasan aparte. Eso protege contra un ataque muy común (la inyección SQL, librito 07). Es un hábito que se toma desde el día uno: los datos, siempre con <code>?</code>, nunca concatenados dentro del texto de la consulta.</p></div>
+  <div class="box nota"><span class="tag">Reconocés el ejemplo</span><p>El "descontar stock tras vender 2" es el mismo problema del ejercicio 34 y del gestor del 37, ahora contra una base de datos real. Ese hilo (el pedido, el stock, el descuento) recorre todo el libro y toda la colección: acá lo hacés en la base, en el librito 10 armás el backend completo, y en el 13 lo ponés en una tienda de verdad.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="39"><span class="dir">Anterior</span><span class="t">← Frontend: generar HTML</span></button><button class="navbtn next" data-goto="41"><span class="dir">Siguiente</span><span class="t">Juntando todo →</span></button></div>
+</section>
+
+<!-- 41 -->
+<section class="chapter" data-part="Parte 9 · Python en la web" data-num="41" data-title="Juntando todo" id="c41">
+  <div class="ch-eyebrow">Capítulo 41</div>
+  <h1>Juntando todo: el flujo completo</h1>
+  <p class="lead">Cerremos la parte web viendo cómo se conectan las piezas en un flujo real, con todo lo que sabés. Un pedido que entra, se valida contra el stock de la base, se cobra, y se le muestra al usuario. Es el ejercicio del stock, ahora de punta a punta.</p>
+  <div class="codehead"><span class="lang txt">el flujo, en palabras</span></div>
+<pre>1. El frontend manda un pedido (producto, cantidad)
+2. El backend (Python) busca el producto en la base de datos
+3. Valida: ¿hay stock? (el if del ejercicio 34)
+4. Si hay: descuenta el stock (UPDATE), calcula el total
+5. Arma la respuesta (HTML o datos) y se la manda al frontend
+6. El frontend la muestra</pre>
+  <div class="codehead"><span class="lang py">el flujo, en Python (junta todo el libro)</span></div>
+<pre>import sqlite3
+con = sqlite3.connect(":memory:")
+con.execute("CREATE TABLE productos (nombre TEXT, precio INT, stock INT)")
+con.execute("INSERT INTO productos VALUES ('Pizza', 8500, 3)")
+con.commit()
+
+def procesar_pedido(nombre, cantidad):
+    fila = con.execute("SELECT precio, stock FROM productos WHERE nombre=?",
+                       (nombre,)).fetchone()
+    if fila is None:
+        return f"no existe {nombre}"
+    precio, stock = fila
+    if cantidad &gt; stock:                                   # el if de siempre
+        return f"sin stock de {nombre} (quedan {stock})"
+    total = precio * cantidad * 0.75                       # con 25% off
+    con.execute("UPDATE productos SET stock = stock - ? WHERE nombre = ?",
+               (cantidad, nombre))
+    con.commit()
+    return f"pedido OK: {cantidad} x {nombre} = ${total:.0f}"
+
+print(procesar_pedido("Pizza", 2))   # entra
+print(procesar_pedido("Pizza", 2))   # ya no hay</pre>
+  <div class="codehead"><span class="lang sh">salida (junta base de datos + validación + cálculo)</span></div>
+<pre class="output">pedido OK: 2 x Pizza = $12750
+sin stock de Pizza (quedan 1)</pre>
+  <p>Leé la función despacio: consulta la base (cap. 40), valida el stock con un <code>if</code> (cap. 10 y ejercicio 34), calcula el total con el descuento (ejercicio 32), actualiza la base, y devuelve un mensaje. Todo lo que aprendiste, trabajando junto, en la forma exacta en que lo hace un backend real. La primera Pizza entra ($12750); la segunda ya no, porque el stock bajó a 1.</p>
+  <div class="box nota"><span class="tag">Esto es una aplicación</span><p>Esa función <code>procesar_pedido</code> es, en esencia, un endpoint de una API (librito 01 y 09): recibe datos, valida, toca la base, y responde. Ponele un framework alrededor (FastAPI), un frontend que la llame, y pagos, y tenés la tienda del librito 13. Empezaste este libro con <code>print("Hola")</code> y llegaste a la lógica de un sistema web. Ese es el camino completo.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="40"><span class="dir">Anterior</span><span class="t">← Backend: base de datos</span></button><button class="navbtn next" data-goto="42"><span class="dir">Siguiente</span><span class="t">Buenas prácticas →</span></button></div>
+</section>
+
+<!-- 42 -->
+<section class="chapter" data-part="Parte 10 · Cierre" data-num="42" data-title="Buenas prácticas" id="c42">
+  <div class="ch-eyebrow">Capítulo 42</div>
+  <h1>Buenas prácticas y estilo</h1>
+  <p class="lead">Saber la sintaxis es la mitad; escribir código que otros (y vos mismo) puedan entender y mantener es la otra mitad. Unas prácticas que conviene adoptar desde ahora, no cuando ya tengas vicios.</p>
+  <h2>Estilo: el PEP 8</h2>
+  <p>Python tiene una guía de estilo oficial (el "PEP 8") que la comunidad sigue. Lo esencial:</p>
+  <ul>
+    <li><strong>Nombres:</strong> variables y funciones en <code>snake_case</code> (minúsculas con guión bajo); clases en <code>PascalCase</code> (<code>Producto</code>, <code>Carrito</code>).</li>
+    <li><strong>Sangría:</strong> 4 espacios, nunca tabs mezclados.</li>
+    <li><strong>Nombres descriptivos:</strong> <code>precio_total</code>, no <code>pt</code> ni <code>x</code>.</li>
+    <li><strong>Espacios:</strong> alrededor de los operadores (<code>a = b + c</code>, no <code>a=b+c</code>).</li>
+    <li><strong>Líneas cortas</strong> y una idea por línea.</li>
+  </ul>
+  <h2>Principios que valen para siempre</h2>
+  <ul>
+    <li><strong>Que se lea:</strong> el código se lee mucho más de lo que se escribe. Claridad sobre astucia.</li>
+    <li><strong>No te repitas (DRY):</strong> si copiás y pegás lo mismo, hacé una función.</li>
+    <li><strong>Cada cosa, una responsabilidad:</strong> funciones y clases que hacen una sola cosa bien.</li>
+    <li><strong>Nombres honestos:</strong> que digan lo que hacen. <code>calcular_total</code> calcula el total, no otra cosa.</li>
+    <li><strong>Andá de a poco:</strong> escribí un pedacito, probalo, seguí. No 200 líneas y después a ver si anda.</li>
+  </ul>
+  <div class="box nota"><span class="tag">El error es parte del proceso</span><p>Vas a equivocarte todo el tiempo, y está perfecto. Programar es un ciclo de escribir, probar, ver el error, corregir, repetir. Nadie escribe todo bien de una, ni el más experto. La diferencia entre quien recién empieza y quien tiene años no es que uno no se equivoca: es la velocidad para encontrar y arreglar el error. Y eso se gana practicando, no leyendo. Así que a practicar.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="41"><span class="dir">Anterior</span><span class="t">← Juntando todo</span></button><button class="navbtn next" data-goto="43"><span class="dir">Siguiente</span><span class="t">A dónde seguir →</span></button></div>
+</section>
+
+<!-- 43 -->
+<section class="chapter" data-part="Parte 10 · Cierre" data-num="43" data-title="Repaso de lo esencial" id="c43">
+  <div class="ch-eyebrow">Repaso · y hay más abajo</div>
+  <h1>Ya sabés lo esencial de programar</h1>
+  <p class="lead">Empezaste sin saber qué era una variable. Cerrás el libro sabiendo Python de verdad: datos y operaciones, decisiones, bucles, listas y diccionarios, funciones, objetos, manejo de errores, archivos y módulos. Resolviste ejercicios pensándolos paso a paso, escribiste proyectos completos, y viste cómo Python arma una página y habla con una base. Eso es programar.</p>
+  <h2>Todo lo que aprendiste</h2>
+  <ul>
+    <li><strong>Fundamentos:</strong> variables, tipos, números, texto, booleanos, input.</li>
+    <li><strong>Control de flujo:</strong> if/elif/else, for, while, break/continue y los patrones.</li>
+    <li><strong>Estructuras:</strong> listas, tuplas, diccionarios, sets, y estructuras anidadas.</li>
+    <li><strong>Funciones:</strong> parámetros, retorno, ámbito, buenas prácticas.</li>
+    <li><strong>POO:</strong> clases, objetos, estado, interacción y herencia.</li>
+    <li><strong>Robustez:</strong> errores y excepciones, archivos, módulos.</li>
+    <li><strong>Resolución de problemas:</strong> el método, y ocho ejercicios y proyectos resueltos.</li>
+    <li><strong>Web:</strong> cliente/servidor, generar HTML, y bases de datos con Python.</li>
+  </ul>
+  <h2>A dónde seguir en la colección</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Te interesó…</th><th>Seguí con</th></tr></thead>
+    <tbody>
+      <tr><td>Las páginas web (el div, la lista)</td><td>El track de Frontend, de 0 a una landing</td></tr>
+      <tr><td>Las bases de datos (SELECT, INSERT)</td><td>Librito 03 (SQL) y 10 (Backend SQL)</td></tr>
+      <tr><td>Las APIs y conectar todo</td><td>Librito 01 (APIs) y 09 (front + back)</td></tr>
+      <tr><td>Analizar datos con Python</td><td>El track de Datos, de 0 a insights</td></tr>
+      <tr><td>Ver todo junto en algo real</td><td>Librito 13 (la tienda de alimentos)</td></tr>
+      <tr><td>Programar con ayuda de IA</td><td>Librito 23 (agentes para programar)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo más importante que te llevás</span><p>Programar no es memorizar Python: es pensar un problema en pasos y traducirlo. La sintaxis la vas a olvidar y volver a buscar mil veces (todos lo hacemos, todo el tiempo). Lo que queda es la forma de pensar. Así que el consejo final es uno solo: <strong>practicá</strong>. Agarrá un problema chico de tu día (organizar unos gastos, automatizar algo repetitivo) y preguntate "¿cómo lo resolvería con un programa?". Ahí, haciendo, es donde se aprende de verdad. Ya tenés todo para empezar. Bienvenido a programar.</p></div>
+  <div class="box nota"><span class="tag">Y todavía hay más</span><p>Con todo esto ya podés programar de verdad. Pero si querés ir un paso más allá, lo que sigue son las <strong>herramientas del día a día</strong> de un programador Python (comprehensions, fechas, JSON, type hints, depuración, cómo organizar un programa) y <strong>tres proyectos más grandes</strong> que juntan todo. No es imprescindible para empezar, pero te va a hacer mucho mejor. Seguí cuando te sientas cómodo con lo anterior.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="42"><span class="dir">Anterior</span><span class="t">← Buenas prácticas</span></button><button class="navbtn next" data-goto="44"><span class="dir">Siguiente</span><span class="t">List comprehensions →</span></button></div>
+</section>
+
+<!-- 44 -->
+<section class="chapter" data-part="Parte 11 · Herramientas del día a día" data-num="44" data-title="List comprehensions" id="c44">
+  <div class="ch-eyebrow">Capítulo 44</div>
+  <h1>List comprehensions: transformar colecciones</h1>
+  <p class="lead">Un patrón que aparece constantemente: tomar una lista y producir otra (transformando o filtrando). Ya lo hiciste con bucles. Python tiene una forma compacta y elegante de hacerlo en una línea: las "list comprehensions". Una vez que las agarrás, no querés volver atrás.</p>
+  <h2>Del bucle a la comprehension</h2>
+  <p>Compará las dos formas de aplicarle IVA a una lista de precios:</p>
+  <div class="codehead"><span class="lang py">el bucle de siempre</span></div>
+<pre>con_iva = []
+for p in precios:
+    con_iva.append(p * 1.21)</pre>
+  <div class="codehead"><span class="lang py">la misma idea, en una línea</span></div>
+<pre>con_iva = [p * 1.21 for p in precios]</pre>
+  <p>Se lee: "para cada <code>p</code> en precios, poné <code>p * 1.21</code>". El resultado es una lista nueva. Es exactamente lo mismo que el bucle, más corto y más claro una vez acostumbrado.</p>
+  <h2>Transformar, filtrar, y las dos cosas</h2>
+  <div class="codehead"><span class="lang py">c_comprehensions.py</span></div>
+<pre>precios = [1200, 8500, 3500, 9800, 1800]
+con_iva = [p * 1.21 for p in precios]              # transformar
+caros = [p for p in precios if p &gt; 5000]           # filtrar (con if al final)
+nombres = ["pizza", "flan", "gaseosa"]
+largos = [n.upper() for n in nombres if len(n) &gt; 4] # transformar + filtrar</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">con IVA: [1452, 10285, 4235, 11858, 2178]
+caros: [8500, 9800]
+largos en mayus: ['PIZZA', 'GASEOSA']</pre>
+  <p>El <code>if</code> al final filtra: solo entran los que cumplen. Así, en una línea, transformás y seleccionás. Es el patrón "filtrar" del capítulo 14, comprimido.</p>
+  <h2>zip: recorrer dos listas a la vez, y dict comprehensions</h2>
+  <div class="codehead"><span class="lang py">c_comprehensions.py</span></div>
+<pre>nombres = ["pizza", "flan", "gaseosa"]
+precios = [8500, 3500, 1800]
+# zip empareja: (pizza,8500), (flan,3500), (gaseosa,1800)
+menu = {n: p for n, p in zip(nombres, precios)}    # dict comprehension
+print(menu)
+for nombre, precio in zip(nombres, precios):
+    print(f"  {nombre}: ${precio}")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">menu: {'pizza': 8500, 'flan': 3500, 'gaseosa': 1800}
+  pizza: $8500
+  flan: $3500
+  gaseosa: $1800</pre>
+  <p><code>zip</code> junta dos (o más) listas elemento a elemento, para recorrerlas en paralelo. Y las comprehensions también sirven para diccionarios (con <code>{clave: valor for ...}</code>). Son herramientas de todos los días en Python.</p>
+  <div class="box nota"><span class="tag">No abuses: legibilidad primero</span><p>Las comprehensions son geniales para transformaciones simples. Pero si le metés dos <code>for</code> y tres <code>if</code>, se vuelven ilegibles: ahí es mejor un bucle normal. La regla: si no la entendés de un vistazo, usá el bucle. La compacidad no vale si nadie entiende el código (capítulo 42).</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="43"><span class="dir">Anterior</span><span class="t">← Repaso</span></button><button class="navbtn next" data-goto="45"><span class="dir">Siguiente</span><span class="t">Fechas y horas →</span></button></div>
+</section>
+
+<!-- 45 -->
+<section class="chapter" data-part="Parte 11 · Herramientas del día a día" data-num="45" data-title="Fechas y horas" id="c45">
+  <div class="ch-eyebrow">Capítulo 45</div>
+  <h1>Fechas y horas: el módulo datetime</h1>
+  <p class="lead">Casi todo programa maneja fechas: cuándo se hizo un pedido, cuántos días faltan, mostrar la fecha linda. Las fechas tienen trampas (meses de distinta duración, años bisiestos), así que nunca las calcules a mano: usá el módulo <code>datetime</code>, que viene con Python.</p>
+  <h2>Fechas y formato</h2>
+  <div class="codehead"><span class="lang py">c_fechas.py</span></div>
+<pre>from datetime import date, timedelta
+hoy = date(2026, 9, 6)
+print("hoy:", hoy)                                  # 2026-09-06
+print("formato dd/mm/aaaa:", hoy.strftime("%d/%m/%Y"))
+print("dentro de 7 días:", hoy + timedelta(days=7))  # sumar días</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">hoy: 2026-09-06
+formato dd/mm/aaaa: 06/09/2026
+dentro de 7 dias: 2026-09-13</pre>
+  <p><code>strftime</code> ("string from time") le da formato a una fecha: <code>%d</code> día, <code>%m</code> mes, <code>%Y</code> año, <code>%H</code> hora, <code>%M</code> minutos. <code>timedelta</code> representa una duración: sumarla o restarla a una fecha te da otra fecha, resolviendo bien fines de mes y años bisiestos.</p>
+  <h2>Restar fechas y trabajar con hora</h2>
+  <div class="codehead"><span class="lang py">c_fechas.py</span></div>
+<pre>from datetime import date, datetime
+nacimiento = date(1995, 3, 15)
+dias = (date(2026, 9, 6) - nacimiento).days     # restar da una duración
+print("días vividos:", dias)
+
+momento = datetime(2026, 9, 6, 21, 30)          # fecha + hora
+print("hora:", momento.hour)                     # 21
+print(momento.strftime("%d/%m/%Y %H:%M"))</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">dias vividos: 11498
+fecha y hora: 06/09/2026 21:30
+solo la hora: 21</pre>
+  <p>Restar dos fechas da un <code>timedelta</code>, y su <code>.days</code> te dice cuántos días hay entre ellas. <code>datetime</code> (con hora) es como <code>date</code> pero incluye hora y minutos, útil para marcar cuándo pasó algo (como el <code>creado_en</code> de un pedido). Para la fecha de hoy de verdad: <code>date.today()</code>.</p>
+  <div class="box nota"><span class="tag">Nunca calcules fechas a mano</span><p>"Sumar 30 días" no es "cambiar el mes": los meses tienen 28, 30 o 31 días, y hay años bisiestos. <code>timedelta</code> maneja todo eso por vos. Y para guardar fechas (en un archivo, una base), el formato estándar es "aaaa-mm-dd" (el que muestra Python por defecto): ordena bien y no se confunde con el día/mes. Es el que usa todo el track de Datos.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="44"><span class="dir">Anterior</span><span class="t">← List comprehensions</span></button><button class="navbtn next" data-goto="46"><span class="dir">Siguiente</span><span class="t">JSON →</span></button></div>
+</section>
+
+<!-- 46 -->
+<section class="chapter" data-part="Parte 11 · Herramientas del día a día" data-num="46" data-title="JSON" id="c46">
+  <div class="ch-eyebrow">Capítulo 46</div>
+  <h1>JSON: guardar y compartir datos</h1>
+  <p class="lead">JSON es el formato en que viajan los datos por internet y el más común para guardarlos en archivos. La buena noticia: es prácticamente igual a los diccionarios y listas de Python que ya conocés. Aprenderlo es media hora bien invertida, porque está en todos lados.</p>
+  <h2>Qué es JSON</h2>
+  <p>JSON (JavaScript Object Notation) es texto con una estructura: objetos entre <code>{}</code> (como los diccionarios) y listas entre <code>[]</code> (como las listas). Cuando una API te manda datos (librito 01), casi siempre es JSON. Cuando guardás datos estructurados en un archivo, JSON es una gran opción.</p>
+  <h2>De Python a JSON y de vuelta</h2>
+  <div class="codehead"><span class="lang py">c_json.py</span></div>
+<pre>import json
+pedido = {"cliente": "Carlos",
+          "items": [{"producto": "Pizza", "cant": 2}],
+          "total": 17000}
+
+texto = json.dumps(pedido, ensure_ascii=False, indent=2)  # objeto -> texto JSON
+print(texto)
+
+recuperado = json.loads(texto)                    # texto JSON -> objeto Python
+print("cliente:", recuperado["cliente"])
+print("primer item:", recuperado["items"][0]["producto"])</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">{
+  "cliente": "Carlos",
+  "items": [
+    { "producto": "Pizza", "cant": 2 }
+  ],
+  "total": 17000
+}
+cliente: Carlos
+primer item: Pizza</pre>
+  <h2>Las dos operaciones</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Función</th><th>Convierte</th><th>Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>json.dumps</code></td><td>objeto Python → texto JSON</td><td>para guardar o enviar</td></tr>
+      <tr><td><code>json.loads</code></td><td>texto JSON → objeto Python</td><td>para leer lo que llega</td></tr>
+      <tr><td><code>json.dump</code> / <code>json.load</code></td><td>igual, pero directo a/desde un archivo</td><td>persistir datos</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">JSON es tu diccionario, viajando</span><p>Fijate que el JSON de arriba es idéntico a un diccionario de Python con listas y diccionarios anidados (capítulo 19). Esa es la clave: un objeto Python "se serializa" a texto JSON para guardarlo o mandarlo, y "se deserializa" de vuelta al recibirlo. Es el puente entre tu programa y el mundo (archivos, APIs, otras apps). Lo vas a usar en el librito 01 y en todo lo que consuma datos.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="45"><span class="dir">Anterior</span><span class="t">← Fechas y horas</span></button><button class="navbtn next" data-goto="47"><span class="dir">Siguiente</span><span class="t">Anotaciones de tipo →</span></button></div>
+</section>
+
+<!-- 47 -->
+<section class="chapter" data-part="Parte 11 · Herramientas del día a día" data-num="47" data-title="Anotaciones de tipo" id="c47">
+  <div class="ch-eyebrow">Capítulo 47</div>
+  <h1>Anotaciones de tipo (type hints)</h1>
+  <p class="lead">Python te deja (opcionalmente) escribir de qué tipo es cada cosa: que un parámetro es un número, que una función devuelve texto. No cambia cómo corre el programa, pero documenta, previene errores, y hace que tu editor te ayude muchísimo más. En proyectos serios se usan siempre.</p>
+  <h2>Tipar funciones y variables</h2>
+  <div class="codehead"><span class="lang py">c_typehints.py</span></div>
+<pre>def total_pedido(precio: float, cantidad: int, descuento: float = 0.0) -&gt; float:
+    subtotal = precio * cantidad
+    return subtotal * (1 - descuento)
+
+nombre: str = "Pizza"
+precios: list[int] = [1200, 8500]
+menu: dict[str, int] = {"pizza": 8500}</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">12750.0
+las anotaciones no cambian el resultado, guían y documentan</pre>
+  <p>Después de cada parámetro, <code>: tipo</code> dice qué se espera. La flecha <code>-&gt; float</code> al final dice qué devuelve la función. En variables, <code>nombre: str</code>. Los tipos de colecciones se escriben <code>list[int]</code> (lista de enteros), <code>dict[str, int]</code> (diccionario de texto a entero).</p>
+  <h2>Por qué molestarse</h2>
+  <ul>
+    <li><strong>Documentación que no miente:</strong> quien usa <code>total_pedido</code> sabe que recibe números y devuelve un número, sin leer el código.</li>
+    <li><strong>Tu editor te ayuda:</strong> autocompleta mejor y te avisa si pasás el tipo equivocado.</li>
+    <li><strong>Herramientas que revisan:</strong> programas como <code>mypy</code> chequean los tipos antes de correr y atrapan bugs.</li>
+  </ul>
+  <div class="box nota"><span class="tag">Puente al librito de TypeScript</span><p>Esto es exactamente la idea de TypeScript (librito 14) pero en Python: agregar tipos para atrapar errores antes y documentar. En Python son opcionales (el programa corre igual sin ellos); en TypeScript son el centro del lenguaje. Si entendiste esto, ya entendés de qué se trata TypeScript. Empezá a usar type hints en tus funciones importantes: es un hábito que paga.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="46"><span class="dir">Anterior</span><span class="t">← JSON</span></button><button class="navbtn next" data-goto="48"><span class="dir">Siguiente</span><span class="t">Depurar errores →</span></button></div>
+</section>
+
+<!-- 48 -->
+<section class="chapter" data-part="Parte 11 · Herramientas del día a día" data-num="48" data-title="Depurar errores" id="c48">
+  <div class="ch-eyebrow">Capítulo 48</div>
+  <h1>Depurar: encontrar y arreglar errores</h1>
+  <p class="lead">Vas a pasar más tiempo arreglando código que escribiéndolo, y eso es normal, incluso para los expertos. Depurar (encontrar y corregir errores) es una habilidad en sí misma, y la buena noticia es que se aprende. Acá van las técnicas que de verdad se usan.</p>
+  <h2>1. Leer el error (bien)</h2>
+  <p>Cuando Python falla, te da un "traceback". No lo ignores: leelo de abajo hacia arriba. La última línea dice <em>qué</em> pasó y las de arriba, <em>dónde</em>. La mayoría de los errores se resuelven solo leyendo esto con atención.</p>
+  <div class="codehead"><span class="lang txt">un traceback, traducido</span></div>
+<pre>Traceback (most recent call last):
+  File "tienda.py", line 12, in &lt;module&gt;
+    total = precio * cantidad
+TypeError: can't multiply sequence by non-int of type 'str'
+   ^-- QUÉ pasó: intentaste multiplicar algo con un texto
+       DÓNDE: línea 12, en total = precio * cantidad
+       CAUSA probable: precio o cantidad es texto, no número (¿faltó int()?)</pre>
+  <h2>2. print para espiar</h2>
+  <p>La técnica más usada del mundo, sin exagerar. Cuando algo da un valor raro, poné <code>print</code> antes para ver qué hay en cada variable:</p>
+  <div class="codehead"><span class="lang py">print-debugging</span></div>
+<pre>def total(precio, cantidad):
+    print("DEBUG precio:", precio, type(precio))     # espiamos
+    print("DEBUG cantidad:", cantidad, type(cantidad))
+    return precio * cantidad</pre>
+  <p>Ver el valor <em>y el tipo</em> (con <code>type()</code>) resuelve la mayoría de los misterios: casi siempre una variable no tiene lo que creías (un número que era texto, una lista vacía, un <code>None</code>). Después borrás los prints.</p>
+  <h2>3. El método: dividir y achicar</h2>
+  <ul>
+    <li><strong>Reproducí el error:</strong> encontrá los pasos exactos que lo disparan.</li>
+    <li><strong>Achicá:</strong> comentá partes del código hasta aislar la línea culpable.</li>
+    <li><strong>Una hipótesis por vez:</strong> "creo que es esto" → probalo → confirmá o descartá. No cambies cinco cosas a la vez.</li>
+    <li><strong>El patito de goma:</strong> explicá el problema en voz alta, línea por línea. Muchas veces, explicándolo, encontrás el error solo. En serio.</li>
+  </ul>
+  <div class="box ojo"><span class="tag">Los errores no son fracasos</span><p>Cambiá el chip: un error no es que "sos malo programando", es información. El programa te está diciendo exactamente qué no le cierra. Los programadores con años no cometen menos errores; los encuentran y arreglan más rápido, porque practicaron esto. Cada bug que resolvés te hace mejor. Frustrarse es parte del proceso; rendirse en el primer error rojo, no.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="47"><span class="dir">Anterior</span><span class="t">← Anotaciones de tipo</span></button><button class="navbtn next" data-goto="49"><span class="dir">Siguiente</span><span class="t">Organizar un programa →</span></button></div>
+</section>
+
+<!-- 49 -->
+<section class="chapter" data-part="Parte 11 · Herramientas del día a día" data-num="49" data-title="Organizar un programa" id="c49">
+  <div class="ch-eyebrow">Capítulo 49</div>
+  <h1>De un script a un programa organizado</h1>
+  <p class="lead">Al principio, todo va en un archivo, de arriba a abajo. Funciona para lo chico. Cuando el programa crece, conviene organizarlo: separar en funciones, repartir en archivos, y saber instalar librerías. Un vistazo a cómo se estructura un proyecto de verdad.</p>
+  <h2>Primero, funciones; después, archivos</h2>
+  <p>El primer paso de orden es agrupar el código en funciones (Parte 5), cada una con su tarea. El segundo, cuando hay muchas, es repartirlas en varios archivos (módulos) y usarlas con <code>import</code>. Por ejemplo: <code>productos.py</code> con la lógica de productos, <code>main.py</code> que la usa.</p>
+  <div class="codehead"><span class="lang py">productos.py</span></div>
+<pre>def total_pedido(precio, cantidad, descuento=0):
+    return precio * cantidad * (1 - descuento)</pre>
+  <div class="codehead"><span class="lang py">main.py</span></div>
+<pre>from productos import total_pedido    # traer la función de otro archivo
+print(total_pedido(8500, 2, 0.25))    # 12750.0</pre>
+  <p>Es lo mismo que importar <code>math</code> o <code>json</code> (capítulo 29), pero de tus propios archivos. Así, cada archivo se ocupa de una parte, y el programa no es un monstruo de mil líneas. Es justo cómo está organizado el backend de la tienda del librito 13 (db.py, pagos.py, stats.py, main.py).</p>
+  <h2>El if __name__ == "__main__"</h2>
+  <div class="codehead"><span class="lang py">un patrón que vas a ver siempre</span></div>
+<pre>def main():
+    print("el programa arranca acá")
+
+if __name__ == "__main__":
+    main()</pre>
+  <p>Esa línea rara significa "ejecutá esto solo si este archivo se corre directamente, no si lo importan desde otro". Sirve para que un archivo pueda usarse como programa <em>y</em> como módulo importable sin que se ejecute de más. No hace falta entenderla a fondo ahora; reconocela, porque está en casi todos los programas Python.</p>
+  <h2>Librerías: pip y entornos virtuales</h2>
+  <ul>
+    <li><strong>pip</strong> instala librerías externas: <code>pip install pandas</code> (el track de Datos), <code>pip install fastapi</code> (los backends). Miles de librerías, para casi todo.</li>
+    <li><strong>Entorno virtual:</strong> una "caja" aislada de librerías por proyecto, así las versiones de un proyecto no chocan con otro. Se crea con <code>python -m venv venv</code> y se activa. En proyectos serios, siempre.</li>
+    <li><strong>requirements.txt:</strong> la lista de librerías que tu proyecto necesita, para que otro las instale de una (<code>pip install -r requirements.txt</code>). Lo viste en el librito de deploy.</li>
+  </ul>
+  <div class="box nota"><span class="tag">Crecé cuando lo necesites</span><p>No arranques con módulos y entornos virtuales para un script de 20 líneas: sería sobreingeniería. Empezá simple, en un archivo. Cuando el programa crezca y se vuelva incómodo, ahí separás en funciones, después en archivos, después sumás un entorno virtual. La estructura sigue a la necesidad, no al revés. Pero saber que estas herramientas existen te dice hacia dónde crecer.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="48"><span class="dir">Anterior</span><span class="t">← Depurar errores</span></button><button class="navbtn next" data-goto="50"><span class="dir">Siguiente</span><span class="t">Proyecto: adivinar el número →</span></button></div>
+</section>
+
+<!-- 50 -->
+<section class="chapter" data-part="Parte 12 · Más proyectos" data-num="50" data-title="Proyecto: adivinar el número" id="c50">
+  <div class="ch-eyebrow">Capítulo 50 · Proyecto</div>
+  <h1>Proyecto: el juego de adivinar el número</h1>
+  <p class="lead">Un clásico para practicar, y muy divertido de hacer. La computadora elige un número secreto del 1 al 100, y el jugador tiene que adivinarlo; en cada intento, el programa dice si es muy alto o muy bajo. Junta: azar (<code>random</code>), un bucle, condicionales, y contar intentos.</p>
+  <h2>La receta</h2>
+  <div class="codehead"><span class="lang txt">cómo lo pensás</span></div>
+<pre>1. Elegir un número secreto al azar (random)
+2. Repetir (un bucle): pedir un intento
+3. Comparar: ¿igual? ganó. ¿menor? "muy bajo". ¿mayor? "muy alto"
+4. Contar los intentos
+5. Cortar cuando acierta (break)</pre>
+  <div class="codehead"><span class="lang py">p_adivinar.py (versión probada, con intentos simulados)</span></div>
+<pre>import random
+random.seed(3)                       # fijo para que la prueba sea reproducible
+secreto = random.randint(1, 100)     # con esta semilla sale 31
+intentos_simulados = [50, 25, 37, 31]  # simula lo que tipearía el jugador
+
+intentos = 0
+for intento in intentos_simulados:
+    intentos += 1
+    if intento == secreto:
+        print(f"intento {intentos}: {intento} -&gt; ACERTASTE en {intentos} intentos!")
+        break
+    elif intento &lt; secreto:
+        print(f"intento {intentos}: {intento} -&gt; muy bajo, probá más alto")
+    else:
+        print(f"intento {intentos}: {intento} -&gt; muy alto, probá más bajo")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">(numero secreto: 31, oculto para el jugador)
+intento 1: 50 -> muy alto, probá mas bajo
+intento 2: 25 -> muy bajo, probá mas alto
+intento 3: 37 -> muy alto, probá mas bajo
+intento 4: 31 -> ACERTASTE en 4 intentos!</pre>
+  <h2>La versión interactiva de verdad</h2>
+  <p>Para probarlo lo simulamos con una lista de intentos (así la salida es reproducible). Para jugarlo de verdad, cambiás la lista por <code>input</code> dentro de un <code>while</code>:</p>
+  <div class="codehead"><span class="lang py">para jugar de verdad</span></div>
+<pre>import random
+secreto = random.randint(1, 100)
+intentos = 0
+while True:
+    intento = int(input("Adiviná (1-100): "))
+    intentos += 1
+    if intento == secreto:
+        print(f"¡Acertaste en {intentos} intentos!")
+        break
+    elif intento &lt; secreto:
+        print("muy bajo")
+    else:
+        print("muy alto")</pre>
+  <div class="box nota"><span class="tag">Fijate la estrategia del jugador</span><p>Los intentos simulados (50, 25, 37, 31) no son al azar: van partiendo el rango a la mitad cada vez. Es la "búsqueda binaria", la forma más rápida de adivinar: con 100 números, siempre ganás en 7 intentos o menos. Programar te entrena a pensar así, en estrategias eficientes. Cuando lo juegues, probá esa técnica.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="49"><span class="dir">Anterior</span><span class="t">← Organizar un programa</span></button><button class="navbtn next" data-goto="51"><span class="dir">Siguiente</span><span class="t">Proyecto: lista de tareas →</span></button></div>
+</section>
+
+<!-- 51 -->
+<section class="chapter" data-part="Parte 12 · Más proyectos" data-num="51" data-title="Proyecto: lista de tareas" id="c51">
+  <div class="ch-eyebrow">Capítulo 51 · Proyecto</div>
+  <h1>Proyecto: una lista de tareas que se guarda</h1>
+  <p class="lead">Una app de tareas (to-do) clásica, que junta casi todo: lista de diccionarios, funciones, y persistencia con JSON (para que las tareas sobrevivan al cerrar el programa). Es, en miniatura, cómo funciona cualquier app que guarda datos.</p>
+  <h2>El diseño</h2>
+  <p>Cada tarea es un diccionario <code>{"texto": ..., "hecha": ...}</code>. Todas viven en una lista. Funciones para agregar, completar y mostrar. Y al final, guardar en un archivo JSON (capítulo 46) para no perderlas.</p>
+  <div class="codehead"><span class="lang py">p_todo.py</span></div>
+<pre>import json
+tareas = []
+
+def agregar(texto):
+    tareas.append({"texto": texto, "hecha": False})
+
+def completar(indice):
+    tareas[indice]["hecha"] = True
+
+def mostrar():
+    for i, t in enumerate(tareas):
+        marca = "[x]" if t["hecha"] else "[ ]"
+        print(f"  {i}. {marca} {t['texto']}")
+
+agregar("comprar harina")
+agregar("preparar la masa")
+agregar("hornear")
+completar(0)
+completar(1)
+mostrar()</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">== lista de tareas ==
+  0. [x] comprar harina
+  1. [x] preparar la masa
+  2. [ ] hornear
+pendientes: 1</pre>
+  <h2>Guardar y recuperar (persistencia)</h2>
+  <div class="codehead"><span class="lang py">p_todo.py</span></div>
+<pre># guardar la lista completa en un archivo JSON
+with open("tareas.json", "w") as f:
+    json.dump(tareas, f, ensure_ascii=False)
+
+# volver a cargarla (por ejemplo, al abrir el programa de nuevo)
+with open("tareas.json") as f:
+    cargadas = json.load(f)
+print("pendientes:", sum(1 for t in cargadas if not t["hecha"]))</pre>
+  <p>Con <code>json.dump</code> guardás toda la lista en un archivo; con <code>json.load</code> la recuperás igualita. Así, si cerrás y volvés a abrir el programa, tus tareas siguen ahí. Ese <code>sum(1 for t in cargadas if not t["hecha"])</code> cuenta las pendientes: es el patrón de contar (capítulo 14) en forma compacta.</p>
+  <div class="box nota"><span class="tag">Esto es una app, en esencia</span><p>Una lista de datos, funciones para modificarla (agregar, completar, borrar), y persistencia para que no se pierda: eso es el núcleo de casi cualquier aplicación. Cambiá el archivo JSON por una base de datos, y las funciones por endpoints de una API, y tenés una app web de verdad (libritos 10 y 13). Empezó como un ejercicio y es el esqueleto de todo.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="50"><span class="dir">Anterior</span><span class="t">← Proyecto: adivinar el número</span></button><button class="navbtn next" data-goto="52"><span class="dir">Siguiente</span><span class="t">Proyecto: análisis de ventas →</span></button></div>
+</section>
+
+<!-- 52 -->
+<section class="chapter" data-part="Parte 12 · Más proyectos" data-num="52" data-title="Proyecto: análisis de ventas" id="c52">
+  <div class="ch-eyebrow">Capítulo 52 · Proyecto</div>
+  <h1>Proyecto: analizar ventas desde datos</h1>
+  <p class="lead">El proyecto final, y el más cercano a un problema real de negocio. Tomamos datos de ventas (como los que saldrían de un archivo o una base), y sacamos conclusiones: cuánto se facturó, cuántas unidades por producto, y cuál es el más vendido. Junta parseo de datos, diccionarios como acumuladores, y todo lo aprendido.</p>
+  <h2>El código</h2>
+  <div class="codehead"><span class="lang py">p_ventas.py</span></div>
+<pre>ventas_texto = """Pizza,8500,2
+Empanada,1200,12
+Pizza,8500,1
+Gaseosa,1800,5
+Flan,3500,3
+Empanada,1200,6"""
+
+# 1. parsear el texto a una lista de diccionarios
+ventas = []
+for linea in ventas_texto.strip().split("\n"):
+    nombre, precio, cant = linea.split(",")
+    ventas.append({"producto": nombre, "precio": int(precio), "cantidad": int(cant)})
+
+# 2. total facturado (acumular con una comprehension)
+total = sum(v["precio"] * v["cantidad"] for v in ventas)
+print(f"total facturado: ${total:,}")
+
+# 3. unidades por producto (acumular en un diccionario)
+por_producto = {}
+for v in ventas:
+    por_producto[v["producto"]] = por_producto.get(v["producto"], 0) + v["cantidad"]
+print("unidades por producto:", por_producto)
+
+# 4. el más vendido
+mas_vendido = max(por_producto, key=por_producto.get)
+print("más vendido:", mas_vendido, "con", por_producto[mas_vendido], "unidades")</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">total facturado: $66,600
+unidades por producto: {'Pizza': 3, 'Empanada': 18, 'Gaseosa': 5, 'Flan': 3}
+mas vendido: Empanada con 18 unidades</pre>
+  <h2>Todo junto, por última vez</h2>
+  <p>Mirá cuánto hay acá: parsear texto con <code>split</code> (capítulo 7), convertir tipos con <code>int</code> (capítulo 9), lista de diccionarios (capítulo 19), acumular con comprehension (capítulo 44), un diccionario como acumulador (el <code>.get(clave, 0) + ...</code> es el patrón para contar por categoría), y <code>max</code> con <code>key</code> para el más vendido. Un problema de negocio real, resuelto con las piezas del libro.</p>
+  <div class="box nota"><span class="tag">Esto es análisis de datos</span><p>Acabás de hacer, a mano, lo que el track de Datos hace con la librería pandas: leer datos, agrupar, sumar, y encontrar el máximo. Cuando pases a pandas, vas a hacer esto mismo en menos líneas y sobre millones de filas, pero entendiendo qué pasa por debajo, porque lo hiciste vos primero. Ese entendimiento es lo que te va a diferenciar.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="51"><span class="dir">Anterior</span><span class="t">← Proyecto: lista de tareas</span></button><button class="navbtn next" data-goto="53"><span class="dir">Siguiente</span><span class="t">Cierre final →</span></button></div>
+</section>
+
+<!-- 53 -->
+<section class="chapter" data-part="Cierre" data-num="53" data-title="Cierre final" id="c53">
+  <div class="ch-eyebrow">Fin del libro</div>
+  <h1>Terminaste el libro: ahora, a construir</h1>
+  <p class="lead">Empezaste sin saber qué era una variable y llegaste hasta acá: sabés Python de verdad, resolviste ejercicios y proyectos pensándolos paso a paso, y conocés las herramientas del día a día de un programador. No es poco. Es la base sobre la que se construye todo lo demás.</p>
+  <h2>El libro completo, de una mirada</h2>
+  <ul>
+    <li><strong>Fundamentos:</strong> variables, tipos, números, texto, booleanos, input.</li>
+    <li><strong>Control de flujo:</strong> if/elif/else, for, while, y los patrones de bucle.</li>
+    <li><strong>Estructuras:</strong> listas, tuplas, diccionarios, sets, anidadas.</li>
+    <li><strong>Funciones y POO:</strong> reutilizar y organizar; clases, objetos, herencia.</li>
+    <li><strong>Robustez:</strong> errores, archivos, módulos.</li>
+    <li><strong>Herramientas:</strong> comprehensions, fechas, JSON, type hints, depuración, organización.</li>
+    <li><strong>Resolución de problemas:</strong> el método, y once ejercicios y proyectos resueltos.</li>
+    <li><strong>Python en la web:</strong> cliente/servidor, generar HTML, y bases de datos.</li>
+  </ul>
+  <h2>A dónde seguir en la colección</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Te interesó…</th><th>Seguí con</th></tr></thead>
+    <tbody>
+      <tr><td>Las páginas web (el div, la lista)</td><td>El track de Frontend, de 0 a una landing</td></tr>
+      <tr><td>Las bases de datos (SELECT, INSERT)</td><td>Librito 03 (SQL) y 10 (Backend SQL)</td></tr>
+      <tr><td>Las APIs y conectar todo</td><td>Librito 01 (APIs) y 09 (front + back)</td></tr>
+      <tr><td>Analizar datos con Python</td><td>El track de Datos (usa lo del capítulo 52, con pandas)</td></tr>
+      <tr><td>Los tipos que viste (type hints)</td><td>Librito 14 (TypeScript)</td></tr>
+      <tr><td>Ver todo junto en algo real</td><td>Librito 13 (la tienda de alimentos)</td></tr>
+      <tr><td>Programar con ayuda de IA</td><td>Librito 23 (agentes para programar)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">El único consejo que importa</span><p>Programar no se aprende leyendo, se aprende <strong>haciendo</strong>. Ahora que tenés las herramientas, el paso que te va a convertir en programador es uno solo: construí cosas. Empezá con algo que te sirva a vos (organizar tus gastos, automatizar una tarea aburrida, un juego tonto) y hacelo, aunque salga feo. Vas a trabarte, buscar en internet, frustrarte, y resolverlo. Cada vez que lo hagas, vas a ser mejor. No existe otro camino, y es más divertido de lo que parece. Ya tenés todo para empezar. Ahora andá y construí algo.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="52"><span class="dir">Anterior</span><span class="t">← Proyecto: análisis de ventas</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('intro-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('intro-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('intro-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('intro-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

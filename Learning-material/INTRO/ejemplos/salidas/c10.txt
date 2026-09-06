@@ -1,0 +1,17 @@
+range(3): 0
+range(3): 1
+range(3): 2
+range(2,5): 2
+range(2,5): 3
+range(2,5): 4
+range(0,10,2): 0
+range(0,10,2): 2
+range(0,10,2): 4
+range(0,10,2): 6
+range(0,10,2): 8
+1. pizza
+2. flan
+total acumulado: 13200
+productos caros: 2
+impar antes del 5: 1
+impar antes del 5: 3

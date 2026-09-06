@@ -1,0 +1,16 @@
+== ANTES ==
+filas: 786
+nulos en precio_unit: 8
+duplicados exactos: 1
+categorías distintas: ['BEBIDAS', 'Bebidas', 'EMPANADAS', 'Empanadas', 'PIZZAS', 'PLATOS', 'POSTRES', 'Pizzas', 'Platos', 'Postres']
+métodos distintos: ['Mercado Pago', 'mercadopago', 'qr', 'transferencia']
+
+== DESPUÉS ==
+filas: 785
+nulos en precio_unit: 0
+duplicados exactos: 0
+categorías distintas: ['Bebidas', 'Empanadas', 'Pizzas', 'Platos', 'Postres']
+métodos distintos: ['mercadopago', 'qr', 'transferencia']
+tipo de 'fecha': datetime64[us]
+
+guardado datos/ventas_limpio.csv

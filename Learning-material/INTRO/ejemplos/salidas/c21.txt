@@ -1,0 +1,6 @@
+solo precio: 1210.0
+con descuento: 907.5
+nombrados: 1105.0
+sumar varios: 15
+min=1200 max=8500 prom=4400
+retorno: 10

@@ -1,0 +1,3 @@
+total facturado: $66,600
+unidades por producto: {'Pizza': 3, 'Empanada': 18, 'Gaseosa': 5, 'Flan': 3}
+mas vendido: Empanada con 18 unidades

@@ -1,0 +1,5 @@
+promedio: 8.0
+14 es par: True
+más caro: 8500
+vocales: 5
+total carrito: 22400

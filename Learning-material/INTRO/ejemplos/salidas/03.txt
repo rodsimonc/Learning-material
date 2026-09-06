@@ -1,0 +1,5 @@
+precio unitario: $8500
+cantidad:        2
+subtotal:        $17000   (8500 x 2)
+descuento 25%:   -$4250
+TOTAL A PAGAR:   $12750

@@ -1,0 +1,12 @@
+largo: 16
+mayusculas: PIZZA MUZZARELLA
+minusculas: pizza muzzarella
+reemplazar: Pizza Napolitana
+primera letra: P
+ultimas 4: ella
+primeras 5: Pizza
+split: ['carne', 'pollo', 'jamon']
+unir: carne + pollo + jamon
+strip: 'hola'
+2 pizzas = $17000
+con formato: $17,000.00

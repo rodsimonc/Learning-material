@@ -1,0 +1,16 @@
+== un div ==
+<div class="saludo">Hola</div>
+
+== una lista (ul > li) ==
+<ul>
+  <li>Pizza</li>
+  <li>Empanada</li>
+  <li>Flan</li>
+</ul>
+
+== un div con una lista adentro (así se anidan) ==
+<div class="menu"><ul>
+  <li>Pizza</li>
+  <li>Empanada</li>
+  <li>Flan</li>
+</ul></div>

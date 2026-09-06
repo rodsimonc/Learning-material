@@ -1,0 +1,21 @@
+total: 3600
+con IVA (21%): 4356.0
+mitad: 1800.0
+resto de 10/3: 1
+falta poco, reponer
+cuenta regresiva:
+  3
+  2
+  1
+tabla del 5:
+  5 x 1 = 5
+  5 x 2 = 10
+  5 x 3 = 15
+productos: ['empanada', 'pizza', 'flan', 'gaseosa']
+primero: empanada | total: 4
+  - empanada
+  - pizza
+  - flan
+  - gaseosa
+el pedido es de 2 pizza
+{'producto': 'pizza', 'cantidad': 2, 'precio': 8500, 'pagado': True}

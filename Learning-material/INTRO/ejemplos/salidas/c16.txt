@@ -1,0 +1,8 @@
+tupla: (10, 20) x = 10
+set sin duplicados: {'oferta', 'nuevo'}
+esta 'nuevo'?: True
+  Pizza: $8500
+  Flan: $3500
+  Gaseosa: $1800
+total del menu: 13800
+mas caro: Pizza

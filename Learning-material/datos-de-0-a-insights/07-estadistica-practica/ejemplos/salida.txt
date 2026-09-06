@@ -1,0 +1,15 @@
+== Ticket por pedido ==
+  media:    $11,076
+  mediana:  $11,300
+  desvío:   $4,170
+  mín/máx:  $4,200 / $20,700
+
+== media vs mediana ==
+  acá están cerca: la distribución es pareja. Si la media fuera
+  mucho mayor, unos pocos pedidos enormes la estarían estirando.
+
+== Correlación: items por pedido vs total del pedido ==
+  -0.03  -> CASI CERO. La intuición ('más items = más plata') NO se cumple.
+  ¿Por qué? Los ítems baratos (empanadas, gaseosa) vienen de a muchos,
+  y los caros (milanesa, pizza) vienen solos. Cantidad no predice importe.
+  Lección: no asumas la correlación; medila. Los datos te corrigen.

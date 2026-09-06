@@ -1,0 +1,9 @@
+== todos los productos ==
+  ('Pizza muzza', 8500, 5)
+  ('Empanada', 1200, 40)
+
+== productos de más de 5000 ==
+  ('Pizza muzza', 8500)
+
+== stock de la pizza tras vender 2 ==
+  ('Pizza muzza', 3)

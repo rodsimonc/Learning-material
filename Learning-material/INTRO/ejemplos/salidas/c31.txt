@@ -1,0 +1,6 @@
+== contenido ==
+  2 x Pizza
+  3 x Gaseosa
+hoy: 2026-09-06
+random 1-6: 2
+raiz de 144: 12.0

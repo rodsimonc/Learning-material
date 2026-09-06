@@ -1,0 +1,6 @@
+hoy: 2026-09-06
+formato dd/mm/aaaa: 06/09/2026
+dentro de 7 dias: 2026-09-13
+dias vividos: 11498
+fecha y hora: 06/09/2026 21:30
+solo la hora: 21

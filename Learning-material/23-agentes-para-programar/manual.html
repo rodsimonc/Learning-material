@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentes para programar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">IA · programar con agentes</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">IA · Agentes para programar</div>
+  <h1>Programar con agentes de IA</h1>
+  <p class="lead">Los asistentes de IA cambiaron cómo se programa. Ya no es autocompletar líneas: hoy un agente lee tu proyecto, escribe funciones enteras, corre comandos y arregla sus propios errores. Bien usados, te multiplican; mal usados, te llenan de código que no entendés. Este librito es sobre trabajar con ellos con criterio.</p>
+  <div class="box nota"><span class="tag">Un librito práctico</span><p>Este no trae código que corre: trae la forma de trabajar. Cómo elegir la herramienta, cómo pedir bien, cómo revisar lo que te dan, y dónde están los límites. Es la habilidad que más rinde hoy, y la que menos se enseña.</p></div>
+  <h2>Qué vas a poder hacer al terminar</h2>
+  <p>Entender el panorama de herramientas, trabajar con un agente de forma efectiva (contexto, prompts, tareas acotadas), revisar su código con ojo crítico, usar MCP para darle capacidades, y saber qué no delegarle.</p>
+  <div class="box nota"><span class="tag">Cómo moverte</span><p>Índice a la izquierda, o flechas <span class="kbd">←</span> <span class="kbd">→</span>. El libro recuerda dónde quedaste.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">De autocompletar a agente →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · El panorama" data-num="1" data-title="De autocompletar a agente" id="evolucion">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>De autocompletar a agente</h1>
+  <p class="lead">"IA para programar" no es una sola cosa. Hay tres niveles, cada uno más autónomo que el anterior. Entenderlos te dice qué esperar y cómo usar cada uno.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Nivel</th><th>Qué hace</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><th>Autocompletado</th><td>Sugiere la línea o el bloque que sigue mientras escribís</td><td>Copilot clásico</td></tr>
+      <tr><th>Chat con contexto</th><td>Le preguntás sobre tu código, te explica y propone cambios</td><td>El chat de Cursor o Copilot</td></tr>
+      <tr><th>Agente</th><td>Le das una tarea; lee archivos, edita varios, corre comandos, itera</td><td>Claude Code, el modo agente de Cursor</td></tr>
+    </tbody>
+  </table></div>
+  <h2>El salto del agente</h2>
+  <p>La diferencia grande es el agente: no completa, ejecuta una tarea de punta a punta. "Agregá autenticación con JWT a esta API" y el agente lee tu código, escribe los archivos, instala dependencias, corre las pruebas, y arregla lo que falla. Vos pasás de escribir a dirigir y revisar.</p>
+  <div class="box nota"><span class="tag">Tu rol cambia, no desaparece</span><p>Con agentes, escribís menos código y tomás más decisiones: qué construir, cómo debería estar hecho, si lo que devolvió está bien. Programar sigue siendo entender el problema y juzgar la solución; eso no lo delega el agente. Por eso las bases de toda esta colección importan más, no menos: sin ellas no podés dirigir ni revisar.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Las herramientas →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · El panorama" data-num="2" data-title="Las herramientas" id="herramientas">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>El panorama de herramientas</h1>
+  <p class="lead">El campo se mueve rápido y las herramientas cambian, pero se agrupan en categorías estables. Conocé las categorías más que las marcas: las marcas cambian, las formas de trabajar quedan.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Categoría</th><th>Qué es</th><th>Ejemplos (hoy)</th></tr></thead>
+    <tbody>
+      <tr><th>Editor con IA integrada</th><td>Un editor de código con chat y agente adentro</td><td>Cursor, Windsurf, VS Code + Copilot</td></tr>
+      <tr><th>Agente de terminal</th><td>Un agente que vive en la línea de comandos, sobre tu repo</td><td>Claude Code, Codex CLI</td></tr>
+      <tr><th>Generadores de app</th><td>De una descripción, generan una app o UI completa</td><td>v0, Lovable, Bolt</td></tr>
+      <tr><th>Autocompletado</th><td>Sugerencias mientras tipeás</td><td>Copilot, Supermaven</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Cuál usar</h2>
+  <p>No son excluyentes; mucha gente combina. Un editor con IA (Cursor) para el día a día, un agente de terminal (Claude Code) para tareas grandes sobre todo el repo, un generador (v0) para arrancar una interfaz rápido. Elegí por la tarea, no por lealtad a una marca.</p>
+  <div class="box nota"><span class="tag">Aprendé la forma, no la herramienta</span><p>Como el campo cambia cada pocos meses, no te cases con una herramienta. Lo que perdura son las habilidades: dar buen contexto, escribir buenos prompts, revisar código crítico. Eso te sirve en Cursor hoy y en lo que venga mañana. Este librito enseña eso, no botones.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← De autocompletar a agente</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">El contexto →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · Trabajar bien" data-num="3" data-title="El contexto" id="contexto">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>El contexto lo es casi todo</h1>
+  <p class="lead">La diferencia entre un agente que ayuda y uno que estorba casi siempre es el contexto que le diste. El agente no sabe nada de tu proyecto salvo lo que ve. Cuanto mejor le muestres, mejor trabaja.</p>
+  <h2>Qué es el contexto</h2>
+  <p>Es todo lo que el agente tiene a la vista al trabajar: los archivos que le abriste o que puede leer, tu prompt, el historial de la conversación, y la documentación que le pases. Un agente con el archivo correcto a la vista acierta; uno adivinando, inventa.</p>
+  <h2>Cómo darle buen contexto</h2>
+  <ul>
+    <li><strong>Señalá los archivos relevantes:</strong> la mayoría de las herramientas te dejan referenciar archivos (con <code>@archivo</code> o abriéndolos). Mostrale dónde está lo que importa.</li>
+    <li><strong>Dale ejemplos de tu código:</strong> "seguí el estilo de este componente" vale más que describirlo.</li>
+    <li><strong>Pegá el error completo:</strong> no lo resumas, pegá el stack trace entero.</li>
+    <li><strong>Documentá el proyecto:</strong> un archivo de reglas (muchas herramientas leen un <code>.cursorrules</code> o un <code>CLAUDE.md</code>) con las convenciones, el stack y cómo correr las cosas.</li>
+  </ul>
+  <div class="box ojo"><span class="tag">El contexto también tiene límite</span><p>Un agente no puede leer un repo gigante entero de una: tiene una "ventana" de contexto finita. Darle demasiado (todo el proyecto) es tan malo como darle poco: se diluye lo importante. Apuntá al contexto <em>relevante</em> para la tarea, no a todo. Precisión, no cantidad.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Las herramientas</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Escribir buenos prompts →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · Trabajar bien" data-num="4" data-title="Buenos prompts" id="prompts">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Pedir bien: prompts para código</h1>
+  <p class="lead">Un buen prompt para programar no es "haceme un login". Es específico, acotado, y dice el qué y las restricciones. Comparar un pedido vago con uno bueno lo deja claro.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Vago (sale mal)</th><th>Bueno (sale usable)</th></tr></thead>
+    <tbody>
+      <tr><td>"hacé login"</td><td>"Agregá un endpoint POST /login en FastAPI que verifique email y contraseña contra la tabla usuarios, devuelva un JWT, y use bcrypt. Seguí el estilo de auth.py."</td></tr>
+      <tr><td>"arreglá el bug"</td><td>"El carrito no actualiza el total al quitar un item. Acá está el componente y el error de consola. Encontrá y corregí la causa."</td></tr>
+    </tbody>
+  </table></div>
+  <h2>La receta</h2>
+  <ul>
+    <li><strong>Qué querés, concreto:</strong> la acción y el resultado esperado.</li>
+    <li><strong>Restricciones:</strong> el stack, las convenciones, qué no tocar.</li>
+    <li><strong>Contexto:</strong> los archivos, el error, un ejemplo a seguir.</li>
+    <li><strong>Cómo verificar:</strong> "y agregá un test que lo pruebe" o "corré las pruebas al terminar".</li>
+  </ul>
+  <div class="box nota"><span class="tag">Tareas chicas, no epopeyas</span><p>El error más común: pedir demasiado de una. "Construí toda la app" sale peor que diez pedidos acotados. Partí el trabajo: primero el modelo de datos, revisás; después un endpoint, revisás; después el siguiente. Igual que le pedís a la IA en los libritos anteriores: de a una pieza, revisando entre medio. El agente rinde mejor y vos mantenés el control.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← El contexto</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Revisar el código →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 2 · Trabajar bien" data-num="5" data-title="Revisar el código" id="revisar">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Revisar lo que te da: la habilidad clave</h1>
+  <p class="lead">Acá está lo que separa a quien usa bien un agente de quien se mete en problemas. El agente escribe rápido y con seguridad, incluso cuando está mal. Vos sos el filtro. Nunca metas código que no entendés.</p>
+  <h2>Qué mirar en cada respuesta</h2>
+  <ul>
+    <li><strong>¿Lo entendés?</strong> Si no podés explicar qué hace una línea, no la aceptes hasta entenderla. Preguntale al agente.</li>
+    <li><strong>¿Hace lo que pediste?</strong> A veces resuelve un problema parecido, no el tuyo.</li>
+    <li><strong>¿Los casos límite?</strong> La lista vacía, el usuario sin permiso, el dato nulo. La IA suele ir por el camino feliz.</li>
+    <li><strong>¿Seguridad?</strong> ¿Parametriza las consultas? ¿Valida la entrada? ¿No expone secretos? (toda la colección).</li>
+    <li><strong>¿Inventó algo?</strong> Los agentes a veces usan funciones o librerías que no existen. Si algo se ve raro, verificalo.</li>
+  </ul>
+  <div class="box ojo"><span class="tag">Vos firmás el código, no la IA</span><p>Cuando ese código rompa producción a las 3 AM, el responsable sos vos, no el agente. "Me lo dio la IA" no es una defensa. Tratá cada línea como si la hubieras escrito vos: si no la revisarías de un compañero, no la aceptes de un agente. La velocidad no vale nada si no podés confiar en el resultado.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Buenos prompts</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">El flujo con agente →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 3 · El flujo" data-num="6" data-title="El flujo con agente" id="flujo">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>El flujo de trabajo con un agente</h1>
+  <p class="lead">Trabajar con un agente tiene un ritmo propio. Cuando lo agarrás, es fluido y productivo. Este es el ciclo que funciona.</p>
+  <div class="codehead"><span class="lang txt">el ciclo</span></div>
+<pre>1. Planificá:  qué querés lograr, dividido en pasos chicos
+2. Contexto:   mostrale los archivos y las reglas relevantes
+3. Pedí:       un paso acotado, específico
+4. Revisá:     leé el cambio (el diff), entendelo
+5. Probá:      corré las pruebas / la app; que funcione de verdad
+6. Iterá:      "faltó esto", "manejá este caso", y repetís
+7. Commiteá:   cuando un paso está bien, guardalo en Git (librito 02)</pre>
+  <h2>Git es tu red de seguridad</h2>
+  <p>El agente puede romper cosas. Por eso Git (librito 02) es tu mejor amigo acá: commiteá seguido, así siempre podés volver a un estado que funcionaba. Trabajá en una rama, revisá el diff completo antes de aceptar, y si el agente hizo un desastre, <code>git restore</code> y volvés a empezar. Sin Git, un agente suelto es peligroso; con Git, experimentás tranquilo.</p>
+  <div class="box nota"><span class="tag">Planificar antes de codear</span><p>Muchos agentes trabajan mejor si primero les pedís un plan: "antes de escribir, decime cómo lo vas a encarar". Revisás el plan (más barato de corregir que el código), lo ajustás, y recién ahí le decís que lo implemente. Pensar antes de codear vale para vos y para el agente.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Revisar el código</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">MCP →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 3 · El flujo" data-num="7" data-title="MCP" id="mcp">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>MCP: darle capacidades al agente</h1>
+  <p class="lead">Por defecto, un agente ve tu código. MCP (Model Context Protocol) es un estándar para conectarle herramientas externas: tu base de datos, tu gestor de tareas, la documentación de una librería, tu repositorio de GitHub. Así el agente no solo lee código: consulta y actúa sobre tus sistemas.</p>
+  <h2>Qué habilita</h2>
+  <p>Con los conectores MCP adecuados, un agente puede, por ejemplo, mirar el esquema real de tu base de datos antes de escribir una consulta, leer un ticket de tu gestor de tareas para entender qué construir, o consultar la documentación oficial y actualizada de una librería en vez de confiar en su memoria. Es la diferencia entre un agente que adivina y uno que sabe.</p>
+  <div class="codehead"><span class="lang txt">la idea</span></div>
+<pre>Agente  ──(MCP)──►  tu base de datos   (ver el esquema real)
+        ──(MCP)──►  GitHub / tareas    (leer el issue a resolver)
+        ──(MCP)──►  docs de una librería (la versión correcta)</pre>
+  <div class="box nota"><span class="tag">Menos alucinaciones, más precisión</span><p>La razón de fondo de MCP: si el agente puede consultar la fuente real (tu esquema, la doc actual), inventa menos (librito 22, alucinaciones). En vez de "creo que la tabla se llama así", lo mira. Es la misma idea de RAG llevada a las herramientas de tu trabajo. A medida que madura, es cada vez más central en cómo trabajan los agentes.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← El flujo con agente</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Límites y riesgos →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Parte 4 · Con cabeza" data-num="8" data-title="Límites y riesgos" id="limites">
+  <div class="ch-eyebrow">Capítulo 8</div>
+  <h1>Límites, riesgos y qué no delegar</h1>
+  <p class="lead">Los agentes son potentes y tienen fallas reales. Conocerlas te evita los errores más caros y te dice dónde tu criterio es insustituible.</p>
+  <h2>Dónde fallan</h2>
+  <ul>
+    <li><strong>Inventan (alucinan):</strong> funciones, librerías o APIs que no existen, con total seguridad.</li>
+    <li><strong>Se pierden en lo grande:</strong> cuanto más grande y entrelazada la tarea, más se equivocan.</li>
+    <li><strong>Van por el camino feliz:</strong> suelen olvidar casos límite, errores y seguridad si no los pedís.</li>
+    <li><strong>No conocen tu contexto de negocio:</strong> por qué las cosas son como son en tu proyecto.</li>
+    <li><strong>Quedan desactualizados:</strong> su conocimiento tiene fecha de corte; una librería nueva puede no conocerla (para eso, MCP o pasarle la doc).</li>
+  </ul>
+  <h2>Qué no delegar sin control</h2>
+  <ul>
+    <li><strong>Decisiones de arquitectura:</strong> pueden proponer, vos decidís (librito 08).</li>
+    <li><strong>Todo lo que toca dinero, datos sensibles o seguridad:</strong> revisá línea por línea (libritos 07, 13, 16).</li>
+    <li><strong>Correr comandos destructivos:</strong> un agente con permiso para borrar o desplegar sin que mires es un accidente esperando pasar.</li>
+    <li><strong>Entender tu propio código:</strong> si dependés del agente para saber qué hace tu app, perdiste el control.</li>
+  </ul>
+  <div class="box ojo"><span class="tag">Cuidado con la dependencia</span><p>Un riesgo sutil, sobre todo si estás aprendiendo: si el agente hace todo, no aprendés. Y sin las bases, no podés dirigir ni revisar, así que dependés cada vez más de él, en un círculo. Usá los agentes para ir más rápido en lo que ya entendés, y bajá el ritmo (o apagalos) para aprender lo nuevo. La herramienta amplifica lo que sabés; no reemplaza saberlo.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← MCP</span></button><button class="navbtn next" data-goto="9"><span class="dir">Siguiente</span><span class="t">Checklist y cierre →</span></button></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" data-part="Cierre" data-num="9" data-title="Checklist y cierre" id="cierre">
+  <div class="ch-eyebrow">Fin del librito</div>
+  <h1>Checklist y cierre</h1>
+  <p class="lead">Programar con agentes es una habilidad, y como toda habilidad, se practica. Estas son las reglas que separan a quien los usa bien.</p>
+  <h2>Checklist para trabajar con un agente</h2>
+  <ul>
+    <li>Dale contexto preciso: los archivos relevantes, no todo el repo.</li>
+    <li>Prompts específicos: qué, restricciones, y cómo verificar.</li>
+    <li>Tareas chicas, revisando entre cada una.</li>
+    <li>Pedí un plan antes de la implementación en tareas grandes.</li>
+    <li>Revisá y entendé cada cambio; no aceptes lo que no entendés.</li>
+    <li>Probá de verdad: que funcione, no que "parezca".</li>
+    <li>Git como red: commiteá seguido, trabajá en ramas.</li>
+    <li>Nunca delegues sin control lo sensible (dinero, datos, seguridad, arquitectura).</li>
+    <li>Usá MCP para que consulte fuentes reales y alucine menos.</li>
+  </ul>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Agente</th><td>IA que ejecuta una tarea de código de punta a punta.</td></tr>
+      <tr><th>Contexto</th><td>Todo lo que el agente ve al trabajar.</td></tr>
+      <tr><th>Ventana de contexto</th><td>El límite de cuánto puede "ver" a la vez.</td></tr>
+      <tr><th>MCP</th><td>Estándar para conectarle herramientas externas al agente.</td></tr>
+      <tr><th>Alucinación</th><td>Cuando inventa algo que no existe, con seguridad.</td></tr>
+      <tr><th>Diff</th><td>Los cambios que propone; lo que tenés que revisar.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Los agentes de IA son la herramienta que más está cambiando cómo se programa, y ahora sabés trabajar con ellos con criterio: dirigir, dar contexto, revisar y no delegar lo que no debe. La clave que atraviesa todo: son un multiplicador de lo que sabés, no un reemplazo. Por eso todo lo que aprendiste en esta colección es lo que te deja usarlos bien. La IA escribe el código; vos seguís siendo quien entiende y decide.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="8"><span class="dir">Anterior</span><span class="t">← Límites y riesgos</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('agentes-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('agentes-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('agentes-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('agentes-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

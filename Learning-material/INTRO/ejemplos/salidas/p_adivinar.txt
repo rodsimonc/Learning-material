@@ -1,0 +1,5 @@
+(numero secreto: 31, oculto para el jugador)
+intento 1: 50 -> muy alto, probá mas bajo
+intento 2: 25 -> muy bajo, probá mas alto
+intento 3: 37 -> muy alto, probá mas bajo
+intento 4: 31 -> ACERTASTE en 4 intentos!

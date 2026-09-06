@@ -1,0 +1,29 @@
+== forma (filas, columnas) ==
+(786, 7)
+
+== primeras filas ==
+ pedido_id            fecha         producto categoria  cantidad  precio_unit   metodo_pago
+      1001 2026-07-26 23:34 Pizza muzzarella    Pizzas         1       8500.0   mercadopago
+      1001 2026-07-26 23:34    Gaseosa 500ml   Bebidas         1       1800.0   mercadopago
+      1002 2026-07-03 12:05   Ensalada Cesar    Platos         1       7200.0 transferencia
+
+== columnas y tipos ==
+pedido_id        int64
+fecha              str
+producto           str
+categoria          str
+cantidad         int64
+precio_unit    float64
+metodo_pago        str
+
+== seleccionar columnas ==
+        producto  cantidad
+Pizza muzzarella         1
+   Gaseosa 500ml         1
+  Ensalada Cesar         1
+
+== filtrar: solo Pizzas ==
+        producto  precio_unit
+Pizza muzzarella       8500.0
+Pizza muzzarella       8500.0
+Pizza napolitana       9800.0

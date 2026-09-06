@@ -1,0 +1,5 @@
+<class 'int'> <class 'float'> <class 'str'> <class 'bool'>
+nuevo precio: 1500
+doble: 6
+como texto: 1500 pesos
+a decimal: 3.5

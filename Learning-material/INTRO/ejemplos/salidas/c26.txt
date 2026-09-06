@@ -1,0 +1,5 @@
+  2x Pizza = $17000
+  3x Gaseosa = $5400
+  TOTAL: $22400
+stock pizza tras la venta: 3
+flan con 20% off, 2 unidades: 5600.0

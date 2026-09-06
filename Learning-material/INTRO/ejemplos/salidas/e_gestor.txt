@@ -1,0 +1,10 @@
+vendidas 2 de Pizza. Total: $17000. Quedan 3
+sin stock de Pizza (quedan 3)
+vendidas 12 de Empanada. Total: $14400. Quedan 28
+no existe Sushi
+hay que reponer: ['Pizza', 'Flan']
+
+inventario final:
+  Pizza: 3 en stock
+  Empanada: 28 en stock
+  Flan: 3 en stock
