@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Algoritmos y estructuras de datos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Fundamentos · eficiencia y Big-O</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Fundamentos · Algoritmos y estructuras</div>
+  <h1>Algoritmos y estructuras de datos</h1>
+  <p class="lead">Saber programar es una cosa; saber elegir <em>cómo</em> resolver un problema para que sea rápido y no se caiga con muchos datos es otra. Eso son los algoritmos y las estructuras de datos: los cimientos de la computación. Es lo que más se pregunta en entrevistas, y lo que separa un programa que anda de uno que anda bien.</p>
+  <div class="box nota"><span class="tag">Código real y medido</span><p>Todos los ejemplos se corrieron de verdad, midiendo el tiempo. Los bloques con <span class="tested">✓ salida real</span> muestran diferencias de velocidad reales (a veces de miles de veces). Ahí se ve, no se cuenta. El código está en <code>ejemplos/</code>.</p></div>
+  <h2>Qué vas a poder hacer al terminar</h2>
+  <p>Entender la notación Big-O (por qué un programa escala o no), elegir la estructura de datos correcta para cada problema, conocer los algoritmos clásicos de búsqueda y ordenamiento, y entender la recursión. No para reinventarlos, sino para elegir bien y saber qué pasa por debajo.</p>
+  <div class="box nota"><span class="tag">Requisito</span><p>Este librito asume que ya sabés Python básico: listas, diccionarios, bucles y funciones (todo eso está en el INTRO). Si algo no te suena, dale una repasada primero.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">Qué es un algoritmo →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="1" data-title="Qué es un algoritmo" id="que-es">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>Qué es un algoritmo (y por qué importa la eficiencia)</h1>
+  <p class="lead">Un algoritmo es una secuencia de pasos para resolver un problema. Una receta es un algoritmo. Pero para el mismo problema suele haber varios algoritmos, y no todos son igual de buenos: algunos tardan un instante y otros, una eternidad, con los mismos datos.</p>
+  <h2>El mismo problema, dos caminos</h2>
+  <p>Buscar un nombre en una guía telefónica: podés leer página por página desde el principio (funciona, pero lento), o abrir por el medio y descartar la mitad según la letra (mucho más rápido). Las dos "funcionan"; una es muchísimo mejor. Elegir el buen algoritmo es de lo que se trata este librito.</p>
+  <h2>Por qué importa cuando hay muchos datos</h2>
+  <p>Con 10 elementos, cualquier algoritmo anda bien: la diferencia es imperceptible. El problema aparece con millones de datos, que es lo normal en apps reales. Ahí, un algoritmo malo hace que la app tarde segundos (o se cuelgue) donde uno bueno tarda milisegundos. Lo vas a ver medido en los próximos capítulos, y las diferencias son brutales.</p>
+  <div class="box nota"><span class="tag">No vas a reinventar la rueda</span><p>Aclaración importante: en el día a día NO escribís tus propios algoritmos de ordenamiento ni estructuras de datos; usás los que ya trae el lenguaje (que están hechos por expertos y optimizados). El valor de este librito es <em>entenderlos</em>: para elegir la estructura correcta, leer el código de otros, y no escribir sin querer algo que se arrastra con muchos datos. Entender, no reinventar.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Big-O →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 1 · Fundamentos" data-num="2" data-title="Big-O" id="bigo">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Big-O: medir cómo escala un algoritmo</h1>
+  <p class="lead">Big-O es la notación para describir cómo crece el tiempo (o la memoria) de un algoritmo a medida que crecen los datos. No mide segundos exactos (eso depende de la máquina); mide la <em>forma</em> en que crece. Es el vocabulario universal para hablar de eficiencia.</p>
+  <h2>Las complejidades que vas a ver</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Notación</th><th>Nombre</th><th>Con 10x más datos...</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><code>O(1)</code></td><td>constante</td><td>tarda igual</td><td>acceder a <code>lista[5]</code> o a <code>dict[clave]</code></td></tr>
+      <tr><td><code>O(log n)</code></td><td>logarítmica</td><td>casi igual</td><td>búsqueda binaria</td></tr>
+      <tr><td><code>O(n)</code></td><td>lineal</td><td>10x más</td><td>recorrer una lista</td></tr>
+      <tr><td><code>O(n log n)</code></td><td>"n log n"</td><td>~13x más</td><td>un buen ordenamiento (sorted)</td></tr>
+      <tr><td><code>O(n²)</code></td><td>cuadrática</td><td>100x más</td><td>dos bucles anidados sobre lo mismo</td></tr>
+    </tbody>
+  </table></div>
+  <h2>La idea, sin matemática</h2>
+  <p>Big-O responde: "si le doy 10 veces más datos, ¿cuánto más tarda?". <code>O(n)</code> tarda 10 veces más (proporcional). <code>O(n²)</code> tarda 100 veces más (por eso es peligroso con muchos datos). <code>O(log n)</code> casi no cambia (por eso es tan bueno). <code>O(1)</code> tarda lo mismo sin importar el tamaño (el ideal).</p>
+  <div class="box nota"><span class="tag">Se ignoran las constantes</span><p>Big-O mira solo cómo crece, no los detalles finos. Un algoritmo que hace "2n + 5" pasos es <code>O(n)</code>: se ignoran el 2 y el 5, porque con muchos datos lo que domina es la <em>forma</em> (lineal). Por eso <code>O(n)</code> siempre le gana a <code>O(n²)</code> cuando los datos crecen, aunque para pocos datos el detalle importe. Big-O es sobre el comportamiento a gran escala.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← Qué es un algoritmo</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Búsqueda →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · Algoritmos" data-num="3" data-title="Búsqueda" id="busqueda">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Búsqueda: lineal vs binaria</h1>
+  <p class="lead">Buscar un elemento es la operación más común. Hay dos formas, y la diferencia entre ellas es el ejemplo perfecto de por qué Big-O importa. Lo medimos de verdad sobre un millón de elementos.</p>
+  <h2>Búsqueda lineal: O(n)</h2>
+  <p>La forma obvia: recorrer desde el principio hasta encontrarlo. Simple y funciona con cualquier lista, pero en el peor caso (el elemento está al final, o no está) recorre todo.</p>
+  <div class="codehead"><span class="lang py">busqueda.py</span></div>
+<pre>def busqueda_lineal(lista, objetivo):
+    for i, x in enumerate(lista):
+        if x == objetivo:
+            return i
+    return -1</pre>
+  <h2>Búsqueda binaria: O(log n)</h2>
+  <p>El truco de la guía telefónica: si la lista está <strong>ordenada</strong>, mirás el medio, y según sea mayor o menor, descartás la mitad. Repetís. Cada paso elimina la mitad de lo que queda.</p>
+  <div class="codehead"><span class="lang py">busqueda.py</span></div>
+<pre>def busqueda_binaria(lista, objetivo):   # requiere lista ordenada
+    lo, hi = 0, len(lista) - 1
+    while lo &lt;= hi:
+        medio = (lo + hi) // 2
+        if lista[medio] == objetivo:
+            return medio
+        elif lista[medio] &lt; objetivo:
+            lo = medio + 1        # descarta la mitad de abajo
+        else:
+            hi = medio - 1        # descarta la mitad de arriba
+    return -1</pre>
+  <h2>La diferencia, medida</h2>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">Buscar el último de 1.000.000 de elementos:
+  lineal  (O(n)):     46.78 ms  (recorrió ~1.000.000)
+  binaria (O(log n)): 0.0243 ms  (solo 20 pasos)
+  la binaria fue ~1925x más rápida</pre>
+  <p>Casi 2000 veces más rápida. La lineal miró un millón de elementos; la binaria, solo 20 (porque log₂ de un millón es ~20). Esa es la magia de <code>O(log n)</code>: duplicar los datos suma un solo paso.</p>
+  <div class="box ojo"><span class="tag">El precio: hay que estar ordenado</span><p>La búsqueda binaria solo funciona si la lista está ordenada. Ordenar cuesta (próximo capítulo), así que si vas a buscar una sola vez, la lineal alcanza. Pero si vas a buscar muchas veces, ordenar una vez y después usar binaria (o mejor, un diccionario, capítulo siguiente) vale enormemente la pena.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Big-O</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Ordenamiento →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 2 · Algoritmos" data-num="4" data-title="Ordenamiento" id="ordenar">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Ordenamiento</h1>
+  <p class="lead">Ordenar es clásico y educativo. Vas a ver un algoritmo simple y lento (para entender), y por qué en la práctica siempre usás el del lenguaje, que es mucho mejor.</p>
+  <h2>Bubble sort: O(n²), el didáctico</h2>
+  <p>El más simple de entender: recorré la lista comparando de a pares y, si están en el orden equivocado, los intercambiás. Repetí hasta que no haya nada que intercambiar. Funciona, pero con dos bucles anidados es <code>O(n²)</code>: lento.</p>
+  <div class="codehead"><span class="lang py">ordenar.py</span></div>
+<pre>def bubble_sort(lista):
+    a = lista[:]
+    n = len(a)
+    for i in range(n):
+        for j in range(n - 1 - i):
+            if a[j] &gt; a[j+1]:
+                a[j], a[j+1] = a[j+1], a[j]   # intercambiar
+    return a</pre>
+  <h2>sorted(): O(n log n), el que usás de verdad</h2>
+  <p>Python trae <code>sorted()</code> (y <code>.sort()</code>), que usa un algoritmo muy optimizado (Timsort), <code>O(n log n)</code>. La diferencia, medida:</p>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">Ordenar 2000 números:
+  bubble sort O(n^2), a mano:     125.3 ms
+  sorted() de Python O(n log n):  0.296 ms
+  sorted() fue ~423x más rápido</pre>
+  <p>Con solo 2000 números, el de Python es 400 veces más rápido. Con más datos, la diferencia crece sin parar, porque <code>O(n²)</code> escala pésimo comparado con <code>O(n log n)</code>.</p>
+  <div class="box ojo"><span class="tag">Nunca escribas tu propio ordenamiento</span><p>La lección práctica del capítulo: entendé cómo funciona el ordenamiento (por eso vimos bubble sort), pero en código real usá siempre <code>sorted()</code> o <code>.sort()</code>. Están hechos por expertos, optimizados durante años, y son más rápidos y correctos que cualquier cosa que escribas a mano. Reinventarlo es más lento y más propenso a bugs. Entender, no reinventar.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Búsqueda</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Elegir la estructura →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 3 · Estructuras" data-num="5" data-title="Elegir la estructura" id="estructuras">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Elegir la estructura de datos correcta</h1>
+  <p class="lead">Acá está el conocimiento más práctico de todo el librito. La estructura de datos que elegís determina qué tan rápido es tu programa. Elegir bien es, muchas veces, la diferencia entre milisegundos y segundos. Y se ve medido.</p>
+  <h2>list vs set/dict para "¿está esto acá?"</h2>
+  <p>Pregunta común: "¿este valor está en mi colección?". En una lista, Python recorre todo (<code>O(n)</code>). En un set o un diccionario, va directo (<code>O(1)</code>), porque usan una técnica (hashing) que ubica el valor sin recorrer. La diferencia, medida:</p>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">'¿está x?' 1000 veces sobre 100.000 elementos:
+  en lista (O(n)): 517.1 ms
+  en set   (O(1)): 0.083 ms
+  el set fue ~6268x más rápido</pre>
+  <p>Seis mil veces. Si tu programa chequea pertenencia muchas veces sobre muchos datos y usás una lista, ahí está tu lentitud. Cambiar la lista por un set es, muchas veces, la optimización más grande y más simple que vas a hacer.</p>
+  <h2>La guía rápida</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Necesitás...</th><th>Usá</th><th>Por qué</th></tr></thead>
+    <tbody>
+      <tr><td>Orden y duplicados</td><td>list</td><td>mantiene el orden, acceso por posición O(1)</td></tr>
+      <tr><td>Buscar por una clave</td><td>dict</td><td>acceso por clave O(1)</td></tr>
+      <tr><td>Valores únicos / "¿está?"</td><td>set</td><td>sin duplicados, pertenencia O(1)</td></tr>
+      <tr><td>Datos fijos que no cambian</td><td>tuple</td><td>inmutable, liviana</td></tr>
+      <tr><td>Cola (primero en entrar, primero en salir)</td><td>deque</td><td>sacar del principio es O(1)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">La pregunta clave</span><p>Antes de elegir, preguntate: ¿cómo voy a <em>usar</em> estos datos? ¿Buscar por clave? dict. ¿Chequear pertenencia seguido? set. ¿Necesito orden? list. La estructura correcta hace que las operaciones que más repetís sean O(1) en vez de O(n). Es la decisión de diseño que más impacta en el rendimiento, y casi no cuesta nada tomarla bien.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Ordenamiento</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Stacks y queues →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Parte 3 · Estructuras" data-num="6" data-title="Stacks y queues" id="stack-queue">
+  <div class="ch-eyebrow">Capítulo 6</div>
+  <h1>Stacks y queues</h1>
+  <p class="lead">Dos estructuras conceptuales que aparecen en todos lados, aunque no siempre con ese nombre. Se diferencian en el orden en que sacás las cosas: la pila saca la última que entró; la cola, la primera.</p>
+  <h2>Stack (pila): LIFO — último en entrar, primero en salir</h2>
+  <p>Como una pila de platos: apilás arriba, sacás de arriba. El último que pusiste es el primero que sacás. En Python, una lista con <code>append</code> (apilar) y <code>pop</code> (sacar el último).</p>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">stack: ['a', 'b', 'c']
+  pop() saca el ULTIMO: c -> queda ['a', 'b']</pre>
+  <p>Ejemplos reales de stacks: el botón "atrás" del navegador (te devuelve a la última página), el "deshacer" (Ctrl+Z) de cualquier programa, y cómo el propio Python maneja las llamadas a funciones (el "call stack" que ves en los errores).</p>
+  <h2>Queue (cola): FIFO — primero en entrar, primero en salir</h2>
+  <p>Como la fila del banco: el primero que llega es el primero que se atiende. En Python se usa <code>deque</code> (de <code>collections</code>) con <code>append</code> y <code>popleft</code>, porque sacar del principio de una lista normal es lento.</p>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">queue: ['a', 'b', 'c']
+  popleft() saca el PRIMERO: a -> queda ['b', 'c']</pre>
+  <p>Ejemplos reales de colas: los pedidos de la tienda (se atienden en orden de llegada), las tareas en espera de un servidor, la cola de impresión. Cada vez que algo se procesa "por orden de llegada", hay una queue.</p>
+  <div class="box nota"><span class="tag">Reconocer el patrón</span><p>No siempre vas a crear un "stack" o una "queue" explícitos, pero reconocer cuándo un problema es LIFO o FIFO te da la solución. "¿Deshacer la última acción?" → stack. "¿Procesar en orden de llegada?" → queue. Ese vocabulario te deja pensar y comunicar soluciones más rápido.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Elegir la estructura</span></button><button class="navbtn next" data-goto="7"><span class="dir">Siguiente</span><span class="t">Recursión →</span></button></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" data-part="Parte 4 · Técnicas" data-num="7" data-title="Recursión" id="recursion">
+  <div class="ch-eyebrow">Capítulo 7</div>
+  <h1>Recursión</h1>
+  <p class="lead">La recursión es una función que se llama a sí misma. Suena rara y hasta imposible al principio, pero para ciertos problemas es la forma más natural y elegante de resolverlos. La clave: siempre tiene un "caso base" que corta la cadena.</p>
+  <h2>Las dos partes de toda recursión</h2>
+  <ul>
+    <li><strong>Caso base:</strong> la condición que corta, donde la función deja de llamarse. Sin esto, se llama para siempre (como un while sin salida).</li>
+    <li><strong>Caso recursivo:</strong> la función se llama a sí misma con un problema más chico, acercándose al caso base.</li>
+  </ul>
+  <div class="codehead"><span class="lang py">recursion.py</span></div>
+<pre>def factorial(n):
+    if n &lt;= 1:                       # caso base: corta
+        return 1
+    return n * factorial(n - 1)      # caso recursivo: n más chico
+
+print("factorial(5) =", factorial(5))   # 5*4*3*2*1</pre>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">factorial(5) = 120   (5*4*3*2*1)
+cuenta regresiva: 3... 2... 1... despegue!
+suma anidada [1,[2,3,[4,5]],6] = 21</pre>
+  <h2>Dónde brilla: estructuras anidadas</h2>
+  <p>La recursión es imbatible para recorrer cosas que se anidan sin profundidad fija: carpetas dentro de carpetas, comentarios con respuestas con respuestas, o una lista con listas adentro. Un bucle normal no sabe cuántos niveles hay; la recursión "entra" en cada nivel sola.</p>
+  <div class="codehead"><span class="lang py">recursion.py · sumar una estructura anidada</span></div>
+<pre>def sumar_todo(cosa):
+    total = 0
+    for x in cosa:
+        if isinstance(x, list):
+            total += sumar_todo(x)   # si es lista, entrar recursivamente
+        else:
+            total += x
+    return total
+print(sumar_todo([1, [2, 3, [4, 5]], 6]))   # 21</pre>
+  <div class="box ojo"><span class="tag">Cuidado con la recursión</span><p>Dos advertencias. Una: siempre necesita un caso base que se alcance, o revienta con "maximum recursion depth exceeded" (el equivalente al bucle infinito). Dos: para problemas simples (como el factorial), un bucle normal suele ser más eficiente y claro; la recursión brilla en lo anidado. No la uses por elegancia si un <code>for</code> lo resuelve mejor.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="6"><span class="dir">Anterior</span><span class="t">← Stacks y queues</span></button><button class="navbtn next" data-goto="8"><span class="dir">Siguiente</span><span class="t">Cierre →</span></button></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" data-part="Cierre" data-num="8" data-title="Cierre" id="cierre">
+  <div class="ch-eyebrow">Fin del librito</div>
+  <h1>Checklist y cierre</h1>
+  <p class="lead">Ya tenés el vocabulario y el criterio de la eficiencia: Big-O, los algoritmos clásicos, y la decisión que más impacta (la estructura de datos correcta). No para reinventar, sino para elegir bien y entender lo que usás.</p>
+  <h2>Lo que te llevás</h2>
+  <ul>
+    <li><strong>Big-O:</strong> O(1) &lt; O(log n) &lt; O(n) &lt; O(n log n) &lt; O(n²). Cuanto más a la derecha, peor escala.</li>
+    <li><strong>Búsqueda:</strong> binaria (O(log n)) le gana a lineal (O(n)), si está ordenado.</li>
+    <li><strong>Ordenar:</strong> usá siempre <code>sorted()</code>; entendé por qué es mejor que el tuyo.</li>
+    <li><strong>Estructuras:</strong> dict/set dan O(1) para buscar; list para orden. La decisión que más rinde.</li>
+    <li><strong>Stack/queue:</strong> LIFO (deshacer, atrás) vs FIFO (colas, orden de llegada).</li>
+    <li><strong>Recursión:</strong> caso base + caso recursivo; brilla en estructuras anidadas.</li>
+  </ul>
+  <h2>Para entrevistas</h2>
+  <p>Este es el temario que más aparece en entrevistas técnicas de programación. Si vas a buscar trabajo, practicá estos conceptos con problemas (hay sitios como LeetCode o HackerRank llenos de ejercicios). Lo importante no es memorizar soluciones, sino reconocer qué estructura o algoritmo pide cada problema, que es justo lo que este librito te dio.</p>
+  <div class="box nota"><span class="tag">La regla de oro</span><p>No optimices antes de tiempo. Escribí código claro y correcto primero. Si va lento y hay muchos datos, ahí medís (como hicimos acá) para encontrar el cuello de botella, y casi siempre la solución es cambiar una estructura de datos (una lista por un set o un dict) o un algoritmo (lineal por binario). Medir, no adivinar: los números te dicen dónde está el problema real.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="7"><span class="dir">Anterior</span><span class="t">← Recursión</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('algo-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('algo-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('algo-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('algo-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

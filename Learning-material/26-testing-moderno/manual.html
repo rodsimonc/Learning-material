@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testing del stack moderno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --sidebar: #f8f9fb;
+    --ink: #1a2230;
+    --ink-soft: #46505f;
+    --ink-faint: #6b7686;
+    --line: #d9dde4;
+    --line-strong: #c3c9d3;
+    --accent: #0e7c86;
+    --accent-soft: #d7edef;
+    --code-bg: #f6f4ef;
+    --code-ink: #2a2f3a;
+    --warn: #b0641a;
+    --warn-soft: #f7ecdc;
+    --good: #2f8f56;
+    --good-soft: #dcefe2;
+    --rest: #0e7c86; --soap: #4756b8; --graphql: #d81b8c; --grpc: #2b7fd4; --ws: #c07a17; --hook: #2f9e5b;
+    --py: #3572A5; --js: #b58900;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 10px 28px rgba(20,28,44,.07);
+    --read: 720px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+      --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+      --line: #2a313d; --line-strong: #3a4351;
+      --accent: #3fc0cc; --accent-soft: #113035;
+      --code-bg: #13161c; --code-ink: #d3d7de;
+      --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+      --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+      --py: #6ab0e8; --js: #e0c04a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218; --surface: #1a1f28; --surface-2: #232936; --sidebar: #12161d;
+    --ink: #e8ebf0; --ink-soft: #b3bcca; --ink-faint: #838d9d;
+    --line: #2a313d; --line-strong: #3a4351;
+    --accent: #3fc0cc; --accent-soft: #113035;
+    --code-bg: #13161c; --code-ink: #d3d7de;
+    --warn: #e0a94a; --warn-soft: #2c2415; --good: #57c983; --good-soft: #12271a;
+    --rest: #3fc0cc; --soap: #8b96ea; --graphql: #f472bc; --grpc: #6bb0f0; --ws: #e0a94a; --hook: #57c983;
+    --py: #6ab0e8; --js: #e0c04a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: "Bricolage Grotesque","IBM Plex Sans",sans-serif; color: var(--ink); text-wrap: balance; line-height: 1.15; }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  p, li { color: var(--ink-soft); }
+  p code, li code { background: var(--surface-2); color: var(--ink); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+
+  /* ---------- layout ---------- */
+  .app { display: grid; grid-template-columns: 288px minmax(0,1fr); min-height: 100vh; }
+  aside {
+    background: var(--sidebar); border-right: 1px solid var(--line);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 16px 40px;
+  }
+  .side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; padding: 0 8px; }
+  .logo { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .side-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; line-height: 1.1; margin: 6px 8px 18px; letter-spacing: -.01em; }
+  .part-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 18px 8px 6px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: baseline; padding: 6px 8px; border-radius: 7px;
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; cursor: pointer;
+  }
+  nav.toc a .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); min-width: 18px; }
+  nav.toc a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.toc a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.toc a.active .n { color: var(--accent); }
+
+  /* ---------- content ---------- */
+  main { padding: 0; }
+  .reader { max-width: var(--read); margin: 0 auto; padding: 40px 32px 80px; }
+  .topbar { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .menu-btn { display: none; }
+  .progress-wrap { flex: 1; height: 5px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+  .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .prog-text { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  .toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    width: 34px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle:focus-visible, nav.toc a:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chapter { display: none; }
+  .chapter.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+  .ch-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .chapter h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 0; }
+  .chapter h2 { font-size: 24px; font-weight: 700; margin: 40px 0 10px; padding-top: 8px; }
+  .chapter h3 { font-size: 18px; font-weight: 600; margin: 26px 0 6px; font-family: "IBM Plex Sans", sans-serif; }
+  .chapter p { max-width: none; }
+  .lead { font-size: 19px; color: var(--ink); margin-top: 16px; }
+  .chapter ul, .chapter ol { padding-left: 22px; }
+  .chapter li { margin: 5px 0; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line);
+    border-radius: 10px; padding: 15px 17px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 6px 0 4px; }
+  pre .cm { color: var(--ink-faint); }
+  pre b { color: var(--accent); font-weight: 600; }
+  pre .k { color: var(--graphql); font-weight: 600; }
+  .codehead { display: flex; align-items: center; gap: 8px; margin: 20px 0 0; }
+  .lang { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; }
+  .lang.py { background: color-mix(in srgb, var(--py) 18%, transparent); color: var(--py); }
+  .lang.js { background: color-mix(in srgb, var(--js) 20%, transparent); color: var(--js); }
+  .lang.sh, .lang.xml, .lang.proto, .lang.txt { background: var(--surface-2); color: var(--ink-soft); }
+  .codehead .cap { font-size: 13px; color: var(--ink-faint); }
+  .tested { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--good);
+    background: var(--good-soft); padding: 3px 8px; border-radius: 20px; }
+  pre.output { border-left: 3px solid var(--good); background: color-mix(in srgb, var(--good-soft) 45%, var(--code-bg)); }
+
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 18px 0; background: var(--surface); }
+  .box p:last-child { margin-bottom: 0; } .box p:first-child { margin-top: 0; }
+  .box .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .box.nota { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .box.nota .tag { color: var(--accent); }
+  .box.ojo { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .box.ojo .tag { color: var(--warn); }
+  .box.nota p, .box.ojo p { color: var(--ink); }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+  tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: baseline; }
+
+  .navrow { display: flex; gap: 12px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .navbtn { flex: 1; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 16px;
+    cursor: pointer; color: var(--ink); text-align: left; font-family: inherit; font-size: 14px; box-shadow: var(--shadow); }
+  .navbtn:hover { border-color: var(--accent); }
+  .navbtn:disabled { opacity: .35; cursor: default; box-shadow: none; }
+  .navbtn .dir { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display: block; }
+  .navbtn .t { font-weight: 600; }
+  .navbtn.next { text-align: right; }
+
+  .kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink-soft); }
+
+  .overlay { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; z-index: 40; width: 300px; left: 0; top: 0; transform: translateX(-102%); transition: transform .25s; box-shadow: var(--shadow); }
+    aside.open { transform: translateX(0); }
+    .menu-btn { display: inline-flex; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+      width: 36px; height: 32px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; }
+    .overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 35; }
+    .reader { padding: 28px 20px 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, html { scroll-behavior: auto; transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+  <aside id="sidebar">
+    <div class="side-head"><span class="logo">Manual</span></div>
+    <div class="side-title">Calidad · Vitest, RTL y Playwright</div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <span class="prog-text" id="progText">0 / 0</span>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    </div>
+    <div class="reader" id="reader">
+
+<!-- ================= CHAPTERS INJECTED BELOW ================= -->
+<!-- 0 -->
+<section class="chapter" data-part="Empezar" data-num="0" data-title="Cómo usar este libro" id="intro">
+  <div class="ch-eyebrow">Calidad · Testing del stack moderno</div>
+  <h1>Testing del frontend moderno</h1>
+  <p class="lead">El librito 04 te enseñó a testear lógica con pytest y jest. Este va al testing del frontend real: probar componentes de React y probar la app entera como la usa una persona (end-to-end). Es lo que te deja cambiar código sin miedo, porque si rompés algo, un test te avisa al instante.</p>
+  <div class="box nota"><span class="tag">Código real y probado</span><p>Los tests de este librito se corrieron de verdad sobre la tienda React del librito 15. Los bloques con <span class="tested">✓ salida real</span> son las corridas reales: 5 tests de componente (Vitest + React Testing Library) y 5 de end-to-end (Playwright), todos en verde. El código está en <code>ejemplos/</code>.</p></div>
+  <h2>Qué vas a poder hacer al terminar</h2>
+  <p>Escribir tests unitarios de tu lógica, tests de componentes de React (que rendericen y respondan a clics), y tests end-to-end que manejan un navegador de verdad. Y entender qué testear con cada uno, sin perder tiempo probando lo que no hace falta.</p>
+  <div class="box nota"><span class="tag">Requisito</span><p>Conviene venir del librito 04 (testing base), el 14 (TypeScript) y el 15 (React), porque testeamos la tienda que armamos ahí. Si no los hiciste, igual se entiende la idea; el código te va a resultar más familiar si sí.</p></div>
+  <div class="navrow"><button class="navbtn" disabled><span class="dir">Inicio</span><span class="t">Este es el comienzo</span></button><button class="navbtn next" data-goto="1"><span class="dir">Siguiente</span><span class="t">La pirámide →</span></button></div>
+</section>
+
+<!-- 1 -->
+<section class="chapter" data-part="Parte 1 · Conceptos" data-num="1" data-title="La pirámide" id="piramide">
+  <div class="ch-eyebrow">Capítulo 1</div>
+  <h1>La pirámide de testing</h1>
+  <p class="lead">No todos los tests son iguales. Hay tres niveles, y la clave es tener muchos de los baratos y pocos de los caros. Esa proporción se llama la pirámide de testing, y es la guía para no perder tiempo ni dejar agujeros.</p>
+  <div class="codehead"><span class="lang txt">la pirámide (muchos abajo, pocos arriba)</span></div>
+<pre>        /\
+       /E2E\        pocos: lentos, prueban el flujo completo
+      /------\
+     /  Comp. \     algunos: prueban componentes de UI
+    /----------\
+   /  Unitarios \   muchos: rápidos, prueban lógica pura
+  /--------------\</pre>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Nivel</th><th>Qué prueba</th><th>Velocidad</th><th>Herramienta</th></tr></thead>
+    <tbody>
+      <tr><th>Unitario</th><td>Una función o hook aislado</td><td>rapidísimo</td><td>Vitest / Jest</td></tr>
+      <tr><th>Componente</th><td>Un componente React (renderiza, responde)</td><td>rápido</td><td>React Testing Library</td></tr>
+      <tr><th>End-to-end (E2E)</th><td>La app entera en un navegador real</td><td>lento</td><td>Playwright / Cypress</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Por qué esta forma</h2>
+  <p>Los unitarios son baratos y rápidos: tené muchos, cubren la lógica. Los E2E son caros y lentos (levantan un navegador), pero son los únicos que prueban que todo junto funciona: tené unos pocos, para los flujos críticos. Los de componente están en el medio. Si invertís la pirámide (muchos E2E, pocos unitarios), tus tests van a ser lentos y frágiles.</p>
+  <div class="box nota"><span class="tag">Por qué testear, en una frase</span><p>Los tests no son para demostrar que el código anda hoy; son para avisarte cuando lo rompas mañana. Cambiás algo, corrés los tests, y en segundos sabés si rompiste algo en otro lado. Sin tests, cada cambio es una apuesta. Con tests, cambiás con confianza. Esa tranquilidad es lo que te compran.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="0"><span class="dir">Anterior</span><span class="t">← Cómo usar este libro</span></button><button class="navbtn next" data-goto="2"><span class="dir">Siguiente</span><span class="t">Tests unitarios →</span></button></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" data-part="Parte 2 · Componentes" data-num="2" data-title="Tests unitarios" id="unitarios">
+  <div class="ch-eyebrow">Capítulo 2</div>
+  <h1>Tests unitarios con Vitest</h1>
+  <p class="lead">Empezamos por la base de la pirámide: probar lógica pura, aislada. Testeamos el hook <code>useCarrito</code> de la tienda (librito 15): que empiece vacío, que sume bien el total, que quite productos. Vitest es el corredor de tests moderno para proyectos con Vite.</p>
+  <h2>Anatomía de un test</h2>
+  <div class="codehead"><span class="lang tsx">useCarrito.test.ts</span></div>
+<pre>import { renderHook, act } from "@testing-library/react";
+import { describe, it, expect } from "vitest";
+import { useCarrito } from "../useCarrito";
+
+describe("useCarrito", () =&gt; {              // agrupa tests relacionados
+  it("empieza vacío con total 0", () =&gt; {   // un caso concreto
+    const { result } = renderHook(() =&gt; useCarrito());
+    expect(result.current.items).toHaveLength(0);   // la afirmación
+    expect(result.current.total).toBe(0);
+  });
+});</pre>
+  <p>Cada test tiene tres partes (el patrón "AAA"): <strong>preparar</strong> (crear el hook), <strong>actuar</strong> (agregar algo), y <strong>afirmar</strong> (<code>expect(...)</code>: lo que debería pasar). Si la afirmación falla, el test falla y te dice exactamente qué esperaba y qué obtuvo.</p>
+  <h2>Probar que el total suma bien</h2>
+  <div class="codehead"><span class="lang tsx">useCarrito.test.ts</span></div>
+<pre>it("suma el total al agregar productos", () =&gt; {
+  const { result } = renderHook(() =&gt; useCarrito());
+  act(() =&gt; { result.current.agregar(pizza); });
+  act(() =&gt; { result.current.agregar(pizza); });   // 2 pizzas
+  act(() =&gt; { result.current.agregar(gaseosa); });
+  expect(result.current.total).toBe(8500 * 2 + 1800);  // 18800
+});</pre>
+  <p>El <code>act</code> envuelve los cambios de estado de React (agregar al carrito). Después afirmamos que el total es exactamente lo esperado. Si mañana alguien rompe el cálculo del total, este test se pone rojo al instante.</p>
+  <div class="box nota"><span class="tag">Un buen test prueba comportamiento, no implementación</span><p>Fijate que testeamos <em>qué hace</em> el carrito (suma bien, quita bien), no <em>cómo</em> lo hace por dentro. Así, si mañana reescribís el interior del hook pero sigue sumando bien, el test sigue pasando. Testear el comportamiento y no los detalles internos hace que los tests no se rompan con cada refactor.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="1"><span class="dir">Anterior</span><span class="t">← La pirámide</span></button><button class="navbtn next" data-goto="3"><span class="dir">Siguiente</span><span class="t">Tests de componente →</span></button></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" data-part="Parte 2 · Componentes" data-num="3" data-title="Tests de componente" id="componente">
+  <div class="ch-eyebrow">Capítulo 3</div>
+  <h1>Tests de componente con React Testing Library</h1>
+  <p class="lead">El nivel del medio: probar un componente de React de verdad. Lo renderizamos en memoria, verificamos que muestre lo correcto, y simulamos que el usuario hace clic. Testeamos la <code>TarjetaProducto</code> de la tienda.</p>
+  <h2>Renderizar y verificar lo que se ve</h2>
+  <div class="codehead"><span class="lang tsx">TarjetaProducto.test.tsx</span></div>
+<pre>import { render, screen, fireEvent } from "@testing-library/react";
+import { TarjetaProducto } from "../componentes/TarjetaProducto";
+
+it("muestra el nombre y el precio", () =&gt; {
+  render(&lt;TarjetaProducto producto={pizza} onAgregar={() =&gt; {}} /&gt;);
+  expect(screen.getByText("Pizza muzza")).toBeTruthy();
+  expect(screen.getByText(/8.500/)).toBeTruthy();
+});</pre>
+  <p><code>render</code> monta el componente en un DOM de mentira (jsdom). <code>screen.getByText</code> lo busca como lo haría un usuario: por el texto que ve. La filosofía de React Testing Library es justo esa: testear como usa la persona, no los detalles internos del componente.</p>
+  <h2>Simular un clic</h2>
+  <div class="codehead"><span class="lang tsx">TarjetaProducto.test.tsx</span></div>
+<pre>it("llama a onAgregar al hacer clic en el botón", () =&gt; {
+  const onAgregar = vi.fn();                      // una función "espía"
+  render(&lt;TarjetaProducto producto={pizza} onAgregar={onAgregar} /&gt;);
+  fireEvent.click(screen.getByText("Agregar"));
+  expect(onAgregar).toHaveBeenCalledWith(pizza);  // se llamó con el producto
+});</pre>
+  <p><code>vi.fn()</code> crea una función espía: no hace nada, pero recuerda si la llamaron y con qué. Simulamos el clic con <code>fireEvent.click</code>, y verificamos que el componente llamó a <code>onAgregar</code> pasándole el producto. Así probás que un componente avisa correctamente hacia arriba (el patrón de props del librito 15).</p>
+  <h2>Todo en verde</h2>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">$ npx vitest run
+ Test Files  2 passed (2)
+      Tests  5 passed (5)
+  useCarrito: ✓ vacío  ✓ suma total  ✓ quita producto
+  TarjetaProducto: ✓ muestra nombre y precio  ✓ llama a onAgregar al clic</pre>
+  <div class="box nota"><span class="tag">getByText, getByRole: como un usuario</span><p>React Testing Library te empuja a buscar elementos como los encuentra una persona: por su texto, su rol (botón, encabezado), su etiqueta. Evita buscar por clases CSS o ids internos. ¿Por qué? Porque esos detalles cambian sin que cambie lo que el usuario ve, y no querés tests que se rompan por un refactor cosmético. Testeá lo que importa: lo que la persona experimenta.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="2"><span class="dir">Anterior</span><span class="t">← Tests unitarios</span></button><button class="navbtn next" data-goto="4"><span class="dir">Siguiente</span><span class="t">Tests end-to-end →</span></button></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" data-part="Parte 3 · End-to-end" data-num="4" data-title="Tests end-to-end" id="e2e">
+  <div class="ch-eyebrow">Capítulo 4</div>
+  <h1>Tests end-to-end con Playwright</h1>
+  <p class="lead">La cima de la pirámide: probar la app entera como la usa una persona real, en un navegador de verdad. Playwright abre la tienda, hace clics, y verifica lo que aparece en pantalla. Es el test que te dice "el flujo completo funciona".</p>
+  <h2>Qué hace un test E2E</h2>
+  <p>A diferencia de los anteriores (que corren en memoria), un E2E levanta un navegador real, carga la app buildeada, y la maneja: navega, hace clic, escribe, y verifica el resultado visible. Es lento (segundos), pero es lo más parecido a un usuario de verdad usando tu app.</p>
+  <div class="codehead"><span class="lang js">e2e.test.mjs (recorte)</span></div>
+<pre>await p.goto('http://localhost:4188/');
+await p.waitForSelector('.tarjeta');
+
+check("se muestran 6 productos", await p.locator('.tarjeta').count() === 6);
+check("el carrito arranca vacío", (await p.locator('.carrito p').first()
+      .textContent()).includes('Vacío'));
+
+// agregar milanesa x2 y napolitana, como haría un usuario
+const btns = p.locator('.tarjeta button');
+await btns.nth(3).click(); await btns.nth(3).click(); await btns.nth(2).click();
+check("el total es $28.800", (await p.getByTestId('total').textContent()).includes('28.800'));
+
+await p.locator('.carrito .x').first().click();
+check("tras quitar, total $9.800", (await p.getByTestId('total').textContent()).includes('9.800'));</pre>
+  <h2>El flujo completo, probado de verdad</h2>
+  <div class="codehead"><span class="lang sh">salida real</span><span class="tested">✓ salida real</span></div>
+<pre class="output">== E2E: flujo de compra en la tienda ==
+  PASS: se muestran 6 productos
+  PASS: el carrito arranca vacío
+  PASS: el carrito tiene 2 líneas
+  PASS: el total es $28.800
+  PASS: tras quitar, total $9.800
+Resultado E2E: 5 pasados, 0 fallidos</pre>
+  <p>Este test hizo lo mismo que haría una persona: entrar, ver los productos, agregar al carrito, mirar el total, quitar uno. Si cualquier pieza del flujo se rompe (el frontend, el estado, el cálculo), el E2E lo atrapa. Es la red de seguridad final antes de que un bug llegue al usuario.</p>
+  <div class="box ojo"><span class="tag">Pocos, pero para lo crítico</span><p>Los E2E son lentos y más frágiles (dependen de tiempos, del navegador). Por eso: pocos, y para los flujos que no pueden fallar (registrarse, comprar, pagar). No testees cada detalle con E2E; para eso están los unitarios y de componente. Reservá los E2E para "el usuario puede completar una compra de principio a fin".</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="3"><span class="dir">Anterior</span><span class="t">← Tests de componente</span></button><button class="navbtn next" data-goto="5"><span class="dir">Siguiente</span><span class="t">Qué testear →</span></button></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" data-part="Parte 4 · Práctica" data-num="5" data-title="Qué testear" id="que">
+  <div class="ch-eyebrow">Capítulo 5</div>
+  <h1>Qué testear (y qué no)</h1>
+  <p class="lead">Testear todo es imposible y una pérdida de tiempo; testear nada es jugar con fuego. La habilidad está en testear lo que importa. Un par de guías para decidir bien.</p>
+  <h2>Qué SÍ vale la pena testear</h2>
+  <ul>
+    <li><strong>La lógica de negocio:</strong> cálculos de totales, descuentos, stock, reglas. Es lo que más duele si falla, y lo más fácil de testear (unitario).</li>
+    <li><strong>Los flujos críticos:</strong> registro, login, compra, pago. Un E2E por cada uno.</li>
+    <li><strong>Los casos límite:</strong> lista vacía, stock en cero, número negativo. Es donde viven los bugs.</li>
+    <li><strong>Los bugs que arreglaste:</strong> cuando corregís un bug, escribí un test que lo reproduzca, así no vuelve nunca (se llama "test de regresión").</li>
+  </ul>
+  <h2>Qué NO hace falta testear</h2>
+  <ul>
+    <li><strong>El framework:</strong> React ya está testeado; no testees que un <code>useState</code> funciona.</li>
+    <li><strong>Detalles cosméticos:</strong> que un botón sea de tal color exacto. Cambian seguido y no aportan.</li>
+    <li><strong>Código trivial:</strong> una función de una línea sin lógica no necesita test.</li>
+  </ul>
+  <h2>La cobertura, con cuidado</h2>
+  <p>La "cobertura" mide qué porcentaje de tu código ejecutan los tests. Es útil para encontrar zonas sin probar, pero no es una meta en sí: 100% de cobertura con tests malos no sirve, y 70% con tests sobre lo que importa es excelente. Apuntá a cubrir la lógica crítica, no a un número.</p>
+  <div class="box nota"><span class="tag">El testing te hace ir más rápido</span><p>Suena contradictorio (escribir tests es más código), pero a mediano plazo te acelera: cambiás sin miedo, los bugs se atrapan temprano (cuando son baratos de arreglar, no en producción), y no tenés que probar todo a mano cada vez. Un proyecto con buenos tests se puede modificar con confianza; uno sin tests se vuelve, con el tiempo, imposible de tocar sin romper algo.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="4"><span class="dir">Anterior</span><span class="t">← Tests end-to-end</span></button><button class="navbtn next" data-goto="6"><span class="dir">Siguiente</span><span class="t">Cierre →</span></button></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" data-part="Cierre" data-num="6" data-title="Cierre" id="cierre">
+  <div class="ch-eyebrow">Fin del librito</div>
+  <h1>Checklist y cierre</h1>
+  <p class="lead">Ya sabés testear el frontend moderno en sus tres niveles, y elegir qué probar con cada uno. Con esto, cerrás el círculo de calidad de la colección: del testing de lógica (04) al de la interfaz completa.</p>
+  <h2>Con IA</h2>
+  <p>Escribir tests es de lo que mejor genera la IA: "escribí tests de Vitest para este hook", "hacé un test E2E de Playwright del flujo de compra". Le pasás el componente y te da los casos, incluidos los límite que quizás no pensaste. Revisá que prueben comportamiento (no implementación) y que los casos tengan sentido.</p>
+  <h2>Checklist de testing</h2>
+  <ul>
+    <li>Muchos unitarios (lógica), algunos de componente, pocos E2E (la pirámide).</li>
+    <li>Testeá comportamiento, no implementación interna.</li>
+    <li>Buscá elementos como un usuario (por texto, rol), no por clases CSS.</li>
+    <li>E2E solo para los flujos críticos (compra, login, pago).</li>
+    <li>Cubrí los casos límite y escribí un test por cada bug que arregles.</li>
+    <li>Corré los tests seguido (idealmente automático en cada push: librito 06, CI/CD).</li>
+  </ul>
+  <h2>Glosario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><th>Unitario</th><td>Test de una función/hook aislado.</td></tr>
+      <tr><th>E2E</th><td>Test de la app entera en un navegador real.</td></tr>
+      <tr><th>Vitest</th><td>Corredor de tests para proyectos Vite.</td></tr>
+      <tr><th>React Testing Library</th><td>Testea componentes como los usa la persona.</td></tr>
+      <tr><th>Playwright</th><td>Maneja un navegador real para E2E.</td></tr>
+      <tr><th>Mock / spy</th><td>Función falsa que registra cómo la llamaron.</td></tr>
+      <tr><th>Regresión</th><td>Test que evita que un bug arreglado vuelva.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box nota"><span class="tag">Lo que te llevás</span><p>Testear es lo que convierte un proyecto que "anda hoy" en uno que se puede mantener y crecer sin miedo. Con la pirámide en la cabeza (muchos unitarios, pocos E2E) y las herramientas de este librito, tus apps van a ser mucho más sólidas. Y en un equipo, los tests son lo que deja que muchas personas toquen el mismo código sin romperse entre sí. Es una de las marcas de un programador profesional.</p></div>
+  <div class="navrow"><button class="navbtn" data-goto="5"><span class="dir">Anterior</span><span class="t">← Qué testear</span></button><button class="navbtn next" data-goto="0"><span class="dir">Volver al</span><span class="t">Inicio ↺</span></button></div>
+</section>
+    </div>
+  </main>
+</div>
+
+<script>
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var toc = document.getElementById('toc');
+  var reader = document.getElementById('reader');
+  var progBar = document.getElementById('progBar');
+  var progText = document.getElementById('progText');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var current = 0;
+
+  // build TOC grouped by data-part
+  var lastPart = null;
+  chapters.forEach(function (ch, i) {
+    var part = ch.getAttribute('data-part');
+    if (part && part !== lastPart) {
+      var pl = document.createElement('div'); pl.className = 'part-label'; pl.textContent = part; toc.appendChild(pl); lastPart = part;
+    }
+    var a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="n">' + (ch.getAttribute('data-num') || '') + '</span><span>' + ch.getAttribute('data-title') + '</span>';
+    a.addEventListener('click', function (e) { e.preventDefault(); go(i); closeSide(); });
+    toc.appendChild(a);
+    ch._tocLink = a;
+  });
+
+  function go(i, noScroll) {
+    if (i < 0 || i >= chapters.length) return;
+    chapters[current].classList.remove('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.remove('active');
+    current = i;
+    chapters[current].classList.add('active');
+    if (chapters[current]._tocLink) chapters[current]._tocLink.classList.add('active');
+    progBar.style.width = ((i + 1) / chapters.length * 100) + '%';
+    progText.textContent = (i + 1) + ' / ' + chapters.length;
+    try { localStorage.setItem('test-cap', String(i)); } catch (e) {}
+    // keep active link visible WITHOUT moving the window (scroll only the sidebar)
+    var link = chapters[current]._tocLink;
+    if (link) {
+      var top = link.offsetTop, bottom = top + link.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 8;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    history.replaceState(null, '', '#' + chapters[current].id);
+  }
+
+  // prev/next buttons (delegated)
+  reader.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]');
+    if (b) { go(parseInt(b.getAttribute('data-goto'), 10)); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') go(current + 1);
+    if (e.key === 'ArrowLeft') go(current - 1);
+  });
+
+  // theme
+  var root = document.documentElement;
+  function curTheme() { return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var n = curTheme() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('test-theme', n); } catch (e) {}
+  });
+  try { var st = localStorage.getItem('test-theme'); if (st) root.setAttribute('data-theme', st); } catch (e) {}
+
+  // mobile drawer
+  function closeSide() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('menuBtn').addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', closeSide);
+
+  // restore position: hash > localStorage > 0
+  (function () {
+    var start = 0;
+    if (location.hash) { var idx = chapters.findIndex(function (c) { return '#' + c.id === location.hash; }); if (idx >= 0) start = idx; }
+    else { try { var s = localStorage.getItem('test-cap'); if (s !== null) start = Math.min(parseInt(s, 10) || 0, chapters.length - 1); } catch (e) {} }
+    go(start, true);
+  })();
+</script>
+
+</html>

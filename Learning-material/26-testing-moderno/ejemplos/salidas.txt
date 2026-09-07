@@ -1,0 +1,24 @@
+=== TESTING MODERNO · salidas reales ===
+
+--- Vitest + React Testing Library (test unitario + de componente) ---
+$ npx vitest run
+ Test Files  2 passed (2)
+      Tests  5 passed (5)
+
+  useCarrito:
+    ✓ empieza vacío con total 0
+    ✓ suma el total al agregar productos (2 pizzas + gaseosa = 18800)
+    ✓ quita un producto del carrito
+  TarjetaProducto:
+    ✓ muestra el nombre y el precio
+    ✓ llama a onAgregar al hacer clic en el botón
+
+--- Playwright E2E (flujo real en el navegador, sobre la app buildeada) ---
+$ node e2e.test.mjs
+== E2E: flujo de compra en la tienda ==
+  PASS: se muestran 6 productos
+  PASS: el carrito arranca vacío
+  PASS: el carrito tiene 2 líneas
+  PASS: el total es $28.800
+  PASS: tras quitar, total $9.800
+Resultado E2E: 5 pasados, 0 fallidos

@@ -1,0 +1,21 @@
+=== ALGORITMOS · salidas reales ===
+
+--- Búsqueda: lineal vs binaria (1.000.000 de elementos, buscar el último) ---
+lineal  (O(n)):     46.78 ms  (recorrió ~1.000.000)
+binaria (O(log n)): 0.0243 ms  (solo 20 pasos)
+la binaria fue ~1925x más rápida
+
+--- Estructuras: "¿está x?" 1000 veces sobre 100.000 elementos ---
+en lista (O(n)): 517.1 ms
+en set   (O(1)): 0.083 ms
+el set fue ~6268x más rápido
+
+--- Ordenar 2000 números ---
+bubble sort O(n^2), a mano:     125.3 ms
+sorted() de Python O(n log n):  0.296 ms
+sorted() fue ~423x más rápido
+
+--- Recursión ---
+factorial(5) = 120
+cuenta regresiva: 3... 2... 1... despegue!
+suma anidada [1,[2,3,[4,5]],6] = 21
